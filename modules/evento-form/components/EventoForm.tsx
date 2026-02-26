@@ -31,12 +31,18 @@ export const EventoForm = () => {
     );
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const dateFormatted = date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     });
+    const timeFormatted = date.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `${dateFormatted} às ${timeFormatted}`;
   };
 
   return (
@@ -58,10 +64,10 @@ export const EventoForm = () => {
 
       <Box sx={{ mb: 2 }}>
         <Typography variant="body1" color="text.secondary" gutterBottom>
-          <strong>Data de início:</strong> {formatDate(evento.data_inicio)}
+          <strong>Data de início:</strong> {formatDateTime(evento.data_inicio)}
         </Typography>
         <Typography variant="body1" color="text.secondary" gutterBottom>
-          <strong>Data de término:</strong> {formatDate(evento.data_fim)}
+          <strong>Data de término:</strong> {formatDateTime(evento.data_fim)}
         </Typography>
         {evento.descricao && (
           <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
