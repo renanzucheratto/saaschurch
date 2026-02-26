@@ -1,7 +1,8 @@
 "use client";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { theme } from "./config/theme/theme";
+import { theme } from "@/config/theme/theme";
+import { ReduxProvider } from "@/config/redux";
 
 export default function RootLayout({
   children,
@@ -11,10 +12,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
+        <ReduxProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {children}
+          </ThemeProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

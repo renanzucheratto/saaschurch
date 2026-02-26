@@ -2,10 +2,42 @@
 
 import { Controller } from 'react-hook-form';
 import { useEventoForm } from '../hooks/useEventoForm';
-import { TextField, Checkbox, FormControlLabel, Button, Box, Typography } from '@mui/material';
+import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { useObterEventoQuery } from '@/config/redux';
+import { usePathname } from 'next/navigation';
 
 export const EventoForm = () => {
-  const { control, handleSubmit, errors, isSubmitting, isValid } = useEventoForm();
+  const params = usePathname();
+  const eventoId = params?.split('/').pop() ?? '';
+
+  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId);
+  const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
+
+  if (isLoadingEvento) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!evento) {
+    return (
+      <Box sx={{ maxWidth: 600, mx: 'auto', p: 3 }}>
+        <Typography variant="h5" color="error">
+          Evento não encontrado
+        </Typography>
+      </Box>
+    );
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
 
   return (
     <Box
@@ -21,6 +53,24 @@ export const EventoForm = () => {
       }}
     >
       <Typography variant="h4" component="h1" gutterBottom>
+        {evento.nome}
+      </Typography>
+
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body1" color="text.secondary" gutterBottom>
+          <strong>Data de início:</strong> {formatDate(evento.data_inicio)}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" gutterBottom>
+          <strong>Data de término:</strong> {formatDate(evento.data_fim)}
+        </Typography>
+        {evento.descricao && (
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+            <strong>Descrição:</strong> {evento.descricao}
+          </Typography>
+        )}
+      </Box>
+
+      <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 2 }}>
         Formulário de Inscrição
       </Typography>
 
@@ -68,7 +118,7 @@ export const EventoForm = () => {
       />
 
       <Controller
-        name="aceitarTermo"
+        name="termo_assinado"
         control={control}
         render={({ field }) => (
           <FormControlLabel
@@ -82,9 +132,9 @@ export const EventoForm = () => {
           />
         )}
       />
-      {errors.aceitarTermo && (
+      {errors.termo_assinado && (
         <Typography color="error" variant="caption">
-          {errors.aceitarTermo.message}
+          {errors.termo_assinado.message}
         </Typography>
       )}
 
@@ -96,6 +146,22 @@ export const EventoForm = () => {
       >
         {isSubmitting ? 'Enviando...' : 'Enviar'}
       </Button>
+
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseAlert}
+          severity={alert.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

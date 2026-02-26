@@ -4,7 +4,7 @@ export const eventoFormSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
   telefone: z.string().min(1, 'Telefone é obrigatório'),
   email: z.string().min(1, 'Email é obrigatório').email('Email inválido'),
-  aceitarTermo: z.boolean().refine((val) => val === true, {
+  termo_assinado: z.boolean().refine((val) => val === true, {
     message: 'Você deve aceitar os termos',
   }),
 });
