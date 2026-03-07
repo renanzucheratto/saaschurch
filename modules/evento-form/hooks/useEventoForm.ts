@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eventoFormSchema, EventoFormSchema } from '../schemas/evento-form.schema';
 import { useCadastrarParticipanteMutation } from '@/config/redux';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 interface Alert {
   open: boolean;
@@ -13,6 +14,7 @@ interface Alert {
 }
 
 export const useEventoForm = (eventoId: string) => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [cadastrarParticipante, { isLoading: isSubmittingApi }] = useCadastrarParticipanteMutation();
   const [alert, setAlert] = useState<Alert>({
     open: false,
@@ -40,17 +42,39 @@ export const useEventoForm = (eventoId: string) => {
 
   const onSubmit = async (data: EventoFormSchema) => {
     try {
+      console.log('[FRONTEND] executeRecaptcha disponível:', !!executeRecaptcha);
+      
+      if (!executeRecaptcha) {
+        console.error('[FRONTEND] executeRecaptcha não está disponível');
+        setAlert({
+          open: true,
+          message: 'reCAPTCHA não está disponível. Tente novamente.',
+          severity: 'error',
+        });
+        return;
+      }
+
+      const recaptchaToken = await executeRecaptcha('submit_form');
+      console.log('[FRONTEND] Token reCAPTCHA gerado:', recaptchaToken ? 'SIM' : 'NÃO');
+      console.log('[FRONTEND] Token (primeiros 20 chars):', recaptchaToken?.substring(0, 20));
+
       const payload = {
         nome: data.nome,
         email: data.email,
         telefone: data.telefone,
         termo_assinado: data.termo_assinado,
+        recaptchaToken,
         produtos_selecionados: [
           {
             produtoId: data.produtoId,
           },
         ],
       };
+
+      console.log('[FRONTEND] Payload sendo enviado:', {
+        ...payload,
+        recaptchaToken: payload.recaptchaToken ? 'PRESENTE' : 'AUSENTE'
+      });
 
       await cadastrarParticipante({ eventId: eventoId, data: payload }).unwrap();
       
