@@ -27,7 +27,8 @@ export const useEventoForm = (eventoId: string) => {
     reset,
   } = useForm<EventoFormSchema>({
     resolver: zodResolver(eventoFormSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
     defaultValues: {
       nome: '',
       telefone: '',
@@ -58,7 +59,20 @@ export const useEventoForm = (eventoId: string) => {
         message: 'Cadastro realizado com sucesso!',
         severity: 'success',
       });
-      reset();
+      reset({
+        nome: '',
+        telefone: '',
+        email: '',
+        produtoId: '',
+        termo_assinado: false,
+      }, {
+        keepErrors: false,
+        keepDirty: false,
+        keepIsSubmitted: false,
+        keepTouched: false,
+        keepIsValid: false,
+        keepSubmitCount: false,
+      });
     } catch (error) {
       console.error('Erro ao enviar formulário:', error);
       

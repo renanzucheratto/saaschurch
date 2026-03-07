@@ -1,11 +1,37 @@
 'use client';
 
 import { Controller } from 'react-hook-form';
+import { IMaskInput } from 'react-imask';
 import { useEventoForm } from '../hooks/useEventoForm';
 import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress, Container } from '@mui/material';
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
 import { ProductAccordion } from './ProductAccordion';
+import React from 'react';
+
+interface CustomProps {
+  onChange: (event: { target: { name: string; value: string } }) => void;
+  name: string;
+}
+
+const TextMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
+  function TextMaskCustom(props, ref) {
+    const { onChange, ...other } = props;
+    return (
+      <IMaskInput
+        {...other}
+        mask="(00) 00000-0000"
+        definitions={{
+          '0': /[0-9]/,
+        }}
+        inputRef={ref}
+        onAccept={(value: unknown, _mask: unknown, event?: Event) => {
+            if (event) onChange({ target: { name: props.name, value: value as string } });
+          }}
+      />
+    );
+  },
+);
 
 export const EventoForm = () => {
   const params = usePathname();
@@ -169,80 +195,6 @@ export const EventoForm = () => {
               p: 2,
             }}
           >
-            <Box sx={{ display: { xs: 'block', lg: 'none' }, mb: 4 }}>
-              <Typography 
-                variant="h3" 
-                component="h1" 
-                sx={{ 
-                  fontWeight: 900,
-                  fontSize: { xs: '2rem', sm: '2.5rem' },
-                  lineHeight: 1.2,
-                  mb: 2,
-                  color: '#1a1a1a',
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {evento.nome}
-              </Typography>
-              {evento.descricao && (
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    mb: 3,
-                    color: 'text.secondary',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {evento.descricao}
-                </Typography>
-              )}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{ 
-                    width: 40, 
-                    height: 40, 
-                    borderRadius: 2,
-                    bgcolor: '#f0f0f0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.2rem',
-                  }}>
-                    📅
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                      Data de Início
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      {formatDateTime(evento.data_inicio)}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{ 
-                    width: 40, 
-                    height: 40, 
-                    borderRadius: 2,
-                    bgcolor: '#f0f0f0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.2rem',
-                  }}>
-                    🏁
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                      Data de Término
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      {formatDateTime(evento.data_fim)}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
 
             <Box component="form" onSubmit={handleSubmit}>
               <Typography 
@@ -294,6 +246,7 @@ export const EventoForm = () => {
                               produto={produto}
                               selected={field.value === produto.id}
                               onSelect={field.onChange}
+                              hasSelection={!!field.value}
                             />
                           ))}
                         </Box>
@@ -354,6 +307,10 @@ export const EventoForm = () => {
                     error={!!errors.telefone}
                     helperText={errors.telefone?.message}
                     variant="outlined"
+                    placeholder="(00) 00000-0000"
+                    InputProps={{
+                      inputComponent: TextMaskCustom as never,
+                    }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 1.5,

@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, Typography, Button, Collapse, Divider } from '@mui/material';
+import { Box, Typography, Button, Collapse, Divider, useMediaQuery, useTheme } from '@mui/material';
 import { ProdutoEvento } from '@/config/redux';
 
 interface ProductAccordionProps {
   produto: ProdutoEvento;
   selected: boolean;
   onSelect: (produtoId: string) => void;
+  hasSelection: boolean;
 }
 
-export const ProductAccordion = ({ produto, selected, onSelect }: ProductAccordionProps) => {
+export const ProductAccordion = ({ produto, selected, onSelect, hasSelection }: ProductAccordionProps) => {
   const [expanded, setExpanded] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
@@ -22,6 +25,7 @@ export const ProductAccordion = ({ produto, selected, onSelect }: ProductAccordi
         overflow: 'hidden',
         transition: 'all 0.3s ease',
         bgcolor: selected ? 'primary.50' : 'white',
+        opacity: hasSelection && !selected ? 0.5 : 1,
         '&:hover': {
           borderColor: 'primary.main',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -29,27 +33,31 @@ export const ProductAccordion = ({ produto, selected, onSelect }: ProductAccordi
       }}
     >
       <Box
+        onClick={isMobile ? () => setExpanded(!expanded) : undefined}
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           p: 2,
           gap: 2,
+          cursor: isMobile ? 'pointer' : 'default',
         }}
       >
-        <Button
-          variant={selected ? 'contained' : 'outlined'}
-          size="small"
-          onClick={() => onSelect(produto.id)}
-          sx={{
-            minWidth: 100,
-            fontWeight: 600,
-            textTransform: 'none',
-            borderRadius: 1.5,
-          }}
-        >
-          {selected ? 'Selecionado' : 'Escolher'}
-        </Button>
+        {!isMobile && (
+          <Button
+            variant={selected ? 'contained' : 'outlined'}
+            size="small"
+            onClick={() => onSelect(produto.id)}
+            sx={{
+              minWidth: 100,
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: 1.5,
+            }}
+          >
+            {selected ? 'Selecionado' : 'Escolher'}
+          </Button>
+        )}
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
@@ -67,18 +75,31 @@ export const ProductAccordion = ({ produto, selected, onSelect }: ProductAccordi
           </Typography>
         </Box>
 
-        <Button
-          size="small"
-          onClick={() => setExpanded(!expanded)}
-          sx={{
-            textTransform: 'none',
-            color: 'text.secondary',
-            fontWeight: 500,
-            minWidth: 'auto',
-          }}
-        >
-          {expanded ? '▲ Ver menos' : '▼ Ver mais'}
-        </Button>
+        {!isMobile && (
+          <Button
+            size="small"
+            onClick={() => setExpanded(!expanded)}
+            sx={{
+              textTransform: 'none',
+              color: 'text.secondary',
+              fontWeight: 500,
+              minWidth: 'auto',
+            }}
+          >
+            {expanded ? '▲ Ver menos' : '▼ Ver mais'}
+          </Button>
+        )}
+
+        {isMobile && (
+          <Typography
+            sx={{
+              color: 'text.secondary',
+              fontSize: '1.2rem',
+            }}
+          >
+            {expanded ? '▲' : '▼'}
+          </Typography>
+        )}
       </Box>
 
       <Collapse in={expanded}>
@@ -89,6 +110,7 @@ export const ProductAccordion = ({ produto, selected, onSelect }: ProductAccordi
               sx={{
                 fontSize: '0.875rem',
                 color: 'text.secondary',
+                mb: isMobile ? 2 : 0,
                 '& div': {
                   fontSize: '0.875rem !important',
                   padding: '8px !important',
@@ -100,6 +122,24 @@ export const ProductAccordion = ({ produto, selected, onSelect }: ProductAccordi
               }}
               dangerouslySetInnerHTML={{ __html: produto.descricao }}
             />
+          )}
+          {isMobile && (
+            <Button
+              variant={selected ? 'contained' : 'outlined'}
+              fullWidth
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(produto.id);
+              }}
+              sx={{
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: 1.5,
+                py: 1.5,
+              }}
+            >
+              {selected ? 'Selecionado' : 'Escolher'}
+            </Button>
           )}
         </Box>
       </Collapse>
