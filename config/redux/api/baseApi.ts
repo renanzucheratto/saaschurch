@@ -4,7 +4,7 @@ export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     // baseUrl: 'https://saaschurch-api.vercel.app',
-    baseUrl: 'http://localhost:3000',
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
   }),
   tagTypes: ['Eventos', 'Participantes'],
   endpoints: () => ({}),
