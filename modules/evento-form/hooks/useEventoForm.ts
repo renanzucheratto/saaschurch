@@ -32,6 +32,7 @@ export const useEventoForm = (eventoId: string) => {
       nome: '',
       telefone: '',
       email: '',
+      produtoId: '',
       termo_assinado: false,
     },
   });
@@ -43,6 +44,11 @@ export const useEventoForm = (eventoId: string) => {
         email: data.email,
         telefone: data.telefone,
         termo_assinado: data.termo_assinado,
+        produtos_selecionados: [
+          {
+            produtoId: data.produtoId,
+          },
+        ],
       };
 
       await cadastrarParticipante({ eventId: eventoId, data: payload }).unwrap();

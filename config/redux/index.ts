@@ -15,5 +15,7 @@ export type {
   CadastrarEventoResponse,
   ParticipanteRequest,
   ParticipanteResponse,
+  ProdutoSelecionado,
+  ProdutoEvento,
   Evento
 } from './api/eventosApi';

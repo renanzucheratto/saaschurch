@@ -16,11 +16,17 @@ export interface CadastrarEventoResponse {
   created_at: string;
 }
 
+export interface ProdutoSelecionado {
+  produtoId: string;
+  valor_pago?: number;
+}
+
 export interface ParticipanteRequest {
   nome: string;
   email: string;
   telefone: string;
   termo_assinado: boolean;
+  produtos_selecionados: ProdutoSelecionado[];
 }
 
 export interface ParticipanteResponse {
@@ -33,13 +39,24 @@ export interface ParticipanteResponse {
   created_at: string;
 }
 
+export interface ProdutoEvento {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  valor: number;
+}
+
 export interface Evento {
   id: string;
   nome: string;
   data_inicio: string;
   data_fim: string;
   descricao?: string;
-  created_at: string;
+  selecao_unica_produto: boolean;
+  userId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  produtos: ProdutoEvento[];
 }
 
 export const eventosApi = baseApi.injectEndpoints({

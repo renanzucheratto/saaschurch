@@ -2,9 +2,10 @@
 
 import { Controller } from 'react-hook-form';
 import { useEventoForm } from '../hooks/useEventoForm';
-import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress, Container } from '@mui/material';
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
+import { ProductAccordion } from './ProductAccordion';
 
 export const EventoForm = () => {
   const params = usePathname();
@@ -15,19 +16,19 @@ export const EventoForm = () => {
 
   if (isLoadingEvento) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress size={60} />
       </Box>
     );
   }
 
   if (!evento) {
     return (
-      <Box sx={{ maxWidth: 600, mx: 'auto', p: 3 }}>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h5" color="error">
           Evento não encontrado
         </Typography>
-      </Box>
+      </Container>
     );
   }
 
@@ -46,112 +47,423 @@ export const EventoForm = () => {
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        maxWidth: 600,
-        mx: 'auto',
-        p: 3,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-      }}
-    >
-      <Typography variant="h4" component="h1" gutterBottom>
-        {evento.nome}
-      </Typography>
+    <Box sx={{ height: '100vh', display: 'flex', bgcolor: '#f8f9fa', overflow: 'hidden' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '35fr 65fr' }, width: '100%', height: '100%' }}>
+        <Box
+          sx={{
+            backgroundImage: 'url(/images/bg-evento.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            display: { xs: 'none', lg: 'flex' },
+            flexDirection: 'column',
+            justifyContent: 'center',
+            p: 6,
+            color: 'white',
+            position: 'relative',
+            overflow: 'hidden',
+            height: '100vh',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              zIndex: 0,
+            },
+          }}
+        >
+          <Box sx={{ position: 'relative', zIndex: 1 }}>
+            <Typography 
+              variant="h2" 
+              component="h1" 
+              sx={{ 
+                fontWeight: 900,
+                fontSize: { lg: '3rem', xl: '3.5rem' },
+                lineHeight: 1.2,
+                mb: 3,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {evento.nome}
+            </Typography>
 
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body1" color="text.secondary" gutterBottom>
-          <strong>Data de início:</strong> {formatDateTime(evento.data_inicio)}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" gutterBottom>
-          <strong>Data de término:</strong> {formatDateTime(evento.data_fim)}
-        </Typography>
-        {evento.descricao && (
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-            <strong>Descrição:</strong> {evento.descricao}
-          </Typography>
-        )}
-      </Box>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                mb: 4,
+                opacity: 0.9,
+                fontWeight: 400,
+                lineHeight: 1.6,
+                fontSize: '1.1rem',
+              }}
+            >
+              {evento.descricao || 'Participe deste evento incrível e faça parte de uma experiência única.'}
+            </Typography>
 
-      <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 2 }}>
-        Formulário de Inscrição
-      </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ 
+                  width: 48, 
+                  height: 48, 
+                  borderRadius: 2,
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                }}>
+                  📅
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Data de Início
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                    {formatDateTime(evento.data_inicio)}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ 
+                  width: 48, 
+                  height: 48, 
+                  borderRadius: 2,
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                }}>
+                  🏁
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Data de Término
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                    {formatDateTime(evento.data_fim)}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
 
-      <Controller
-        name="nome"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Nome"
-            fullWidth
-            error={!!errors.nome}
-            helperText={errors.nome?.message}
-          />
-        )}
-      />
+        <Box
+          sx={{
+            overflowY: 'auto',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 900,
+              p: 2,
+            }}
+          >
+            <Box sx={{ display: { xs: 'block', lg: 'none' }, mb: 4 }}>
+              <Typography 
+                variant="h3" 
+                component="h1" 
+                sx={{ 
+                  fontWeight: 900,
+                  fontSize: { xs: '2rem', sm: '2.5rem' },
+                  lineHeight: 1.2,
+                  mb: 2,
+                  color: '#1a1a1a',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {evento.nome}
+              </Typography>
+              {evento.descricao && (
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    mb: 3,
+                    color: 'text.secondary',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {evento.descricao}
+                </Typography>
+              )}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: 2,
+                    bgcolor: '#f0f0f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                  }}>
+                    📅
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                      Data de Início
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                      {formatDateTime(evento.data_inicio)}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: 2,
+                    bgcolor: '#f0f0f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                  }}>
+                    🏁
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                      Data de Término
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                      {formatDateTime(evento.data_fim)}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
 
-      <Controller
-        name="telefone"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Telefone"
-            fullWidth
-            error={!!errors.telefone}
-            helperText={errors.telefone?.message}
-          />
-        )}
-      />
+            <Box component="form" onSubmit={handleSubmit}>
+              <Typography 
+                variant="h4" 
+                component="h2" 
+                sx={{ 
+                  fontWeight: 700,
+                  mb: 1,
+                  fontSize: { xs: '1.75rem', md: '2rem' },
+                  color: '#1a1a1a',
+                }}
+              >
+                Inscreva-se no evento
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 4, fontSize: '0.95rem' }}>
+                Preencha os dados abaixo para garantir sua participação
+              </Typography>
 
-      <Controller
-        name="email"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Email"
-            type="email"
-            fullWidth
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
-        )}
-      />
+              <Box sx={{ mb: 4 }}>
+                <Typography 
+                  variant="subtitle2" 
+                  sx={{ 
+                    fontWeight: 700, 
+                    mb: 2,
+                    fontSize: '0.875rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    color: 'text.primary',
+                  }}
+                >
+                  Selecione uma opção *
+                </Typography>
+                <Controller
+                  name="produtoId"
+                  control={control}
+                  render={({ field }) => (
+                    <Box>
+                      {evento.produtos && evento.produtos.length > 0 ? (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1.5,
+                          }}
+                        >
+                          {evento.produtos.map((produto) => (
+                            <ProductAccordion
+                              key={produto.id}
+                              produto={produto}
+                              selected={field.value === produto.id}
+                              onSelect={field.onChange}
+                            />
+                          ))}
+                        </Box>
+                      ) : (
+                        <Typography color="text.secondary">
+                          Nenhuma opção disponível para este evento.
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+                />
+                {errors.produtoId && (
+                  <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+                    {errors.produtoId.message}
+                  </Typography>
+                )}
+              </Box>
 
-      <Controller
-        name="termo_assinado"
-        control={control}
-        render={({ field }) => (
-          <FormControlLabel
-            control={
-              <Checkbox
-                {...field}
-                checked={field.value}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              <Controller
+                name="nome"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Nome completo"
+                    fullWidth
+                    error={!!errors.nome}
+                    helperText={errors.nome?.message}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5,
+                        bgcolor: '#fafafa',
+                        '&:hover': {
+                          bgcolor: '#f5f5f5',
+                        },
+                        '&.Mui-focused': {
+                          bgcolor: 'white',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                      },
+                    }}
+                  />
+                )}
               />
-            }
-            label="Aceito os termos e condições"
-          />
-        )}
-      />
-      {errors.termo_assinado && (
-        <Typography color="error" variant="caption">
-          {errors.termo_assinado.message}
-        </Typography>
-      )}
 
-      <Button
-        type="submit"
-        variant="contained"
-        size="large"
-        disabled={!isValid || isSubmitting}
-      >
-        {isSubmitting ? 'Enviando...' : 'Enviar'}
-      </Button>
+              <Controller
+                name="telefone"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Telefone"
+                    fullWidth
+                    error={!!errors.telefone}
+                    helperText={errors.telefone?.message}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5,
+                        bgcolor: '#fafafa',
+                        '&:hover': {
+                          bgcolor: '#f5f5f5',
+                        },
+                        '&.Mui-focused': {
+                          bgcolor: 'white',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                      },
+                    }}
+                  />
+                )}
+              />
+
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5,
+                        bgcolor: '#fafafa',
+                        '&:hover': {
+                          bgcolor: '#f5f5f5',
+                        },
+                        '&.Mui-focused': {
+                          bgcolor: 'white',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                      },
+                    }}
+                  />
+                )}
+              />
+
+              <Box sx={{ mt: 2 }}>
+                <Controller
+                  name="termo_assinado"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          {...field}
+                          checked={field.value}
+                        />
+                      }
+                      label={
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
+                          Aceito os termos e condições
+                        </Typography>
+                      }
+                    />
+                  )}
+                />
+                {errors.termo_assinado && (
+                  <Typography color="error" variant="caption" sx={{ display: 'block', ml: 4 }}>
+                    {errors.termo_assinado.message}
+                  </Typography>
+                )}
+              </Box>
+
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={!isValid || isSubmitting}
+                sx={{
+                  mb: 6,
+                  py: 1.5,
+                  borderRadius: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  bgcolor: '#1a1a1a',
+                  color: 'white',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    bgcolor: '#000000',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  },
+                  '&:disabled': {
+                    bgcolor: '#e0e0e0',
+                    color: '#9e9e9e',
+                  },
+                }}
+              >
+                {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
+              </Button>
+            </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
 
       <Snackbar
         open={alert.open}
