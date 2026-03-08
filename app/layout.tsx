@@ -4,7 +4,6 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { theme } from "@/config/theme/theme";
 import { ReduxProvider } from "@/config/redux";
 import { Noto_Sans } from "next/font/google";
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -17,19 +16,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
   
   return (
     <html lang="en">
       <body className={notoSans.className}>
-        <GoogleReCaptchaProvider reCaptchaKey={recaptchaKey}>
           <ReduxProvider>
             <ThemeProvider theme={theme}>
               <CssBaseline />
               {children}
             </ThemeProvider>
           </ReduxProvider>
-        </GoogleReCaptchaProvider>
       </body>
     </html>
   );
