@@ -1,23 +1,26 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
 const publicPaths = ['/login', '/signup', '/externo'];
-const authPaths = ['/login', '/signup', '/'];
 
-export function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  const token = request.cookies.get('access_token')?.value;
+  const token = await getToken({ 
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET 
+  });
+  
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
-  const isAuthPath = authPaths.some(path => pathname.startsWith(path));
 
-  if (!token && !isPublicPath) {
+  if (!token && !isPublicPath && !pathname.startsWith('/api/auth')) {
     const url = new URL('/login', request.url);
     url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
 
-  if (token && isAuthPath) {
+  if (token && (pathname === '/login' || pathname === '/signup')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
@@ -26,6 +29,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|images).*)',
   ],
 };

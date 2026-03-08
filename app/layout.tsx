@@ -1,6 +1,7 @@
 "use client";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import { SessionProvider } from "next-auth/react";
 import { theme } from "@/config/theme/theme";
 import { ReduxProvider } from "@/config/redux";
 import { Noto_Sans } from "next/font/google";
@@ -20,12 +21,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={notoSans.className}>
+        <SessionProvider>
           <ReduxProvider>
             <ThemeProvider theme={theme}>
               <CssBaseline />
               {children}
             </ThemeProvider>
           </ReduxProvider>
+        </SessionProvider>
       </body>
     </html>
   );

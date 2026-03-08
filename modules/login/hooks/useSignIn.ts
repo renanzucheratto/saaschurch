@@ -4,14 +4,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { signInSchema, SignInFormData } from '../schemas/signin.schema';
-import { useSignInMutation } from '@/config/redux';
 
 export function useSignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const [signIn] = useSignInMutation();
 
   const {
     register,
@@ -31,18 +30,18 @@ export function useSignIn() {
     setError(null);
 
     try {
-      const response = await signIn({
+      const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-      }).unwrap();
+        redirect: false,
+      });
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('access_token', response.session.access_token);
-        localStorage.setItem('refresh_token', response.session.refresh_token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+      if (result?.error) {
+        setError('Credenciais inválidas. Tente novamente.');
+      } else if (result?.ok) {
+        router.push('/');
+        router.refresh();
       }
-
-      router.push('/');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login. Tente novamente.');
     } finally {

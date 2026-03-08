@@ -134,7 +134,7 @@ export const EventoForm = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: '#000724db',
+              backgroundColor: '#000724bc',
               zIndex: 0,
             },
           }}
