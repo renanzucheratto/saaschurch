@@ -481,7 +481,7 @@ export const EventoForm = () => {
                       }
                       label={
                         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
-                          Aceito os termos e condições
+                          Eu declaro estar ciente e concordar com as condições contidas neste formulário de inscrição da Igreja Formosa de Cristo, bem como a responsabilidade do cumprimento com o pagamento do valor escolhido
                         </Typography>
                       }
                     />
