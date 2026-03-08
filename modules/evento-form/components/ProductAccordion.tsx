@@ -25,7 +25,6 @@ export const ProductAccordion = ({ produto, selected, onSelect, hasSelection }: 
         overflow: 'hidden',
         transition: 'all 0.3s ease',
         bgcolor: selected ? 'primary.50' : 'white',
-        opacity: hasSelection && !selected ? 0.5 : 1,
         '&:hover': {
           borderColor: 'primary.main',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',

@@ -35,6 +35,8 @@ export const useEventoForm = (eventoId: string) => {
       nome: '',
       telefone: '',
       email: '',
+      rg: '',
+      cpf: '',
       produtoId: '',
       termo_assinado: false,
     },
@@ -42,10 +44,7 @@ export const useEventoForm = (eventoId: string) => {
 
   const onSubmit = async (data: EventoFormSchema) => {
     try {
-      console.log('[FRONTEND] executeRecaptcha disponível:', !!executeRecaptcha);
-      
       if (!executeRecaptcha) {
-        console.error('[FRONTEND] executeRecaptcha não está disponível');
         setAlert({
           open: true,
           message: 'reCAPTCHA não está disponível. Tente novamente.',
@@ -55,13 +54,13 @@ export const useEventoForm = (eventoId: string) => {
       }
 
       const recaptchaToken = await executeRecaptcha('submit_form');
-      console.log('[FRONTEND] Token reCAPTCHA gerado:', recaptchaToken ? 'SIM' : 'NÃO');
-      console.log('[FRONTEND] Token (primeiros 20 chars):', recaptchaToken?.substring(0, 20));
 
       const payload = {
         nome: data.nome,
         email: data.email,
         telefone: data.telefone,
+        rg: data.rg,
+        cpf: data.cpf,
         termo_assinado: data.termo_assinado,
         recaptchaToken,
         produtos_selecionados: [
@@ -70,11 +69,6 @@ export const useEventoForm = (eventoId: string) => {
           },
         ],
       };
-
-      console.log('[FRONTEND] Payload sendo enviado:', {
-        ...payload,
-        recaptchaToken: payload.recaptchaToken ? 'PRESENTE' : 'AUSENTE'
-      });
 
       await cadastrarParticipante({ eventId: eventoId, data: payload }).unwrap();
       
@@ -87,6 +81,8 @@ export const useEventoForm = (eventoId: string) => {
         nome: '',
         telefone: '',
         email: '',
+        rg: '',
+        cpf: '',
         produtoId: '',
         termo_assinado: false,
       }, {

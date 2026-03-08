@@ -33,6 +33,44 @@ const TextMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
   },
 );
 
+const CPFMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
+  function CPFMaskCustom(props, ref) {
+    const { onChange, ...other } = props;
+    return (
+      <IMaskInput
+        {...other}
+        mask="000.000.000-00"
+        definitions={{
+          '0': /[0-9]/,
+        }}
+        inputRef={ref}
+        onAccept={(value: unknown, _mask: unknown, event?: Event) => {
+            if (event) onChange({ target: { name: props.name, value: value as string } });
+          }}
+      />
+    );
+  },
+);
+
+const RGMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
+  function RGMaskCustom(props, ref) {
+    const { onChange, ...other } = props;
+    return (
+      <IMaskInput
+        {...other}
+        mask="00.000.000-0"
+        definitions={{
+          '0': /[0-9]/,
+        }}
+        inputRef={ref}
+        onAccept={(value: unknown, _mask: unknown, event?: Event) => {
+            if (event) onChange({ target: { name: props.name, value: value as string } });
+          }}
+      />
+    );
+  },
+);
+
 export const EventoForm = () => {
   const params = usePathname();
   const eventoId = params?.split('/').pop() ?? '';
@@ -342,6 +380,74 @@ export const EventoForm = () => {
                     error={!!errors.email}
                     helperText={errors.email?.message}
                     variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5,
+                        bgcolor: '#fafafa',
+                        '&:hover': {
+                          bgcolor: '#f5f5f5',
+                        },
+                        '&.Mui-focused': {
+                          bgcolor: 'white',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                      },
+                    }}
+                  />
+                )}
+              />
+
+              <Controller
+                name="rg"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="RG"
+                    fullWidth
+                    error={!!errors.rg}
+                    helperText={errors.rg?.message}
+                    variant="outlined"
+                    placeholder="00.000.000-0"
+                    InputProps={{
+                      inputComponent: RGMaskCustom as never,
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5,
+                        bgcolor: '#fafafa',
+                        '&:hover': {
+                          bgcolor: '#f5f5f5',
+                        },
+                        '&.Mui-focused': {
+                          bgcolor: 'white',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                      },
+                    }}
+                  />
+                )}
+              />
+
+              <Controller
+                name="cpf"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="CPF"
+                    fullWidth
+                    error={!!errors.cpf}
+                    helperText={errors.cpf?.message}
+                    variant="outlined"
+                    placeholder="000.000.000-00"
+                    InputProps={{
+                      inputComponent: CPFMaskCustom as never,
+                    }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 1.5,

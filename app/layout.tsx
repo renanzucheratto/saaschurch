@@ -18,8 +18,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
-  console.log('[LAYOUT] reCAPTCHA Key configurada:', recaptchaKey ? 'SIM' : 'NÃO');
-  console.log('[LAYOUT] reCAPTCHA Key (primeiros 10 chars):', recaptchaKey.substring(0, 10));
   
   return (
     <html lang="en">
