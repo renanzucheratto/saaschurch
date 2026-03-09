@@ -12,7 +12,9 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.2.2",
+    "@iconify/react": "^6.0.2",
     "@mui/material": "^7.3.8",
+    "@mui/x-data-grid": "^8.27.4",
     "@reduxjs/toolkit": "^2.11.2",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
@@ -22,6 +24,7 @@
     "react-hook-form": "^7.71.2",
     "react-imask": "^7.6.1",
     "react-redux": "^9.2.0",
+    "redux-persist": "^6.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

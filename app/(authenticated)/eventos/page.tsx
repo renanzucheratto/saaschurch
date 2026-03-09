@@ -1,0 +1,112 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { Box, Typography, Paper, CircularProgress } from "@mui/material";
+import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
+import { useListarEventosQuery } from "@/config/redux/api/eventosApi";
+
+const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
+  if (!dataInicio && !dataFim) return "-";
+  
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  if (dataInicio && dataFim) {
+    return `${formatDate(dataInicio)} à ${formatDate(dataFim)}`;
+  }
+  
+  return dataInicio ? formatDate(dataInicio) : (dataFim ? formatDate(dataFim) : "-");
+};
+
+const columns: GridColDef[] = [
+  {
+    field: "nome",
+    headerName: "Nome",
+    flex: 1,
+    minWidth: 250,
+  },
+  {
+    field: "data",
+    headerName: "Data",
+    width: 250,
+    valueGetter: (value, row) => formatDateRange(row.data_inicio, row.data_fim),
+  },
+  {
+    field: "quantidadeParticipantes",
+    headerName: "Quantidade de Participantes",
+    width: 220,
+    type: "number",
+  },
+];
+
+export default function EventosPage() {
+  const router = useRouter();
+  const { data: eventos = [], isLoading } = useListarEventosQuery();
+
+  const handleRowClick = (params: GridRowParams) => {
+    router.push(`/eventos/${params.id}`);
+  };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 400 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: "#1A1A1A" }}>
+        Lista de Eventos
+      </Typography>
+
+      <Paper
+        elevation={0}
+        sx={{
+          width: "100%",
+          border: "1px solid #E0E0E0",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <DataGrid
+          rows={eventos}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10, page: 0 },
+            },
+          }}
+          pageSizeOptions={[5, 10, 25]}
+          onRowClick={handleRowClick}
+          autoHeight
+          density="comfortable"
+          sx={{
+            border: "none",
+            "& .MuiDataGrid-columnHeaders": {
+              bgcolor: "#FAFAFA",
+              borderBottom: "2px solid #E0E0E0",
+              fontWeight: 600,
+            },
+            "& .MuiDataGrid-cell": {
+              borderBottom: "1px solid #F0F0F0",
+            },
+            "& .MuiDataGrid-row": {
+              cursor: "pointer",
+              "&:hover": {
+                bgcolor: "#F5F5F5",
+              },
+            },
+          }}
+        />
+      </Paper>
+    </Box>
+  );
+}

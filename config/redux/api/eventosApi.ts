@@ -1,19 +1,11 @@
 import { baseApi } from './baseApi';
+import { EventoListagem, EventoDetalhes, Participante } from '@/types/evento.types';
 
 export interface CadastrarEventoRequest {
   nome: string;
   data_inicio: string;
   data_fim: string;
   descricao?: string;
-}
-
-export interface CadastrarEventoResponse {
-  id: string;
-  nome: string;
-  data_inicio: string;
-  data_fim: string;
-  descricao?: string;
-  created_at: string;
 }
 
 export interface ProdutoSelecionado {
@@ -29,47 +21,21 @@ export interface ParticipanteRequest {
   produtos_selecionados: ProdutoSelecionado[];
 }
 
-export interface ParticipanteResponse {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  termo_assinado: boolean;
-  evento_id: string;
-  created_at: string;
-}
-
-export interface ProdutoEvento {
-  id: string;
-  nome: string;
-  descricao: string | null;
-  valor: number;
-}
-
-export interface Evento {
-  id: string;
-  nome: string;
-  data_inicio: string;
-  data_fim: string;
-  descricao?: string;
-  selecao_unica_produto: boolean;
-  userId: string | null;
-  createdAt: string;
-  updatedAt: string;
-  produtos: ProdutoEvento[];
-}
-
 export const eventosApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    listarEventos: builder.query<Evento[], void>({
+    listarEventos: builder.query<EventoListagem[], void>({
       query: () => '/eventos',
       providesTags: ['Eventos'],
     }),
-    obterEvento: builder.query<Evento, string>({
+    obterEvento: builder.query<EventoDetalhes, string>({
       query: (eventoId) => `/eventos/${eventoId}`,
-      providesTags: ['Eventos'],
+      providesTags: (result, error, eventoId) => [{ type: 'Eventos', id: eventoId }],
     }),
-    cadastrarEvento: builder.mutation<CadastrarEventoResponse, CadastrarEventoRequest>({
+    listarParticipantes: builder.query<Participante[], string>({
+      query: (eventoId) => `/eventos/${eventoId}/participantes`,
+      providesTags: (result, error, eventoId) => [{ type: 'Participantes', id: eventoId }],
+    }),
+    cadastrarEvento: builder.mutation<EventoDetalhes, CadastrarEventoRequest>({
       query: (data) => ({
         url: '/eventos',
         method: 'POST',
@@ -77,17 +43,16 @@ export const eventosApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Eventos'],
     }),
-    cadastrarParticipante: builder.mutation<ParticipanteResponse, { eventId: string; data: ParticipanteRequest }>({
+    cadastrarParticipante: builder.mutation<Participante, { eventId: string; data: ParticipanteRequest }>({
       query: ({ eventId, data }) => ({
         url: `/eventos/${eventId}/participantes`,
         method: 'POST',
         body: data,
       }),
-      invalidatesTags: ['Participantes'],
-    }),
-    listarParticipantes: builder.query<ParticipanteResponse[], string>({
-      query: (eventoId) => `/eventos/${eventoId}/participantes`,
-      providesTags: ['Participantes'],
+      invalidatesTags: (result, error, { eventId }) => [
+        { type: 'Participantes', id: eventId },
+        { type: 'Eventos', id: eventId },
+      ],
     }),
   }),
 });
@@ -95,7 +60,7 @@ export const eventosApi = baseApi.injectEndpoints({
 export const { 
   useListarEventosQuery,
   useObterEventoQuery,
+  useListarParticipantesQuery,
   useCadastrarEventoMutation,
   useCadastrarParticipanteMutation,
-  useListarParticipantesQuery
 } = eventosApi;
