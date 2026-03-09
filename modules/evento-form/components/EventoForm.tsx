@@ -96,7 +96,8 @@ export const EventoForm = () => {
     );
   }
 
-  const formatDateTime = (dateString: string) => {
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     const dateFormatted = date.toLocaleDateString('pt-BR', {
       day: '2-digit',
