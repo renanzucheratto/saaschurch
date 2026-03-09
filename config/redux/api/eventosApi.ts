@@ -1,5 +1,5 @@
 import { baseApi } from './baseApi';
-import { EventoListagem, EventoDetalhes, Participante } from '@/types/evento.types';
+import { EventoListagem, EventoDetalhes, Participante, Produto } from '@/types/evento.types';
 
 export interface CadastrarEventoRequest {
   nome: string;
@@ -7,6 +7,14 @@ export interface CadastrarEventoRequest {
   data_fim: string;
   descricao?: string;
 }
+
+export type CadastrarEventoResponse = EventoDetalhes;
+
+export type ParticipanteResponse = Participante;
+
+export type ProdutoEvento = Produto;
+
+export type Evento = EventoDetalhes;
 
 export interface ProdutoSelecionado {
   produtoId: string;
