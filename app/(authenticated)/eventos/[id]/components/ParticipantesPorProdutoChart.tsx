@@ -85,6 +85,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
           name: "Participantes",
           type: "bar",
           data: quantidades,
+          barWidth: 50,
           itemStyle: {
             color: "#1976d2",
             borderRadius: [4, 4, 0, 0],
