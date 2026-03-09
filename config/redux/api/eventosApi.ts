@@ -29,6 +29,12 @@ export interface ParticipanteRequest {
   produtos_selecionados: ProdutoSelecionado[];
 }
 
+export interface EstatisticaParticipantesPorProduto {
+  produtoId: string;
+  produtoNome: string;
+  quantidadeParticipantes: number;
+}
+
 export const eventosApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     listarEventos: builder.query<EventoListagem[], void>({
@@ -41,6 +47,10 @@ export const eventosApi = baseApi.injectEndpoints({
     }),
     listarParticipantes: builder.query<Participante[], string>({
       query: (eventoId) => `/eventos/${eventoId}/participantes`,
+      providesTags: (result, error, eventoId) => [{ type: 'Participantes', id: eventoId }],
+    }),
+    obterEstatisticasParticipantesPorProduto: builder.query<EstatisticaParticipantesPorProduto[], string>({
+      query: (eventoId) => `/eventos/${eventoId}/estatisticas/participantes-por-produto`,
       providesTags: (result, error, eventoId) => [{ type: 'Participantes', id: eventoId }],
     }),
     cadastrarEvento: builder.mutation<EventoDetalhes, CadastrarEventoRequest>({
@@ -69,6 +79,7 @@ export const {
   useListarEventosQuery,
   useObterEventoQuery,
   useListarParticipantesQuery,
+  useObterEstatisticasParticipantesPorProdutoQuery,
   useCadastrarEventoMutation,
   useCadastrarParticipanteMutation,
 } = eventosApi;

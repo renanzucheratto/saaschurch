@@ -13,6 +13,7 @@ import { Icon as IconifyIcon } from "@iconify/react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useObterEventoQuery, useListarParticipantesQuery } from "@/config/redux/api/eventosApi";
 import { ProdutoParticipante } from "@/types/evento.types";
+import ParticipantesPorProdutoChart from "./components/ParticipantesPorProdutoChart";
 
 const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
   if (!dataInicio && !dataFim) return "-";
@@ -191,6 +192,11 @@ export default function EventoDetalhesPage() {
           )}
         </Box>
       </Paper>
+
+      {/* Gráfico de Participantes por Produto */}
+      <Box sx={{ mb: 3 }}>
+        <ParticipantesPorProdutoChart eventoId={eventoId} />
+      </Box>
 
       {/* Listagem de Participantes */}
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: "#1A1A1A" }}>
