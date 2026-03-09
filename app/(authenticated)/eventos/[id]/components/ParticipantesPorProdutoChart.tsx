@@ -39,7 +39,8 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
       grid: {
         left: "3%",
         right: "4%",
-        bottom: "3%",
+        bottom: "10%",
+        top: "15%",
         containLabel: true,
       },
       xAxis: {
@@ -116,7 +117,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: 400,
+          minHeight: 600,
         }}
       >
         <CircularProgress />
@@ -135,7 +136,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: 400,
+          minHeight: 600,
         }}
       >
         <Typography variant="body1" color="text.secondary">
@@ -154,7 +155,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
         borderRadius: 2,
       }}
     >
-      <Box sx={{ width: "100%", height: 400 }}>
+      <Box sx={{ width: "100%", height: 600 }}>
         <ReactECharts
           option={chartOptions}
           style={{ height: "100%", width: "100%" }}
