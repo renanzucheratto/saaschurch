@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/config/redux/slices/authSlice';
@@ -15,6 +15,10 @@ export function useSignIn() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { update } = useSession();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
+
+  console.log('callbackUrl', callbackUrl);
 
   const {
     register,
@@ -37,7 +41,7 @@ export function useSignIn() {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        redirect: false,
+        callbackUrl,
       });
 
       if (result?.error) {

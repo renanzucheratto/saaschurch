@@ -16,12 +16,8 @@ export async function proxy(request: NextRequest) {
 
   if (!token && !isPublicPath && !pathname.startsWith('/api/auth')) {
     const url = new URL('/login', request.url);
-    url.searchParams.set('redirect', pathname);
+    url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
-  }
-
-  if (token && (pathname === '/login' || pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
