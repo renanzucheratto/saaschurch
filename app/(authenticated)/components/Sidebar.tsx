@@ -15,6 +15,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
+import { BORDER_RADIUS } from "@/config/utils/contants";
 
 interface MenuItem {
   id: string;
@@ -56,7 +57,7 @@ export default function Sidebar() {
         width: collapsed ? 80 : 240,
         minWidth: collapsed ? 80 : 240,
         height: "100vh",
-        bgcolor: "#FAFAFA",
+        bgcolor: "#FFFFFF",
         borderRight: "1px solid #E0E0E0",
         display: "flex",
         flexDirection: "column",
@@ -69,7 +70,10 @@ export default function Sidebar() {
       {/* Logo */}
       <Box
         sx={{
-          height: "65px",
+          minHeight: {
+            xs: 51,
+            sm: 61,
+          },
           px: 3,
           display: "flex",
           alignItems: "center",
@@ -85,13 +89,13 @@ export default function Sidebar() {
             </Typography>
           </Box>
         )}
-        <IconButton
+        {/* <IconButton
           size="small"
           onClick={() => setCollapsed(!collapsed)}
           sx={{ color: "#666" }}
         >
           {collapsed ? <IconifyIcon icon="material-symbols:chevron-right" width={20} /> : <IconifyIcon icon="material-symbols:chevron-left" width={20} />}
-        </IconButton>
+        </IconButton> */}
       </Box>
 
       <Box sx={{ flex: 1, overflowY: "auto", py: 2 }}>
@@ -102,7 +106,6 @@ export default function Sidebar() {
                 variant="caption"
                 sx={{
                   px: 2.5,
-                  mb: 1,
                   display: "block",
                   color: "#999",
                   fontWeight: 600,
@@ -124,9 +127,9 @@ export default function Sidebar() {
                       }
                     }}
                     sx={{
-                      borderRadius: 1.5,
-                      py: 1.25,
-                      px: collapsed ? 1.5 : 2,
+                      borderRadius: BORDER_RADIUS.small,
+                      p: 0.5,
+                      py: 0.75,
                       justifyContent: collapsed ? "center" : "flex-start",
                       "&.Mui-selected": {
                         bgcolor: "#EDEDFE",
@@ -136,18 +139,44 @@ export default function Sidebar() {
                         },
                         "&:hover": {
                           bgcolor: "#E5E5FD",
+                          "::before": {
+                            bgcolor: "#5B5FED",
+                          },
+                        },
+                        "::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: '-12px',
+                          height: '100%',
+                          width: '4px',
+                          borderTopRightRadius: BORDER_RADIUS.full,
+                          borderBottomRightRadius: BORDER_RADIUS.full,
+                          bgcolor: "#5B5FED",
                         },
                       },
                       "&:hover": {
                         bgcolor: "#F5F5F5",
+                        "::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: '-12px',
+                          height: '100%',
+                          width: '4px',
+                          borderTopRightRadius: BORDER_RADIUS.full,
+                          borderBottomRightRadius: BORDER_RADIUS.full,
+                          bgcolor: "#ccc",
+                        },
                       },
+                      
                     }}
                   >
                     <ListItemIcon
                       sx={{
-                        minWidth: collapsed ? 0 : 40,
                         color: "#666",
                         justifyContent: "center",
+                        minWidth: 35
                       }}
                     >
                       {item.icon}

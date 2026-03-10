@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
-import { Box, Typography, Paper, CircularProgress } from "@mui/material";
+import { Box, Typography, Paper, CircularProgress, Card } from "@mui/material";
 import { useObterEstatisticasParticipantesPorProdutoQuery } from "@/config/redux/api/eventosApi";
 
 interface ParticipantesPorProdutoChartProps {
@@ -17,15 +17,6 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
     const quantidades = estatisticas.map(e => e.quantidadeParticipantes);
 
     return {
-      title: {
-        text: "Participantes por Produto",
-        left: "center",
-        textStyle: {
-          fontSize: 18,
-          fontWeight: 600,
-          color: "#1A1A1A",
-        },
-      },
       tooltip: {
         trigger: "axis",
         axisPointer: {
@@ -37,10 +28,10 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
         },
       },
       grid: {
-        left: "3%",
-        right: "4%",
-        bottom: "10%",
-        top: "15%",
+        left: "10px",
+        right: "10px",
+        bottom: "0px",
+        top: "30px",
         containLabel: true,
       },
       xAxis: {
@@ -48,7 +39,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
         data: produtoNomes,
         axisLabel: {
           interval: 0,
-          rotate: produtoNomes.length > 5 ? 45 : 0,
+          rotate: produtoNomes.length > 5 ? 70 : 0,
           fontSize: 12,
           color: "#666",
         },
@@ -87,16 +78,17 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
           data: quantidades,
           barWidth: 50,
           itemStyle: {
-            color: "#1976d2",
+            color: "#7b57df",
             borderRadius: [4, 4, 0, 0],
           },
           emphasis: {
             itemStyle: {
-              color: "#1565c0",
+              color: "#5b3fbd",
             },
           },
           label: {
             show: true,
+            
             position: "top",
             color: "#1A1A1A",
             fontSize: 12,
@@ -109,60 +101,39 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
 
   if (isLoading) {
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          border: "1px solid #E0E0E0",
-          borderRadius: 2,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: 600,
-        }}
-      >
+      <Card variant="outlined">
         <CircularProgress />
-      </Paper>
+      </Card>
     );
   }
 
   if (!estatisticas || estatisticas.length === 0) {
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          border: "1px solid #E0E0E0",
-          borderRadius: 2,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: 600,
-        }}
-      >
+      <Card variant="outlined">
         <Typography variant="body1" color="text.secondary">
           Nenhum dado disponível para exibir
         </Typography>
-      </Paper>
+      
+        <Typography variant="body1" color="text.secondary">
+          Nenhum dado disponível para exibir
+        </Typography>
+      </Card>
     );
   }
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        border: "1px solid #E0E0E0",
-        borderRadius: 2,
-      }}
-    >
-      <Box sx={{ width: "100%", height: 600 }}>
+    <Card variant="outlined">
+      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+        Participantes por produto
+      </Typography>
+      <Box sx={{ width: "100%", height: 500 }}>
         <ReactECharts
           option={chartOptions}
           style={{ height: "100%", width: "100%" }}
           opts={{ renderer: "svg" }}
         />
+        
       </Box>
-    </Paper>
+    </Card>
   );
 }

@@ -4,6 +4,7 @@ import storage from 'redux-persist/lib/storage';
 import { combineReducers } from '@reduxjs/toolkit';
 import { baseApi } from './api/baseApi';
 import authReducer from './slices/authSlice';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 const persistConfig = {
   key: 'root',
@@ -32,3 +33,4 @@ export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

@@ -18,8 +18,6 @@ export function useSignIn() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
 
-  console.log('callbackUrl', callbackUrl);
-
   const {
     register,
     handleSubmit,
@@ -41,7 +39,7 @@ export function useSignIn() {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        callbackUrl,
+        redirect: false,
       });
 
       if (result?.error) {
@@ -62,6 +60,7 @@ export function useSignIn() {
 
         if (response.ok) {
           const authData = await response.json();
+          console.log('authData', authData);
           
           dispatch(setCredentials({
             accessToken: authData.session.access_token,
@@ -76,8 +75,8 @@ export function useSignIn() {
           }));
         }
         
-        router.push('/');
-        router.refresh();
+        router.push(callbackUrl);
+        // router.refresh();
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login. Tente novamente.');
