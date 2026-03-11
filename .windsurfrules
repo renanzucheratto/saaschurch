@@ -1,0 +1,13 @@
+# Regras de Arquitetura Frontend
+
+1. **Roteamento e Componentização**: Toda nova página deve ser criada na pasta `app` apenas para definição de rota. O conteúdo real e a lógica devem ser importados de um módulo correspondente na pasta `modules`. NUNCA crie lógica de página diretamente na pasta `app`.
+2. **Estrutura dos Módulos**:
+   - `/components`: componentes específicos do módulo.
+   - `/hooks`: lógica do componente principal (`index.tsx`).
+   - `/helpers`: funções utilitárias (usar *kebab-case* para nome do arquivo, ex: `my-helper.ts` e exportar *arrow functions*) e `constants.ts` para variáveis fixas.
+   - `styles.tsx`: estilização do módulo.
+   - `types.ts`: tipagens do módulo.
+   - `index.tsx`: componente principal do módulo.
+3. **Nomenclatura**: Todas as pastas e arquivos devem adotar o formato **kebab-case**.
+4. **Helpers Globais**: Devem ser criados em `@/config/helpers`.
+5. **Estilização Global MUI**: Toda alteração de layout de componentes do Material-UI (MUI) deve ser feita nos overrides em `@/config/theme/overrides`.

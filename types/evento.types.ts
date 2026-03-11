@@ -48,6 +48,7 @@ export interface Participante {
   rg: string;
   cpf: string;
   termo_assinado: boolean;
+  isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
   produtos: ProdutoParticipante[];

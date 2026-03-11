@@ -1,0 +1,347 @@
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  IconButton,
+  Chip,
+  Card,
+  Grid,
+  Stack,
+} from "@mui/material";
+import { Icon as IconifyIcon } from "@iconify/react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useObterEventoQuery, useListarParticipantesQuery } from "@/config/redux/api/eventosApi";
+import { ProdutoParticipante } from "@/types/evento.types";
+import ParticipantesPorProdutoChart from "./components/ParticipantesPorProdutoChart";
+import { useState } from "react";
+import { Tabs, Tab } from "@mui/material";
+import ParticipanteDrawer from "./components/ParticipanteDrawer";
+import { Participante } from "@/types/evento.types";
+
+const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
+  if (!dataInicio && !dataFim) return "-";
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (dataInicio && dataFim) {
+    return `${formatDate(dataInicio)} à ${formatDate(dataFim)}`;
+  }
+
+  return dataInicio ? formatDate(dataInicio) : (dataFim ? formatDate(dataFim) : "-");
+};
+
+const participantesColumns: GridColDef[] = [
+  {
+    field: "nome",
+    headerName: "Nome",
+    flex: 1,
+    minWidth: 200,
+  },
+  {
+    field: "email",
+    headerName: "Email",
+    flex: 1,
+    minWidth: 200,
+  },
+  {
+    field: "telefone",
+    headerName: "Telefone",
+    width: 150,
+  },
+  {
+    field: "termo_assinado",
+    headerName: "Termo Assinado",
+    width: 150,
+    renderCell: (params) => (
+      <Chip
+        label={params.value ? "Sim" : "Não"}
+        size="small"
+        color={params.value ? "success" : "error"}
+        sx={{ fontWeight: 600 }}
+      />
+    ),
+  },
+  {
+    field: "produto",
+    headerName: "Produto",
+    flex: 1,
+    minWidth: 250,
+    valueGetter: (value, row) => {
+      return row.produtos && row.produtos.length > 0
+        ? row.produtos.map((p: ProdutoParticipante) => p.nome).join(", ")
+        : "-";
+    },
+  },
+  {
+    field: "valor",
+    headerName: "Valor",
+    width: 120,
+    valueGetter: (value, row) => {
+      if (!row.produtos || row.produtos.length === 0) return 0;
+      const total = row.produtos.reduce((sum: number, p: ProdutoParticipante) => sum + p.valor, 0);
+      return total;
+    },
+    valueFormatter: (value) => {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(value);
+    },
+  },
+];
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
+    </div>
+  );
+}
+
+export default function EventoDetalhesModule() {
+  const params = useParams();
+  const router = useRouter();
+  const eventoId = params.id as string;
+
+  const [currentTab, setCurrentTab] = useState(0); // 0 = Ativos, 1 = Inativos
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedParticipanteId, setSelectedParticipanteId] = useState<string | null>(null);
+
+  const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
+  
+  const { data: participantesAtivos = [], isLoading: isLoadingAtivos } = useListarParticipantesQuery({
+    eventoId,
+    isDeleted: false
+  });
+
+  const { data: participantesInativos = [], isLoading: isLoadingInativos } = useListarParticipantesQuery({
+    eventoId,
+    isDeleted: true
+  });
+
+  const handleRowClick = (params: any) => {
+    setSelectedParticipanteId(params.row.id);
+    setDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerOpen(false);
+  };
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setCurrentTab(newValue);
+    setSelectedParticipanteId(null);
+  };
+
+  const allParticipantes = [...participantesAtivos, ...participantesInativos];
+  const selectedParticipante = allParticipantes.find((p) => p.id === selectedParticipanteId) || null;
+
+  const isLoading = isLoadingEvento;
+
+  if (isLoading && !evento) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 400 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!evento) {
+    return (
+      <Box>
+        <Typography variant="h5" color="error">
+          Evento não encontrado
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Grid container gap={2}>
+      {/* Header com botão voltar */}
+      <Grid size={12}>
+        <Stack direction="row" alignItems="center" gap={2}>
+          <IconButton
+            onClick={() => router.push("/eventos")}
+            sx={{
+              bgcolor: "#F5F5F5",
+              "&:hover": { bgcolor: "#E0E0E0" },
+            }}
+          >
+            <IconifyIcon icon="material-symbols:arrow-back" width={18} />
+          </IconButton>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1A1A1A" }}>
+            {evento.nome}
+          </Typography>
+        </Stack>
+      </Grid>
+
+      {/* Informações do Evento */}
+      <Grid size={12}>
+        <Card variant="outlined">
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+            Informações do Evento
+          </Typography>
+
+          <Box sx={{ display: "grid", gap: 2 }}>
+            <Box>
+              <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
+                Data
+              </Typography>
+              <Typography variant="body1">
+                {formatDateRange(evento.data_inicio, evento.data_fim)}
+              </Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
+                Descrição
+              </Typography>
+              <Typography variant="body1">{evento.descricao}</Typography>
+            </Box>
+
+            {evento.produtos && evento.produtos.length > 0 && (
+              <Box>
+                <Typography variant="caption" sx={{ color: "#666", fontWeight: 600, mb: 1, display: "block" }}>
+                  Produtos Disponíveis
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {evento.produtos.map((produto) => (
+                    <Chip
+                      key={produto.id}
+                      label={produto.nome}
+                      variant="outlined"
+                      sx={{ fontWeight: 500 }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Card>
+      </Grid>
+
+      {/* Gráfico de Participantes por Produto */}
+      <Grid size={12}>
+        <ParticipantesPorProdutoChart eventoId={eventoId} />
+      </Grid>
+
+      <Grid size={12}>
+        {/* Listagem de Participantes com Tabs */}
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={currentTab} onChange={handleTabChange} textColor="primary" indicatorColor="primary">
+              <Tab label="Ativos" />
+              <Tab label="Inativos" />
+            </Tabs>
+          </Box>
+
+          <CustomTabPanel value={currentTab} index={0}>
+            <Card variant="outlined">
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                Participantes Ativos ({participantesAtivos.length})
+              </Typography>
+              <DataGrid
+                rows={participantesAtivos}
+                columns={participantesColumns}
+                loading={isLoadingAtivos}
+                initialState={{
+                  pagination: {
+                    paginationModel: { pageSize: 10, page: 0 },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 25, 50]}
+                disableRowSelectionOnClick
+                onRowClick={handleRowClick}
+                sx={{
+                  border: "none",
+                  height: '621px',
+                  "& .MuiDataGrid-columnHeaders": {
+                    bgcolor: "#FAFAFA",
+                    borderBottom: "2px solid #E0E0E0",
+                    fontWeight: 600,
+                  },
+                  "& .MuiDataGrid-cell": {
+                    borderBottom: "1px solid #F0F0F0",
+                  },
+                  "& .MuiDataGrid-row:hover": {
+                    bgcolor: "#F5F5F5",
+                  },
+                }}
+              />
+            </Card>
+          </CustomTabPanel>
+
+          <CustomTabPanel value={currentTab} index={1}>
+            <Card variant="outlined">
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                Participantes Inativos ({participantesInativos.length})
+              </Typography>
+              <DataGrid
+                rows={participantesInativos}
+                columns={participantesColumns}
+                loading={isLoadingInativos}
+                initialState={{
+                  pagination: {
+                    paginationModel: { pageSize: 10, page: 0 },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 25, 50]}
+                disableRowSelectionOnClick
+                onRowClick={handleRowClick}
+                sx={{
+                  border: "none",
+                  height: '621px',
+                  "& .MuiDataGrid-columnHeaders": {
+                    bgcolor: "#FAFAFA",
+                    borderBottom: "2px solid #E0E0E0",
+                    fontWeight: 600,
+                  },
+                  "& .MuiDataGrid-cell": {
+                    borderBottom: "1px solid #F0F0F0",
+                  },
+                  "& .MuiDataGrid-row:hover": {
+                    bgcolor: "#F5F5F5",
+                  },
+                }}
+              />
+            </Card>
+          </CustomTabPanel>
+        </Box>
+      </Grid>
+
+      <ParticipanteDrawer
+        open={drawerOpen}
+        onClose={handleCloseDrawer}
+        participante={selectedParticipante}
+        eventoId={eventoId}
+      />
+    </Grid>
+  );
+}
