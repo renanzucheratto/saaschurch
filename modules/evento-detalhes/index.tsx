@@ -19,7 +19,7 @@ import ParticipantesPorProdutoChart from "./components/ParticipantesPorProdutoCh
 import { useState } from "react";
 import { Tabs, Tab } from "@mui/material";
 import ParticipanteDrawer from "./components/ParticipanteDrawer";
-import { Participante } from "@/types/evento.types";
+import ParticipantesPizzaChart from "./components/ParticipantesPizzaChart";
 
 const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
   if (!dataInicio && !dataFim) return "-";
@@ -134,7 +134,7 @@ export default function EventoDetalhesModule() {
   const [selectedParticipanteId, setSelectedParticipanteId] = useState<string | null>(null);
 
   const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
-  
+
   const { data: participantesAtivos = [], isLoading: isLoadingAtivos } = useListarParticipantesQuery({
     eventoId,
     isDeleted: false
@@ -247,9 +247,12 @@ export default function EventoDetalhesModule() {
         </Card>
       </Grid>
 
-      {/* Gráfico de Participantes por Produto */}
-      <Grid size={12}>
+      {/* Gráficos de Participantes */}
+      <Grid size={{ xs: 12, md: 7 }}>
         <ParticipantesPorProdutoChart eventoId={eventoId} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 5 }}>
+        <ParticipantesPizzaChart eventoId={eventoId} />
       </Grid>
 
       <Grid size={12}>
