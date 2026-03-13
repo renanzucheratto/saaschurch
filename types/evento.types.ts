@@ -12,6 +12,7 @@ export interface EventoListagem {
   data_fim: string | null;
   descricao: string;
   selecao_unica_produto: boolean;
+  imagem_url: string | null;
   userId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -26,6 +27,7 @@ export interface EventoDetalhes {
   data_fim: string | null;
   descricao: string;
   selecao_unica_produto: boolean;
+  imagem_url: string | null;
   userId: string | null;
   instituicaoId: string;
   createdAt: string;

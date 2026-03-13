@@ -6,6 +6,7 @@ export interface CadastrarEventoRequest {
   data_inicio: string;
   data_fim: string;
   descricao?: string;
+  imagem_url?: string;
 }
 
 export type CadastrarEventoResponse = EventoDetalhes;
