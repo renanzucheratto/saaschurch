@@ -126,7 +126,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
         Participantes por produto
       </Typography>
-      <Box sx={{ width: "100%", height: 500 }}>
+      <Box sx={{ width: "100%", height: 550 }}>
         <ReactECharts
           option={chartOptions}
           style={{ height: "100%", width: "100%" }}

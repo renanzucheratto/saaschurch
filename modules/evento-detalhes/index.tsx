@@ -288,7 +288,7 @@ export default function EventoDetalhesModule() {
                 onRowClick={handleRowClick}
                 sx={{
                   border: "none",
-                  height: '621px',
+                  height: '650px',
                   "& .MuiDataGrid-columnHeaders": {
                     bgcolor: "#FAFAFA",
                     borderBottom: "2px solid #E0E0E0",
