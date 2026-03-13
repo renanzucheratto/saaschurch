@@ -183,7 +183,7 @@ export default function EventoDetalhesModule() {
   }
 
   return (
-    <Grid container gap={2}>
+    <Grid container spacing={2}>
       {/* Header com botão voltar */}
       <Grid size={12}>
         <Stack direction="row" alignItems="center" gap={2}>

@@ -24,8 +24,7 @@ export default function ParticipantesPizzaChart({ eventoId }: ParticipantesPizza
         formatter: "{b}: {c}"
       },
       legend: {
-        top: "5%",
-        left: "center",
+        top: "0",
       },
       series: [
         {
@@ -35,34 +34,34 @@ export default function ParticipantesPizzaChart({ eventoId }: ParticipantesPizza
           center: ["50%", "55%"],
           avoidLabelOverlap: false,
           itemStyle: {
-            borderRadius: 10,
+            borderRadius: 6,
             borderColor: "#fff",
-            borderWidth: 2,
+            borderWidth: 5,
           },
           label: {
             show: true,
             position: "outside",
             formatter: "{b}\n{c}",
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: 600,
           },
           emphasis: {
             label: {
               show: true,
-              fontSize: 18,
+              fontSize: 14,
               fontWeight: "bold",
             },
           },
           labelLine: {
             show: true,
-            length: 15,
-            length2: 10,
+            length: 10,
+            length2: 12,
             smooth: true,
           },
           data: pieData,
         },
       ],
-      color: ["#34a853", "#fbbc05"],
+      color: ["#3db0a5ff", "#fba505ff"],
     };
   }, [estatisticas]);
 
@@ -89,7 +88,7 @@ export default function ParticipantesPizzaChart({ eventoId }: ParticipantesPizza
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
         Day Use vs Retiro (Inclui Pacotes)
       </Typography>
-      <Box sx={{ width: "100%", height: 500, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <Box sx={{ width: "100%", height: 450, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ReactECharts
           option={chartOptions}
           style={{ height: "100%", width: "100%" }}

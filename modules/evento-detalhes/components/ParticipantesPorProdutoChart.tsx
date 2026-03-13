@@ -88,7 +88,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
           },
           label: {
             show: true,
-            
+
             position: "top",
             color: "#1A1A1A",
             fontSize: 12,
@@ -113,7 +113,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
         <Typography variant="body1" color="text.secondary">
           Nenhum dado disponível para exibir
         </Typography>
-      
+
         <Typography variant="body1" color="text.secondary">
           Nenhum dado disponível para exibir
         </Typography>
@@ -132,7 +132,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
           style={{ height: "100%", width: "100%" }}
           opts={{ renderer: "svg" }}
         />
-        
+
       </Box>
     </Card>
   );
