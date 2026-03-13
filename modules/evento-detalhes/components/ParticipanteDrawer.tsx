@@ -94,16 +94,18 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
             <Typography variant="caption" color="text.secondary" fontWeight={600}>Termo Assinado</Typography>
             <Typography variant="body1">{participante.termo_assinado ? 'Sim' : 'Não'}</Typography>
           </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>Produtos Adquiridos</Typography>
-            <Stack spacing={1} mt={1}>
-              {participante.produtos.map((p) => (
-                <Typography key={p.id} variant="body2" sx={{ bgcolor: 'grey.100', p: 1, borderRadius: 1 }}>
-                  {p.nome} - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor)}
-                </Typography>
-              ))}
-            </Stack>
-          </Box>
+          {participante.produtos && participante.produtos.length > 0 && (
+            <Box>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>Produtos Adquiridos</Typography>
+              <Stack spacing={1} mt={1}>
+                {participante.produtos.map((p) => (
+                  <Typography key={p.id} variant="body2" sx={{ bgcolor: 'grey.100', p: 1, borderRadius: 1 }}>
+                    {p.nome} - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor)}
+                  </Typography>
+                ))}
+              </Stack>
+            </Box>
+          )}
         </Stack>
 
         <Box sx={{ mt: 4, pt: 2, display: 'flex', gap: 2, borderTop: '1px solid', borderColor: 'divider' }}>
