@@ -13,7 +13,7 @@ interface Alert {
   severity: 'success' | 'error';
 }
 
-export const useEventoForm = (eventoId: string) => {
+export const useEventoForm = (eventoId: string, hasProdutos: boolean = false) => {
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [cadastrarParticipante, { isLoading: isSubmittingApi }] = useCadastrarParticipanteMutation();
   const [alert, setAlert] = useState<Alert>({
@@ -25,6 +25,7 @@ export const useEventoForm = (eventoId: string) => {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting, isValid },
     reset,
   } = useForm<EventoFormSchema>({
@@ -44,6 +45,11 @@ export const useEventoForm = (eventoId: string) => {
 
   const onSubmit = async (data: EventoFormSchema) => {
     try {
+      if (hasProdutos && !data.produtoId) {
+        setError('produtoId', { type: 'manual', message: 'Selecione um produto' });
+        return;
+      }
+
       if (!executeRecaptcha) {
         setAlert({
           open: true,
@@ -63,11 +69,11 @@ export const useEventoForm = (eventoId: string) => {
         cpf: data.cpf,
         termo_assinado: data.termo_assinado,
         recaptchaToken,
-        produtos_selecionados: [
+        produtos_selecionados: data.produtoId ? [
           {
             produtoId: data.produtoId,
           },
-        ],
+        ] : [],
       };
 
       await cadastrarParticipante({ eventId: eventoId, data: payload }).unwrap();

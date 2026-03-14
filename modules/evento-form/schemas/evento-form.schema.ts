@@ -20,7 +20,7 @@ export const eventoFormSchema = z.object({
     .refine((val) => validateCPF(val), {
       message: 'CPF inválido',
     }),
-  produtoId: z.string().min(1, 'Selecione um produto'),
+  produtoId: z.string().optional(),
   termo_assinado: z.boolean().refine((val) => val === true, {
     message: 'Você deve aceitar os termos',
   }),

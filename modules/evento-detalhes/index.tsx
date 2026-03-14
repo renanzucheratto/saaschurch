@@ -16,7 +16,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useObterEventoQuery, useListarParticipantesQuery } from "@/config/redux/api/eventosApi";
 import { ProdutoParticipante } from "@/types/evento.types";
 import ParticipantesPorProdutoChart from "./components/ParticipantesPorProdutoChart";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Tabs, Tab } from "@mui/material";
 import ParticipanteDrawer from "./components/ParticipanteDrawer";
 import ParticipantesPizzaChart from "./components/ParticipantesPizzaChart";
@@ -164,6 +164,17 @@ export default function EventoDetalhesModule() {
 
   const isLoading = isLoadingEvento;
 
+  const gridColumns = useMemo(() => {
+    if (!evento) return participantesColumns;
+    const temProdutos = evento.produtos && evento.produtos.length > 0;
+    
+    if (temProdutos) return participantesColumns;
+    
+    return participantesColumns.filter(
+      col => col.field !== "produto" && col.field !== "valor"
+    );
+  }, [evento]);
+
   if (isLoading && !evento) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 400 }}>
@@ -276,7 +287,7 @@ export default function EventoDetalhesModule() {
               </Typography>
               <DataGrid
                 rows={participantesAtivos}
-                columns={participantesColumns}
+                columns={gridColumns}
                 loading={isLoadingAtivos}
                 initialState={{
                   pagination: {
@@ -312,7 +323,7 @@ export default function EventoDetalhesModule() {
               </Typography>
               <DataGrid
                 rows={participantesInativos}
-                columns={participantesColumns}
+                columns={gridColumns}
                 loading={isLoadingInativos}
                 initialState={{
                   pagination: {

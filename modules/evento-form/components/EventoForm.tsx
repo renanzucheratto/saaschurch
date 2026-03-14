@@ -75,8 +75,9 @@ export const EventoForm = () => {
   const params = usePathname();
   const eventoId = params?.split('/').pop() ?? '';
 
-  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId);
   const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
+  const hasProdutos = !!(evento?.produtos && evento.produtos.length > 0);
+  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos);
 
   if (isLoadingEvento) {
     return (
@@ -252,26 +253,26 @@ export const EventoForm = () => {
                 Preencha os dados abaixo para garantir sua participação
               </Typography>
 
-              <Box sx={{ mb: 4 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 700,
-                    mb: 2,
-                    fontSize: '0.875rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    color: 'text.primary',
-                  }}
-                >
-                  Selecione uma opção *
-                </Typography>
-                <Controller
-                  name="produtoId"
-                  control={control}
-                  render={({ field }) => (
-                    <Box>
-                      {evento.produtos && evento.produtos.length > 0 ? (
+              {hasProdutos && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 2,
+                      fontSize: '0.875rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      color: 'text.primary',
+                    }}
+                  >
+                    Selecione uma opção *
+                  </Typography>
+                  <Controller
+                    name="produtoId"
+                    control={control}
+                    render={({ field }) => (
+                      <Box>
                         <Box
                           sx={{
                             display: 'flex',
@@ -289,20 +290,16 @@ export const EventoForm = () => {
                             />
                           ))}
                         </Box>
-                      ) : (
-                        <Typography color="text.secondary">
-                          Nenhuma opção disponível para este evento.
-                        </Typography>
-                      )}
-                    </Box>
+                      </Box>
+                    )}
+                  />
+                  {errors.produtoId && (
+                    <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+                      {errors.produtoId.message}
+                    </Typography>
                   )}
-                />
-                {errors.produtoId && (
-                  <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
-                    {errors.produtoId.message}
-                  </Typography>
-                )}
-              </Box>
+                </Box>
+              )}
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                 <Controller
