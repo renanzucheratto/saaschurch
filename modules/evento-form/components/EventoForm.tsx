@@ -3,7 +3,7 @@
 import { Controller } from 'react-hook-form';
 import { IMaskInput } from 'react-imask';
 import { useEventoForm } from '../hooks/useEventoForm';
-import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress, Container, useMediaQuery, useTheme } from '@mui/material';
+import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress, Container, useMediaQuery, useTheme, Stack } from '@mui/material';
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
 import { ProductAccordion } from './ProductAccordion';
@@ -240,21 +240,25 @@ export const EventoForm = () => {
           >
 
             <Box component="form" onSubmit={handleSubmit}>
-              <Typography
-                variant="h4"
-                component="h2"
-                sx={{
-                  fontWeight: 700,
-                  mb: 1,
-                  fontSize: { xs: '1.75rem', md: '2rem' },
-                  color: '#1a1a1a',
-                }}
-              >
-                {isMobile ? evento.nome : 'Inscreva-se no evento'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 4, fontSize: '0.95rem' }}>
-                Preencha os dados abaixo para garantir sua participação
-              </Typography>
+              <Stack mb={4}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 1,
+                  }}
+                >
+                  {isMobile ? evento.nome : 'Inscreva-se no evento'}
+                </Typography >
+                {evento.descricao && isMobile ?
+                  <Typography variant="body2" mb={1}>
+                    {evento.descricao}
+                  </Typography>
+                  : null}
+                <Typography variant="body2">
+                  Preencha os dados abaixo para garantir sua participação
+                </Typography>
+              </Stack>
 
               {hasProdutos && (
                 <Box sx={{ mb: 4 }}>
