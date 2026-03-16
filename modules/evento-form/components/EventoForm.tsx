@@ -3,7 +3,7 @@
 import { Controller } from 'react-hook-form';
 import { IMaskInput } from 'react-imask';
 import { useEventoForm } from '../hooks/useEventoForm';
-import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress, Container } from '@mui/material';
+import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress, Container, useMediaQuery, useTheme } from '@mui/material';
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
 import { ProductAccordion } from './ProductAccordion';
@@ -76,6 +76,9 @@ export const EventoForm = () => {
   const eventoId = params?.split('/').pop() ?? '';
 
   const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
+
   const hasProdutos = !!(evento?.produtos && evento.produtos.length > 0);
   const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos);
 
@@ -247,7 +250,7 @@ export const EventoForm = () => {
                   color: '#1a1a1a',
                 }}
               >
-                Inscreva-se no evento
+                {isMobile ? evento.nome : 'Inscreva-se no evento'}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 4, fontSize: '0.95rem' }}>
                 Preencha os dados abaixo para garantir sua participação
