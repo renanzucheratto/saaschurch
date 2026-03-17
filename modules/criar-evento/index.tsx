@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -19,99 +19,61 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { criarEventoSchema, type CriarEventoSchema } from "./schemas/criar-evento.schema";
 import { useCadastrarEventoMutation } from "@/config/redux/api/eventosApi";
 import type { ProdutoEventoRequest } from "@/config/redux/api/eventosApi";
 import RichTextEditor from "./components/RichTextEditor";
-
-interface ProdutoForm {
-  nome: string;
-  descricao: string;
-  valor: string;
-}
-
-const emptyProduto: ProdutoForm = { nome: "", descricao: "", valor: "" };
+import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 
 export default function CriarEventoModule() {
   const router = useRouter();
   const [cadastrarEvento, { isLoading }] = useCadastrarEventoMutation();
 
-  // Event fields
-  const [nome, setNome] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [dataInicio, setDataInicio] = useState("");
-  const [dataFim, setDataFim] = useState("");
-  const [imagemUrl, setImagemUrl] = useState("");
-  const [selecaoUnicaProduto, setSelecaoUnicaProduto] = useState(true);
-
-  // Products
-  const [produtos, setProdutos] = useState<ProdutoForm[]>([]);
-
-  // Alert
   const [alert, setAlert] = useState<{
     open: boolean;
     message: string;
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
-  // Validation
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    watch,
+  } = useForm<CriarEventoSchema>({
+    resolver: zodResolver(criarEventoSchema),
+    mode: "onChange",
+    defaultValues: {
+      nome: "",
+      data_inicio: "",
+      data_fim: "",
+      descricao: "",
+      selecao_unica_produto: true,
+      produtos: [],
+    },
+  });
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!nome.trim()) newErrors.nome = "Nome é obrigatório";
-    if (!dataInicio) newErrors.dataInicio = "Data de início é obrigatória";
-    if (!dataFim) newErrors.dataFim = "Data de término é obrigatória";
-    if (dataInicio && dataFim && new Date(dataInicio) > new Date(dataFim)) {
-      newErrors.dataFim = "Data de término deve ser posterior à data de início";
-    }
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "produtos",
+  });
 
-    produtos.forEach((p, i) => {
-      if (!p.nome.trim()) newErrors[`produto_${i}_nome`] = "Nome é obrigatório";
-      if (!p.valor || isNaN(Number(p.valor)) || Number(p.valor) < 0) {
-        newErrors[`produto_${i}_valor`] = "Valor inválido";
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleAddProduto = () => {
-    setProdutos([...produtos, { ...emptyProduto }]);
-  };
-
-  const handleRemoveProduto = (index: number) => {
-    setProdutos(produtos.filter((_, i) => i !== index));
-  };
-
-  const handleProdutoChange = (
-    index: number,
-    field: keyof ProdutoForm,
-    value: string
-  ) => {
-    const updated = [...produtos];
-    updated[index] = { ...updated[index], [field]: value };
-    setProdutos(updated);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-
+  const onSubmit = async (data: CriarEventoSchema) => {
     try {
-      const produtosPayload: ProdutoEventoRequest[] = produtos.map((p) => ({
+      const produtosPayload: ProdutoEventoRequest[] = (data.produtos || []).map((p) => ({
         nome: p.nome,
-        descricao: p.descricao || undefined,
-        valor: Number(p.valor),
+        descricao: p.descricao,
+        valor: formatCurrencyToNumber(p.valor),
       }));
 
       const result = await cadastrarEvento({
-        nome,
-        data_inicio: new Date(dataInicio).toISOString(),
-        data_fim: new Date(dataFim).toISOString(),
-        descricao: descricao || undefined,
-        imagem_url: imagemUrl || undefined,
-        selecao_unica_produto: selecaoUnicaProduto,
+        nome: data.nome,
+        data_inicio: new Date(data.data_inicio).toISOString(),
+        data_fim: new Date(data.data_fim).toISOString(),
+        descricao: data.descricao || undefined,
+        selecao_unica_produto: data.selecao_unica_produto,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
       }).unwrap();
 
@@ -131,6 +93,8 @@ export default function CriarEventoModule() {
     }
   };
 
+  const selecao_unica_produto = watch("selecao_unica_produto");
+
   return (
     <Box>
       {/* Header */}
@@ -149,7 +113,7 @@ export default function CriarEventoModule() {
         </Typography>
       </Stack>
 
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={3}>
           {/* Informações Básicas */}
           <Grid size={12}>
@@ -163,70 +127,90 @@ export default function CriarEventoModule() {
 
               <Grid container spacing={2.5}>
                 <Grid size={12}>
-                  <TextField
-                    label="Nome do evento *"
-                    fullWidth
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    error={!!errors.nome}
-                    helperText={errors.nome}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 1.5,
-                      },
-                    }}
+                  <Controller
+                    name="nome"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Nome do evento *"
+                        fullWidth
+                        error={!!errors.nome}
+                        helperText={errors.nome?.message}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 1.5,
+                          },
+                        }}
+                      />
+                    )}
                   />
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
-                    label="Data de início *"
-                    type="datetime-local"
-                    fullWidth
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
-                    error={!!errors.dataInicio}
-                    helperText={errors.dataInicio}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 1.5,
-                      },
-                    }}
+                  <Controller
+                    name="data_inicio"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Data de início *"
+                        type="datetime-local"
+                        fullWidth
+                        error={!!errors.data_inicio}
+                        helperText={errors.data_inicio?.message}
+                        slotProps={{ inputLabel: { shrink: true } }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 1.5,
+                          },
+                        }}
+                      />
+                    )}
                   />
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
-                    label="Data de término *"
-                    type="datetime-local"
-                    fullWidth
-                    value={dataFim}
-                    onChange={(e) => setDataFim(e.target.value)}
-                    error={!!errors.dataFim}
-                    helperText={errors.dataFim}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 1.5,
-                      },
-                    }}
+                  <Controller
+                    name="data_fim"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Data de término *"
+                        type="datetime-local"
+                        fullWidth
+                        error={!!errors.data_fim}
+                        helperText={errors.data_fim?.message}
+                        slotProps={{ inputLabel: { shrink: true } }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 1.5,
+                          },
+                        }}
+                      />
+                    )}
                   />
                 </Grid>
 
                 <Grid size={12}>
-                  <TextField
-                    label="Descrição"
-                    fullWidth
-                    multiline
-                    minRows={3}
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 1.5,
-                      },
-                    }}
+                  <Controller
+                    name="descricao"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Descrição"
+                        fullWidth
+                        multiline
+                        minRows={3}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 1.5,
+                          },
+                        }}
+                      />
+                    )}
                   />
                 </Grid>
 
@@ -278,7 +262,7 @@ export default function CriarEventoModule() {
                       width={18}
                     />
                   }
-                  onClick={handleAddProduto}
+                  onClick={() => append({ nome: "", descricao: "", valor: "" })}
                   sx={{
                     borderRadius: 1.5,
                     textTransform: "none",
@@ -289,41 +273,45 @@ export default function CriarEventoModule() {
                 </Button>
               </Stack>
 
-              {produtos.length > 0 && (
+              {fields.length > 0 && (
                 <Box>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={selecaoUnicaProduto}
-                        onChange={(e) =>
-                          setSelecaoUnicaProduto(e.target.checked)
+                  <Controller
+                    name="selecao_unica_produto"
+                    control={control}
+                    render={({ field: { value, onChange } }) => (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={value}
+                            onChange={(e) => onChange(e.target.checked)}
+                          />
                         }
+                        label={
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              Seleção de produto obrigatória
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {value
+                                ? "O participante será obrigado a selecionar um produto ao se inscrever"
+                                : "O participante poderá se inscrever sem selecionar um produto"}
+                            </Typography>
+                          </Box>
+                        }
+                        sx={{ mb: 2, ml: 0 }}
                       />
-                    }
-                    label={
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          Seleção de produto obrigatória
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                        >
-                          {selecaoUnicaProduto
-                            ? "O participante será obrigado a selecionar um produto ao se inscrever"
-                            : "O participante poderá se inscrever sem selecionar um produto"}
-                        </Typography>
-                      </Box>
-                    }
-                    sx={{ mb: 2, ml: 0 }}
+                    )}
                   />
 
                   <Divider sx={{ mb: 2 }} />
 
                   <Stack spacing={2}>
-                    {produtos.map((produto, index) => (
+                    {fields.map((field, index) => (
                       <Card
-                        key={index}
+                        key={field.id}
                         variant="outlined"
                         sx={{
                           p: 2,
@@ -333,7 +321,7 @@ export default function CriarEventoModule() {
                       >
                         <IconButton
                           size="small"
-                          onClick={() => handleRemoveProduto(index)}
+                          onClick={() => remove(index)}
                           sx={{
                             position: "absolute",
                             top: 8,
@@ -361,71 +349,73 @@ export default function CriarEventoModule() {
                         </Typography>
 
                         <Grid container spacing={2}>
-                          <Grid size={{ xs: 12, md: 5 }}>
-                            <TextField
-                              label="Nome *"
-                              fullWidth
-                              size="small"
-                              value={produto.nome}
-                              onChange={(e) =>
-                                handleProdutoChange(
-                                  index,
-                                  "nome",
-                                  e.target.value
-                                )
-                              }
-                              error={!!errors[`produto_${index}_nome`]}
-                              helperText={errors[`produto_${index}_nome`]}
-                              sx={{
-                                "& .MuiOutlinedInput-root": {
-                                  borderRadius: 1.5,
-                                },
-                              }}
+                          <Grid size={{ xs: 12 }}>
+                            <Controller
+                              name={`produtos.${index}.nome`}
+                              control={control}
+                              render={({ field }) => (
+                                <TextField
+                                  {...field}
+                                  label="Nome do produto"
+                                  size="small"
+                                  error={!!errors.produtos?.[index]?.nome}
+                                  helperText={errors.produtos?.[index]?.nome?.message}
+                                  sx={{
+                                    minWidth: '300px',
+                                    "& .MuiOutlinedInput-root": {
+                                      borderRadius: 1.5,
+                                    },
+                                  }}
+                                />
+                              )}
                             />
                           </Grid>
-                          <Grid size={{ xs: 12, md: 4 }}>
-                            <RichTextEditor
-                              label="Descrição"
-                              value={produto.descricao}
-                              onChange={(value) =>
-                                handleProdutoChange(
-                                  index,
-                                  "descricao",
-                                  value
-                                )
-                              }
+                          <Grid size={{ xs: 12 }} mb={2}>
+                            <Controller
+                              name={`produtos.${index}.descricao`}
+                              control={control}
+                              render={({ field }) => (
+                                <RichTextEditor
+                                  label="Descrição"
+                                  value={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              )}
                             />
+                            {errors.produtos?.[index]?.descricao && (
+                              <Typography color="error" variant="caption">
+                                {errors.produtos?.[index]?.descricao?.message}
+                              </Typography>
+                            )}
                           </Grid>
-                          <Grid size={{ xs: 12, md: 3 }}>
-                            <TextField
-                              label="Valor *"
-                              fullWidth
-                              size="small"
-                              type="number"
-                              value={produto.valor}
-                              onChange={(e) =>
-                                handleProdutoChange(
-                                  index,
-                                  "valor",
-                                  e.target.value
-                                )
-                              }
-                              error={!!errors[`produto_${index}_valor`]}
-                              helperText={errors[`produto_${index}_valor`]}
-                              slotProps={{
-                                input: {
-                                  startAdornment: (
-                                    <InputAdornment position="start">
-                                      R$
-                                    </InputAdornment>
-                                  ),
-                                },
-                              }}
-                              sx={{
-                                "& .MuiOutlinedInput-root": {
-                                  borderRadius: 1.5,
-                                },
-                              }}
+                          <Grid size={{ xs: 12 }}>
+                            <Controller
+                              name={`produtos.${index}.valor`}
+                              control={control}
+                              render={({ field }) => (
+                                <TextField
+                                  {...field}
+                                  label="Valor *"
+                                  size="small"
+                                  placeholder="R$ 0,00"
+                                  error={!!errors.produtos?.[index]?.valor}
+                                  helperText={errors.produtos?.[index]?.valor?.message}
+                                  disabled={isLoading}
+                                  slotProps={{
+                                    inputLabel: {
+                                      shrink: true,
+                                    },
+                                  }}
+                                  InputProps={{
+                                    inputComponent: CurrencyMaskCustom as any,
+                                  }}
+                                  sx={{
+                                    "& .MuiOutlinedInput-root": {
+                                      borderRadius: 1.5,
+                                    },
+                                  }}
+                                />
+                              )}
                             />
                           </Grid>
                         </Grid>
@@ -435,7 +425,7 @@ export default function CriarEventoModule() {
                 </Box>
               )}
 
-              {produtos.length === 0 && (
+              {fields.length === 0 && (
                 <Box
                   sx={{
                     textAlign: "center",
@@ -473,7 +463,7 @@ export default function CriarEventoModule() {
               <Button
                 type="submit"
                 variant="contained"
-                disabled={isLoading}
+                disabled={isLoading || !isValid}
                 sx={{
                   borderRadius: 1.5,
                   textTransform: "none",
@@ -481,6 +471,10 @@ export default function CriarEventoModule() {
                   px: 4,
                   bgcolor: "#5B5FED",
                   "&:hover": { bgcolor: "#4A4EDC" },
+                  "&:disabled": {
+                    bgcolor: "#E0E0E0",
+                    color: "#999",
+                  }
                 }}
               >
                 {isLoading ? "Criando..." : "Criar evento"}
