@@ -314,7 +314,7 @@ export default function EventoDetalhesModule() {
       </Grid>
 
       {/* QR Code e Link do Evento */}
-      <Grid size={{ xs: 12, md: 6 }}>
+      <Grid size={{ xs: 12 }}>
         <Card variant="outlined">
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
             Link do Evento
