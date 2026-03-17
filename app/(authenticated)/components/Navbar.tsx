@@ -8,7 +8,11 @@ import { BORDER_RADIUS } from "@/config/utils/contants";
 import { formatFirstLastName } from "@/config/helpers/name-formatter";
 import { useState } from "react";
 
-export default function Navbar() {
+interface NavbarProps {
+  onMenuClick: () => void;
+}
+
+export default function Navbar({ onMenuClick }: NavbarProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const { user } = useAppSelector((state) => state.auth);
@@ -36,7 +40,17 @@ export default function Navbar() {
         xs: 50,
         sm: 60,
       } }}>
-        <Box />
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={onMenuClick}
+            sx={{ mr: 2, display: { sm: "none" }, color: "GrayText" }}
+          >
+            <Icon icon="material-symbols:menu" />
+          </IconButton>
+        </Box>
         
           <Button 
             color="inherit" 

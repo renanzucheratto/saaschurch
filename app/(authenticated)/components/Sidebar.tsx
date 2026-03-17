@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Box,
@@ -11,8 +10,9 @@ import {
   ListItemText,
   Typography,
   Chip,
-  Avatar,
-  IconButton,
+  Drawer,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { BORDER_RADIUS } from "@/config/utils/contants";
@@ -47,62 +47,53 @@ const menuSections: MenuSection[] = [
   },
 ];
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+const DRAWER_WIDTH = 240;
+
+interface SidebarProps {
+  mobileOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  return (
+  const drawerContent = (
     <Box
       sx={{
-        width: collapsed ? 80 : 240,
-        minWidth: collapsed ? 80 : 240,
-        height: "100vh",
+        height: "100%",
         bgcolor: "#FFFFFF",
-        borderRight: "1px solid #E0E0E0",
         display: "flex",
         flexDirection: "column",
-        transition: "width 0.3s ease, min-width 0.3s ease",
-        position: "sticky",
-        top: 0,
-        left: 0,
       }}
     >
       {/* Logo */}
       <Box
         sx={{
           minHeight: {
-            xs: 51,
+            xs: 52,
             sm: 61,
           },
           px: 3,
           display: "flex",
           alignItems: "center",
-          justifyContent: collapsed ? "center" : "space-between",
+          justifyContent: "space-between",
           borderBottom: "1px solid #E0E0E0",
         }}
       >
-        {!collapsed && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            
-            <Typography variant="body1" sx={{ fontWeight: 700, color: "#1A1A1A" }}>
-              IFC Maravilhas
-            </Typography>
-          </Box>
-        )}
-        {/* <IconButton
-          size="small"
-          onClick={() => setCollapsed(!collapsed)}
-          sx={{ color: "#666" }}
-        >
-          {collapsed ? <IconifyIcon icon="material-symbols:chevron-right" width={20} /> : <IconifyIcon icon="material-symbols:chevron-left" width={20} />}
-        </IconButton> */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 700, color: "#1A1A1A" }}>
+            IFC Maravilhas
+          </Typography>
+        </Box>
       </Box>
 
       <Box sx={{ flex: 1, overflowY: "auto", py: 2 }}>
         {menuSections.map((section) => (
           <Box key={section.title} sx={{ mb: 3 }}>
-            {!collapsed && (
+            {section.title && (
               <Typography
                 variant="caption"
                 sx={{
@@ -126,12 +117,14 @@ export default function Sidebar() {
                       if (item.href) {
                         router.push(item.href);
                       }
+                      if (isMobile) {
+                        onClose();
+                      }
                     }}
                     sx={{
                       borderRadius: BORDER_RADIUS.small,
                       p: 0.5,
                       py: 0.75,
-                      justifyContent: collapsed ? "center" : "flex-start",
                       "&.Mui-selected": {
                         bgcolor: "#EDEDFE",
                         color: "#5B5FED",
@@ -140,17 +133,14 @@ export default function Sidebar() {
                         },
                         "&:hover": {
                           bgcolor: "#E5E5FD",
-                          "::before": {
-                            bgcolor: "#5B5FED",
-                          },
                         },
                         "::before": {
                           content: '""',
                           position: "absolute",
                           top: 0,
-                          left: '-12px',
-                          height: '100%',
-                          width: '4px',
+                          left: "-12px",
+                          height: "100%",
+                          width: "4px",
                           borderTopRightRadius: BORDER_RADIUS.full,
                           borderBottomRightRadius: BORDER_RADIUS.full,
                           bgcolor: "#5B5FED",
@@ -158,66 +148,50 @@ export default function Sidebar() {
                       },
                       "&:hover": {
                         bgcolor: "#F5F5F5",
-                        "::before": {
-                          content: '""',
-                          position: "absolute",
-                          top: 0,
-                          left: '-12px',
-                          height: '100%',
-                          width: '4px',
-                          borderTopRightRadius: BORDER_RADIUS.full,
-                          borderBottomRightRadius: BORDER_RADIUS.full,
-                          bgcolor: "#ccc",
-                        },
                       },
-                      
                     }}
                   >
                     <ListItemIcon
                       sx={{
                         color: "#666",
                         justifyContent: "center",
-                        minWidth: 35
+                        minWidth: 35,
                       }}
                     >
                       {item.icon}
                     </ListItemIcon>
-                    {!collapsed && (
-                      <>
-                        <ListItemText
-                          primary={item.label}
-                          primaryTypographyProps={{
-                            fontSize: 14,
-                            fontWeight: 500,
-                          }}
-                        />
-                        {item.badge && (
-                          <Chip
-                            label={item.badge}
-                            size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: 11,
-                              fontWeight: 600,
-                              bgcolor: "#F5F5F5",
-                              color: "#666",
-                            }}
-                          />
-                        )}
-                        {item.isBeta && (
-                          <Chip
-                            label="BETA"
-                            size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: 10,
-                              fontWeight: 700,
-                              bgcolor: "#E8E8FF",
-                              color: "#5B5FED",
-                            }}
-                          />
-                        )}
-                      </>
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontSize: 14,
+                        fontWeight: 500,
+                      }}
+                    />
+                    {item.badge && (
+                      <Chip
+                        label={item.badge}
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          bgcolor: "#F5F5F5",
+                          color: "#666",
+                        }}
+                      />
+                    )}
+                    {item.isBeta && (
+                      <Chip
+                        label="BETA"
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: 10,
+                          fontWeight: 700,
+                          bgcolor: "#E8E8FF",
+                          color: "#5B5FED",
+                        }}
+                      />
                     )}
                   </ListItemButton>
                 </ListItem>
@@ -226,6 +200,52 @@ export default function Sidebar() {
           </Box>
         ))}
       </Box>
+    </Box>
+  );
+
+  return (
+    <Box
+      component="nav"
+      sx={{
+        width: { sm: DRAWER_WIDTH },
+        flexShrink: { sm: 0 },
+      }}
+    >
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onClose}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          display: { xs: "block", sm: "none" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: DRAWER_WIDTH,
+            borderRight: "1px solid #E0E0E0",
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+
+      {/* Desktop Drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: "none", sm: "block" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: DRAWER_WIDTH,
+            borderRight: "1px solid #E0E0E0",
+          },
+        }}
+        open
+      >
+        {drawerContent}
+      </Drawer>
     </Box>
   );
 }
