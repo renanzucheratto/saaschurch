@@ -101,11 +101,11 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
   }
 
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{ height: '100%' }}>
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
         Participantes por produto
       </Typography>
-      <Box sx={{ width: "100%", minHeight: 400 }}>
+      <Box sx={{ width: "100%", minHeight: 400, height: '100%' }}>
         <ReactECharts
           option={chartOptions}
           style={{ height: "400px", width: "100%" }}

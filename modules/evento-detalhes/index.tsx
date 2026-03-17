@@ -415,9 +415,14 @@ export default function EventoDetalhesModule() {
               </Grid>
             </>
           ) : (
-            <Grid size={12}>
-              <ParticipantesPorProdutoChart eventoId={eventoId} />
-            </Grid>
+            <>
+              <Grid size={6}>
+                <ParticipantesPorProdutoChart eventoId={eventoId} />
+              </Grid>
+              <Grid size={6}>
+                <ParticipantesPizzaChart eventoId={eventoId} />
+              </Grid>
+            </>
           )}
         </>
       )}

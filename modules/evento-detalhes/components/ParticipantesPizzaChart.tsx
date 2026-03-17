@@ -88,7 +88,7 @@ export default function ParticipantesPizzaChart({ eventoId }: ParticipantesPizza
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
         Day Use vs Retiro (Inclui Pacotes)
       </Typography>
-      <Box sx={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <Box sx={{ width: "100%", minHeight: 250, height: '100%', display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ReactECharts
           option={chartOptions}
           style={{ height: "100%", width: "100%" }}
