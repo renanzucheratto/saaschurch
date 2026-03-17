@@ -20,10 +20,20 @@ export const eventoFormSchema = z.object({
     .refine((val) => validateCPF(val), {
       message: 'CPF inválido',
     }),
-  produtoId: z.string().min(1, 'Selecione um produto'),
+  produtoId: z.string().optional(),
+  selecaoUnicaProduto: z.boolean().optional(),
+  hasProdutos: z.boolean().optional(),
   termo_assinado: z.boolean().refine((val) => val === true, {
     message: 'Você deve aceitar os termos',
   }),
+}).refine((data) => {
+  if (data.hasProdutos && data.selecaoUnicaProduto && !data.produtoId) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Selecione um produto',
+  path: ['produtoId'],
 });
 
 export type EventoFormSchema = z.infer<typeof eventoFormSchema>;

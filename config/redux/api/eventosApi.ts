@@ -1,11 +1,20 @@
 import { baseApi } from './baseApi';
 import { EventoListagem, EventoDetalhes, Participante, Produto } from '@/types/evento.types';
 
+export interface ProdutoEventoRequest {
+  nome: string;
+  descricao?: string;
+  valor: number;
+}
+
 export interface CadastrarEventoRequest {
   nome: string;
   data_inicio: string;
   data_fim: string;
   descricao?: string;
+  imagem_url?: string;
+  selecao_unica_produto?: boolean;
+  produtos?: ProdutoEventoRequest[];
 }
 
 export type CadastrarEventoResponse = EventoDetalhes;
@@ -25,7 +34,10 @@ export interface ParticipanteRequest {
   nome: string;
   email: string;
   telefone: string;
+  rg: string;
+  cpf: string;
   termo_assinado: boolean;
+  recaptchaToken: string;
   produtos_selecionados: ProdutoSelecionado[];
 }
 
@@ -45,9 +57,9 @@ export const eventosApi = baseApi.injectEndpoints({
       query: (eventoId) => `/eventos/${eventoId}`,
       providesTags: (result, error, eventoId) => [{ type: 'Eventos', id: eventoId }],
     }),
-    listarParticipantes: builder.query<Participante[], string>({
-      query: (eventoId) => `/eventos/${eventoId}/participantes`,
-      providesTags: (result, error, eventoId) => [{ type: 'Participantes', id: eventoId }],
+    listarParticipantes: builder.query<Participante[], { eventoId: string; isDeleted?: boolean }>({
+      query: ({ eventoId, isDeleted }) => `/eventos/${eventoId}/participantes${isDeleted !== undefined ? `?isDeleted=${isDeleted}` : ''}`,
+      providesTags: (result, error, { eventoId }) => [{ type: 'Participantes', id: eventoId }],
     }),
     obterEstatisticasParticipantesPorProduto: builder.query<EstatisticaParticipantesPorProduto[], string>({
       query: (eventoId) => `/eventos/${eventoId}/estatisticas/participantes-por-produto`,

@@ -41,6 +41,7 @@ const menuSections: MenuSection[] = [
     title: "EVENTOS",
     items: [
       { id: "eventos", label: "Lista de Eventos", icon: <IconifyIcon icon="material-symbols:event-outline" width={20} />, href: "/eventos" },
+      { id: "criar-evento", label: "Criar evento", icon: <IconifyIcon icon="material-symbols:add-circle-outline" width={20} />, href: "/eventos/criar" },
     ],
   },
 ];

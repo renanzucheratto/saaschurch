@@ -7,7 +7,7 @@ import { useListarEventosQuery } from "@/config/redux/api/eventosApi";
 
 const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
   if (!dataInicio && !dataFim) return "-";
-  
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("pt-BR", {
@@ -20,7 +20,7 @@ const formatDateRange = (dataInicio: string | null, dataFim: string | null): str
   if (dataInicio && dataFim) {
     return `${formatDate(dataInicio)} à ${formatDate(dataFim)}`;
   }
-  
+
   return dataInicio ? formatDate(dataInicio) : (dataFim ? formatDate(dataFim) : "-");
 };
 
@@ -87,7 +87,7 @@ export default function EventosPage() {
           pageSizeOptions={[5, 10, 25]}
           onRowClick={handleRowClick}
           autoHeight
-          density="comfortable"
+          density="standard"
           sx={{
             border: "none",
             "& .MuiDataGrid-columnHeaders": {
