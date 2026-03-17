@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Box, Typography, Paper, CircularProgress } from "@mui/material";
+import { Box, Typography, Paper, CircularProgress, Chip, Button, Card } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
+import { ptBR } from '@mui/x-data-grid/locales';
 import { useListarEventosQuery } from "@/config/redux/api/eventosApi";
+import { Icon } from "@iconify/react";
 
 const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
   if (!dataInicio && !dataFim) return "-";
@@ -34,14 +36,15 @@ const columns: GridColDef[] = [
   {
     field: "data",
     headerName: "Data",
-    width: 250,
+    flex: 1,
+    minWidth: 250,
     valueGetter: (value, row) => formatDateRange(row.data_inicio, row.data_fim),
   },
   {
     field: "quantidadeParticipantes",
     headerName: "Quantidade de Participantes",
-    width: 220,
-    type: "number",
+    flex: 1,
+    minWidth: 220,
   },
 ];
 
@@ -63,19 +66,11 @@ export default function EventosPage() {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: "#1A1A1A" }}>
+      <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
         Lista de Eventos
       </Typography>
 
-      <Paper
-        elevation={0}
-        sx={{
-          width: "100%",
-          border: "1px solid #E0E0E0",
-          borderRadius: 2,
-          overflow: "hidden",
-        }}
-      >
+      <Card variant="outlined">
         <DataGrid
           rows={eventos}
           columns={columns}
@@ -105,8 +100,9 @@ export default function EventosPage() {
               },
             },
           }}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
         />
-      </Paper>
+      </Card>
     </Box>
   );
 }

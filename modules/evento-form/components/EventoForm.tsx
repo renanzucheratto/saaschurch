@@ -81,7 +81,6 @@ export const EventoForm = () => {
 
   const hasProdutos = !!(evento?.produtos && evento.produtos.length > 0);
   const selecaoUnicaProduto = evento?.selecao_unica_produto;
-  console.log('>>', selecaoUnicaProduto)
   const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto);
 
   if (isLoadingEvento) {

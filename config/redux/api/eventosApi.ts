@@ -47,6 +47,12 @@ export interface EstatisticaParticipantesPorProduto {
   quantidadeParticipantes: number;
 }
 
+export interface EstatisticaPizza {
+  id: string;
+  label: string;
+  value: number;
+}
+
 export const eventosApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     listarEventos: builder.query<EventoListagem[], void>({
@@ -65,6 +71,10 @@ export const eventosApi = baseApi.injectEndpoints({
       query: (eventoId) => `/eventos/${eventoId}/estatisticas/participantes-por-produto`,
       providesTags: (result, error, eventoId) => [{ type: 'Participantes', id: eventoId }],
     }),
+    obterEstatisticasPizza: builder.query<EstatisticaPizza[], string>({
+      query: (eventoId) => `/eventos/${eventoId}/estatisticas/dayuse-retiro`,
+      providesTags: (result, error, eventoId) => [{ type: 'Participantes', id: eventoId }],
+    }),
     cadastrarEvento: builder.mutation<EventoDetalhes, CadastrarEventoRequest>({
       query: (data) => ({
         url: '/eventos',
@@ -81,17 +91,47 @@ export const eventosApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { eventId }) => [
         { type: 'Participantes', id: eventId },
+        { type: 'Participantes', id: `${eventId}-false` },
+        { type: 'Participantes', id: `${eventId}-true` },
         { type: 'Eventos', id: eventId },
+      ],
+    }),
+    excluirParticipante: builder.mutation<void, { eventoId: string; participanteId: string }>({
+      query: ({ eventoId, participanteId }) => ({
+        url: `/eventos/${eventoId}/participantes/${participanteId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Participantes', id: eventoId },
+        { type: 'Participantes', id: `${eventoId}-false` },
+        { type: 'Participantes', id: `${eventoId}-true` },
+        { type: 'Eventos', id: eventoId },
+      ],
+    }),
+    editarParticipante: builder.mutation<Participante, { eventoId: string; participanteId: string; data: Partial<Participante> }>({
+      query: ({ eventoId, participanteId, data }) => ({
+        url: `/eventos/${eventoId}/participantes/${participanteId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Participantes', id: eventoId },
+        { type: 'Participantes', id: `${eventoId}-false` },
+        { type: 'Participantes', id: `${eventoId}-true` },
+        { type: 'Eventos', id: eventoId },
       ],
     }),
   }),
 });
 
-export const { 
+export const {
   useListarEventosQuery,
   useObterEventoQuery,
   useListarParticipantesQuery,
   useObterEstatisticasParticipantesPorProdutoQuery,
+  useObterEstatisticasPizzaQuery,
   useCadastrarEventoMutation,
   useCadastrarParticipanteMutation,
+  useExcluirParticipanteMutation,
+  useEditarParticipanteMutation,
 } = eventosApi;

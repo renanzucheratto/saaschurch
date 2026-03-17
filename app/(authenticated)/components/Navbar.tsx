@@ -1,12 +1,26 @@
 "use client";
 
-import { AppBar, Toolbar, Box, IconButton, Tooltip } from "@mui/material";
-import { Icon as IconifyIcon } from "@iconify/react";
+import { AppBar, Toolbar, Box, IconButton, Tooltip, Button, Stack, Typography, Avatar, Menu, MenuItem } from "@mui/material";
+import { Icon } from "@iconify/react";
 import { signOut } from "next-auth/react";
+import { useAppSelector } from "@/config/redux/store";
+import { BORDER_RADIUS } from "@/config/utils/contants";
+import { formatFirstLastName } from "@/config/helpers/name-formatter";
+import { useState } from "react";
 
 export default function Navbar() {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const { user } = useAppSelector((state) => state.auth);
+  const userName = user?.nome;
+  const email = user?.email;
   const handleLogout = async () => {
+    setAnchorEl(null);
     await signOut({ callbackUrl: "/login" });
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
   return (
@@ -18,23 +32,48 @@ export default function Navbar() {
         borderBottom: "1px solid #E0E0E0",
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between", px: 3 }}>
+      <Toolbar sx={{ justifyContent: "space-between", px: '16px!important', minHeight: {
+        xs: 50,
+        sm: 60,
+      } }}>
         <Box />
         
-        <Tooltip title="Sair">
-          <IconButton
-            onClick={handleLogout}
+          <Button 
+            color="inherit" 
+            sx={{ borderRadius: BORDER_RADIUS.default, color: 'GrayText', textTransform: 'inherit', textAlign: 'right' }}
+            onClick={handleMenuOpen}
+          >
+            <Stack flexDirection="row" gap={1}>
+              <Stack justifyContent="center">
+                <Typography variant="body2" fontSize={13} fontWeight={500}>
+                  {formatFirstLastName(userName || '')}
+                </Typography>
+                {email && <Typography variant="caption">{email}</Typography>}
+              </Stack>
+              <Avatar sx={{ width: 35, height: 35 }}>{userName ? userName.charAt(0).toUpperCase() : '?'}</Avatar>
+            </Stack>
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
             sx={{
-              color: "#666",
-              "&:hover": { 
-                bgcolor: "#FEE2E2",
-                color: "#DC2626",
-              },
+              '.MuiPaper-root': {
+                minWidth: 200,
+                boxShadow: '0 0 30px #ccc',
+                borderRadius: BORDER_RADIUS.medium,
+              }
             }}
           >
-            <IconifyIcon icon="material-symbols:logout" width={24} />
-          </IconButton>
-        </Tooltip>
+            <MenuItem onClick={handleLogout} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Icon icon="material-symbols:logout" fontSize={16} />
+              <Typography variant="body2">Sair</Typography>
+            </MenuItem>
+          </Menu>
       </Toolbar>
     </AppBar>
   );

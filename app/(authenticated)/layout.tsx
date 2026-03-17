@@ -27,7 +27,8 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
           component="main"
           sx={{
             flex: 1,
-            p: 3,
+            px: 2.5,
+            py: 2,
             bgcolor: "#FAFAFA",
             overflowY: "auto",
           }}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/config/redux/slices/authSlice';
@@ -15,6 +15,8 @@ export function useSignIn() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { update } = useSession();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
 
   const {
     register,
@@ -58,6 +60,7 @@ export function useSignIn() {
 
         if (response.ok) {
           const authData = await response.json();
+          console.log('authData', authData);
           
           dispatch(setCredentials({
             accessToken: authData.session.access_token,
@@ -72,8 +75,8 @@ export function useSignIn() {
           }));
         }
         
-        router.push('/');
-        router.refresh();
+        router.push(callbackUrl);
+        // router.refresh();
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login. Tente novamente.');

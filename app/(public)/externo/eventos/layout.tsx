@@ -2,7 +2,7 @@
 
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
-const reCaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_KEY ?? "";
+const reCaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
 
 export default function EventosLayout({
   children,
