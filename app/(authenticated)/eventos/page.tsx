@@ -79,7 +79,7 @@ export default function EventosPage() {
               paginationModel: { pageSize: 10, page: 0 },
             },
           }}
-          pageSizeOptions={[5, 10, 25]}
+          pageSizeOptions={[5, 10, 25, 50, 100]}
           onRowClick={handleRowClick}
           autoHeight
           density="standard"

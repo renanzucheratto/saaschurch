@@ -438,7 +438,7 @@ export default function EventoDetalhesModule() {
                     paginationModel: { pageSize: 10, page: 0 },
                   },
                 }}
-                pageSizeOptions={[5, 10, 25, 50]}
+                pageSizeOptions={[5, 10, 25, 50, 100]}
                 disableRowSelectionOnClick
                 onRowClick={handleRowClick}
                 autoHeight
@@ -474,7 +474,7 @@ export default function EventoDetalhesModule() {
                     paginationModel: { pageSize: 10, page: 0 },
                   },
                 }}
-                pageSizeOptions={[5, 10, 25, 50]}
+                pageSizeOptions={[5, 10, 25, 50, 100]}
                 disableRowSelectionOnClick
                 onRowClick={handleRowClick}
                 autoHeight
