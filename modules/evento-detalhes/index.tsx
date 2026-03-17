@@ -12,6 +12,8 @@ import {
   Stack,
   Button,
   Tooltip,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
@@ -138,6 +140,7 @@ export default function EventoDetalhesModule() {
   const [selectedParticipanteId, setSelectedParticipanteId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [eventoDrawerOpen, setEventoDrawerOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const eventoLink = `${process.env.NEXT_PUBLIC_APP_URL}/externo/eventos/${eventoId}`;
 
@@ -215,6 +218,46 @@ export default function EventoDetalhesModule() {
       col => col.field !== "produto" && col.field !== "valor"
     );
   }, [evento]);
+
+  const filterParticipantes = (participantes: any[]) => {
+    if (!searchTerm) return participantes;
+    const lowerSearch = searchTerm.toLowerCase();
+    const numericSearch = searchTerm.replace(/\D/g, "");
+
+    return participantes.filter((p) => {
+      // Verifica se algum valor no objeto (incluindo campos formatados) bate com a busca
+      return Object.entries(p).some(([key, value]) => {
+        if (value === null || value === undefined) return false;
+
+        // Compara string normal
+        const stringValue = String(value).toLowerCase();
+        if (stringValue.includes(lowerSearch)) return true;
+
+        // Compara apenas dígitos para campos que costumam ter formatação (telefone, cpf, rg, valor, etc)
+        if (numericSearch && (typeof value === "string" || typeof value === "number")) {
+          const digitsOnly = String(value).replace(/\D/g, "");
+          if (digitsOnly.length > 0 && digitsOnly.includes(numericSearch)) return true;
+        }
+
+        // Busca em produtos vinculados
+        if (key === "produtos" && Array.isArray(value)) {
+          return value.some((prod) => {
+            const prodString = JSON.stringify(prod).toLowerCase();
+            const prodDigits = JSON.stringify(prod).replace(/\D/g, "");
+            return (
+              prodString.includes(lowerSearch) ||
+              (numericSearch && prodDigits.includes(numericSearch))
+            );
+          });
+        }
+
+        return false;
+      });
+    });
+  };
+
+  const filteredAtivos = useMemo(() => filterParticipantes(participantesAtivos), [participantesAtivos, searchTerm]);
+  const filteredInativos = useMemo(() => filterParticipantes(participantesInativos), [participantesInativos, searchTerm]);
 
   if (isLoading && !evento) {
     return (
@@ -424,9 +467,14 @@ export default function EventoDetalhesModule() {
 
       <Grid size={12}>
         {/* Listagem de Participantes com Tabs */}
-        <Box sx={{ width: '100%' }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={currentTab} onChange={handleTabChange} textColor="primary" indicatorColor="primary">
+        <Box sx={{ width: "100%" }}>
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={currentTab}
+              onChange={handleTabChange}
+              textColor="primary"
+              indicatorColor="primary"
+            >
               <Tab label="Ativos" />
               <Tab label="Inativos" />
             </Tabs>
@@ -434,11 +482,39 @@ export default function EventoDetalhesModule() {
 
           <CustomTabPanel value={currentTab} index={0}>
             <Card variant="outlined">
-              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-                Participantes Ativos ({participantesAtivos.length})
-              </Typography>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                alignItems={{ xs: "start", sm: "center" }}
+                justifyContent="space-between"
+                spacing={2}
+                sx={{ mb: 2 }}
+              >
+                <Typography variant="subtitle1" fontWeight={600}>
+                  Participantes Ativos ({filteredAtivos.length})
+                </Typography>
+                <TextField
+                  placeholder="Buscar em todos os dados..."
+                  size="small"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <IconifyIcon icon="material-symbols:search" width={20} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    minWidth: { xs: "100%", sm: 300 },
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      bgcolor: "white",
+                    },
+                  }}
+                />
+              </Stack>
               <DataGrid
-                rows={participantesAtivos}
+                rows={filteredAtivos}
                 columns={gridColumns}
                 loading={isLoadingAtivos}
                 initialState={{
@@ -470,11 +546,39 @@ export default function EventoDetalhesModule() {
 
           <CustomTabPanel value={currentTab} index={1}>
             <Card variant="outlined">
-              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-                Participantes Inativos ({participantesInativos.length})
-              </Typography>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                alignItems={{ xs: "start", sm: "center" }}
+                justifyContent="space-between"
+                spacing={2}
+                sx={{ mb: 2 }}
+              >
+                <Typography variant="subtitle1" fontWeight={600}>
+                  Participantes Inativos ({filteredInativos.length})
+                </Typography>
+                <TextField
+                  placeholder="Buscar em todos os dados..."
+                  size="small"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <IconifyIcon icon="material-symbols:search" width={20} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    minWidth: { xs: "100%", sm: 300 },
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      bgcolor: "white",
+                    },
+                  }}
+                />
+              </Stack>
               <DataGrid
-                rows={participantesInativos}
+                rows={filteredInativos}
                 columns={gridColumns}
                 loading={isLoadingInativos}
                 initialState={{
