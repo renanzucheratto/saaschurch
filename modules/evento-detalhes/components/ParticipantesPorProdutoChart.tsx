@@ -34,27 +34,24 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
 
     return {
       tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "shadow",
-        },
+        trigger: "item",
       },
       legend: {
         bottom: 0,
-        type: "scroll",
+        type: "plain",
         padding: [20, 0, 0, 0],
         data: legendData,
       },
       grid: {
         left: "10px",
         right: "10px",
-        bottom: "60px", // Espaço extra para a legenda
+        bottom: "100px", // Espaço extra para as múltiplas linhas da legenda
         top: "30px",
         containLabel: true,
       },
       xAxis: {
         type: "category",
-        data: ["Produtos"], // Placeholder genérico no eixo X
+        data: ["Participantes"], // Placeholder genérico no eixo X
         axisLabel: {
           show: false // Oculta os nomes abaixo da barra
         },
@@ -108,10 +105,10 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
         Participantes por produto
       </Typography>
-      <Box sx={{ width: "100%", height: 300 }}>
+      <Box sx={{ width: "100%", minHeight: 400 }}>
         <ReactECharts
           option={chartOptions}
-          style={{ height: "100%", width: "100%" }}
+          style={{ height: "400px", width: "100%" }}
           opts={{ renderer: "svg" }}
         />
 
