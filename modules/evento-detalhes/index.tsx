@@ -22,6 +22,7 @@ import { useState, useMemo } from "react";
 import { Tabs, Tab } from "@mui/material";
 import ParticipanteDrawer from "./components/ParticipanteDrawer";
 import ParticipantesPizzaChart from "./components/ParticipantesPizzaChart";
+import EventoDrawer from "./components/EventoDrawer";
 import { QRCodeSVG } from "qrcode.react";
 
 const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
@@ -136,6 +137,7 @@ export default function EventoDetalhesModule() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedParticipanteId, setSelectedParticipanteId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [eventoDrawerOpen, setEventoDrawerOpen] = useState(false);
 
   const eventoLink = `${process.env.NEXT_PUBLIC_APP_URL}/externo/eventos/${eventoId}`;
 
@@ -236,19 +238,33 @@ export default function EventoDetalhesModule() {
     <Grid container spacing={2}>
       {/* Header com botão voltar */}
       <Grid size={12}>
-        <Stack direction="row" alignItems="center" gap={2}>
-          <IconButton
-            onClick={() => router.push("/eventos")}
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" alignItems="center" gap={2}>
+            <IconButton
+              onClick={() => router.push("/eventos")}
+              sx={{
+                bgcolor: "#F5F5F5",
+                "&:hover": { bgcolor: "#E0E0E0" },
+              }}
+            >
+              <IconifyIcon icon="material-symbols:arrow-back" width={18} />
+            </IconButton>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: "#1A1A1A" }}>
+              {evento.nome}
+            </Typography>
+          </Stack>
+          <Button
+            variant="outlined"
+            startIcon={<IconifyIcon icon="material-symbols:edit-outline" width={18} />}
+            onClick={() => setEventoDrawerOpen(true)}
             sx={{
-              bgcolor: "#F5F5F5",
-              "&:hover": { bgcolor: "#E0E0E0" },
+              borderRadius: 1.5,
+              textTransform: "none",
+              fontWeight: 600,
             }}
           >
-            <IconifyIcon icon="material-symbols:arrow-back" width={18} />
-          </IconButton>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1A1A1A" }}>
-            {evento.nome}
-          </Typography>
+            Editar Evento
+          </Button>
         </Stack>
       </Grid>
 
@@ -487,6 +503,12 @@ export default function EventoDetalhesModule() {
         onClose={handleCloseDrawer}
         participante={selectedParticipante}
         eventoId={eventoId}
+      />
+
+      <EventoDrawer 
+        open={eventoDrawerOpen} 
+        onClose={() => setEventoDrawerOpen(false)} 
+        evento={evento as any} 
       />
     </Grid>
   );

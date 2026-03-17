@@ -2,6 +2,7 @@ import { baseApi } from './baseApi';
 import { EventoListagem, EventoDetalhes, Participante, Produto } from '@/types/evento.types';
 
 export interface ProdutoEventoRequest {
+  id?: string;
   nome: string;
   descricao?: string;
   valor: number;
@@ -83,6 +84,14 @@ export const eventosApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Eventos'],
     }),
+    editarEvento: builder.mutation<EventoDetalhes, { eventoId: string; data: Partial<CadastrarEventoRequest> }>({
+      query: ({ eventoId, data }) => ({
+        url: `/eventos/${eventoId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [{ type: 'Eventos', id: eventoId }, 'Eventos'],
+    }),
     cadastrarParticipante: builder.mutation<Participante, { eventId: string; data: ParticipanteRequest }>({
       query: ({ eventId, data }) => ({
         url: `/eventos/${eventId}/participantes`,
@@ -131,6 +140,7 @@ export const {
   useObterEstatisticasParticipantesPorProdutoQuery,
   useObterEstatisticasPizzaQuery,
   useCadastrarEventoMutation,
+  useEditarEventoMutation,
   useCadastrarParticipanteMutation,
   useExcluirParticipanteMutation,
   useEditarParticipanteMutation,

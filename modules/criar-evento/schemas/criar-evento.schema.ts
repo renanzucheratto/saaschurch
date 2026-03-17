@@ -2,6 +2,7 @@ import { z } from "zod";
 import { formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 
 export const produtoSchema = z.object({
+  id: z.string().optional(),
   nome: z.string().min(1, "O nome do produto é obrigatório"),
   descricao: z.string().min(1, "A descrição do produto é obrigatória"),
   valor: z.string().min(1, "O valor do produto é obrigatório").refine((val) => formatCurrencyToNumber(val) > 0, {

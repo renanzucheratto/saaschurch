@@ -6,33 +6,20 @@ interface CustomProps {
   name: string;
 }
 
-export const CurrencyMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
-  function CurrencyMaskCustom(props, ref) {
-    // We must omit props injected by MUI that `react-currency-mask` or native `<input>` doesn't recognize
-    const { onChange, ownerState, inputProps, ...other } = props as any;
-    
-    return (
-      // @ts-ignore: Legacy module typing issue with React 19
-      <CurrencyInput
-        {...other}
-        // react-currency-mask accepts ref internally through its own mechanism or we just pass it
-        ref={ref}
-        locale="pt-BR"
-        currency="BRL"
-        onChangeValue={(event: any, originalValue: number | string, maskedValue: string) => {
-          onChange({ target: { name: props.name, value: String(originalValue || "") } });
-        }}
-      />
-    );
-  }
-);
-
 export const formatCurrencyToNumber = (value: string | number): number => {
   if (typeof value === "number") return value;
   if (!value) return 0;
   
-  const num = parseFloat(value);
-  return isNaN(num) ? 0 : num;
+  // Remove currency symbols and spaces
+  const cleanValue = String(value).replace(/[^\d.,-]/g, "");
+  
+  if (cleanValue.includes(",")) {
+    // PT-BR: remove thousands dots, then replace decimal comma with dot
+    const sanitized = cleanValue.replace(/\./g, "").replace(",", ".");
+    return parseFloat(sanitized) || 0;
+  }
+  
+  return parseFloat(cleanValue) || 0;
 };
 
 export const formatNumberToCurrency = (value: number): string => {
@@ -42,3 +29,27 @@ export const formatNumberToCurrency = (value: number): string => {
     currency: "BRL",
   }).format(value);
 };
+
+export const CurrencyMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
+  function CurrencyMaskCustom(props, ref) {
+    const { onChange, ownerState, inputProps, value, ...other } = props as any;
+    
+    return (
+      // @ts-ignore: Legacy module typing issue with React 19
+      <CurrencyInput
+        {...other}
+        ref={ref}
+        value={value}
+        locale="pt-BR"
+        currency="BRL"
+        inputMode="numeric"
+        onChangeValue={(event: any, originalValue: number | string) => {
+          // Always send as localized string with 2 decimals to preserve "cents" context
+          const normalized = originalValue !== undefined && originalValue !== null ? Number(originalValue) : 0;
+          const valueToSend = normalized.toFixed(2).replace(".", ",");
+          onChange({ target: { name: props.name, value: valueToSend } });
+        }}
+      />
+    );
+  }
+);
