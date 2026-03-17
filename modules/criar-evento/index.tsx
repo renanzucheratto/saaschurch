@@ -230,7 +230,7 @@ export default function CriarEventoModule() {
                   />
                 </Grid>
 
-                <Grid size={12}>
+                {/* <Grid size={12}>
                   <TextField
                     label="URL da imagem (opcional)"
                     fullWidth
@@ -243,7 +243,7 @@ export default function CriarEventoModule() {
                       },
                     }}
                   />
-                </Grid>
+                </Grid> */}
               </Grid>
             </Card>
           </Grid>
