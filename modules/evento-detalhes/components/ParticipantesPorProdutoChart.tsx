@@ -14,15 +14,16 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
 
   const chartOptions = useMemo(() => {
     const legendData = estatisticas.map(e => e.produtoNome);
-    const seriesData = estatisticas.map((e, index) => ({
+    const seriesData = estatisticas.map((e) => ({
       name: e.produtoNome,
       type: "bar",
       barMaxWidth: 50,
+      barGap: "20%", // Adiciona um pequeno espaço entre as barras
       itemStyle: {
-        color: "#7b57df", // Mantendo a cor roxa solicitada anteriormente
+        color: "#7b57df",
         borderRadius: [4, 4, 0, 0],
       },
-      data: estatisticas.map((_, i) => (i === index ? e.quantidadeParticipantes : null)),
+      data: [e.quantidadeParticipantes], // Cada série tem apenas um ponto na categoria única
       label: {
         show: true,
         position: "top",
@@ -45,15 +46,15 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
       grid: {
         left: "10px",
         right: "10px",
-        bottom: "100px", // Espaço extra para as múltiplas linhas da legenda
+        bottom: "100px",
         top: "30px",
         containLabel: true,
       },
       xAxis: {
         type: "category",
-        data: estatisticas.map(() => "Participantes"),
+        data: ["Participantes"], // Categoria única para agrupar todas as séries no centro
         axisLabel: {
-          show: false // Oculta os nomes abaixo da barra
+          show: false
         },
         axisLine: {
           show: false
