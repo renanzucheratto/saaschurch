@@ -441,9 +441,9 @@ export default function EventoDetalhesModule() {
                 pageSizeOptions={[5, 10, 25, 50]}
                 disableRowSelectionOnClick
                 onRowClick={handleRowClick}
+                autoHeight
                 sx={{
                   border: "none",
-                  height: '650px',
                   "& .MuiDataGrid-columnHeaders": {
                     bgcolor: "#FAFAFA",
                     borderBottom: "2px solid #E0E0E0",
@@ -477,9 +477,9 @@ export default function EventoDetalhesModule() {
                 pageSizeOptions={[5, 10, 25, 50]}
                 disableRowSelectionOnClick
                 onRowClick={handleRowClick}
+                autoHeight
                 sx={{
                   border: "none",
-                  height: '621px',
                   "& .MuiDataGrid-columnHeaders": {
                     bgcolor: "#FAFAFA",
                     borderBottom: "2px solid #E0E0E0",
@@ -506,10 +506,10 @@ export default function EventoDetalhesModule() {
         produtos={evento.produtos || []}
       />
 
-      <EventoDrawer 
-        open={eventoDrawerOpen} 
-        onClose={() => setEventoDrawerOpen(false)} 
-        evento={evento as any} 
+      <EventoDrawer
+        open={eventoDrawerOpen}
+        onClose={() => setEventoDrawerOpen(false)}
+        evento={evento as any}
       />
     </Grid>
   );
