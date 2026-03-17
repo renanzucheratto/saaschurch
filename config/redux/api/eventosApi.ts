@@ -90,7 +90,11 @@ export const eventosApi = baseApi.injectEndpoints({
         method: 'PUT',
         body: data,
       }),
-      invalidatesTags: (result, error, { eventoId }) => [{ type: 'Eventos', id: eventoId }, 'Eventos'],
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Eventos', id: eventoId },
+        'Eventos',
+        { type: 'Participantes', id: eventoId },
+      ],
     }),
     cadastrarParticipante: builder.mutation<Participante, { eventId: string; data: ParticipanteRequest }>({
       query: ({ eventId, data }) => ({
@@ -117,7 +121,7 @@ export const eventosApi = baseApi.injectEndpoints({
         { type: 'Eventos', id: eventoId },
       ],
     }),
-    editarParticipante: builder.mutation<Participante, { eventoId: string; participanteId: string; data: Partial<Participante> }>({
+    editarParticipante: builder.mutation<Participante, { eventoId: string; participanteId: string; data: Partial<Participante> & { produtoId?: string } }>({
       query: ({ eventoId, participanteId, data }) => ({
         url: `/eventos/${eventoId}/participantes/${participanteId}`,
         method: 'PUT',

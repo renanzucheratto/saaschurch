@@ -10,7 +10,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Icon as IconifyIcon } from '@iconify/react';
-import { Participante } from '@/types/evento.types';
+import { Participante, Produto } from '@/types/evento.types';
 import { useEditarParticipanteMutation } from '@/config/redux/api/eventosApi';
 import DeleteParticipanteModal from './DeleteParticipanteModal';
 import EditParticipanteModal from './EditParticipanteModal';
@@ -20,9 +20,10 @@ interface ParticipanteDrawerProps {
   onClose: () => void;
   participante: Participante | null;
   eventoId: string;
+  produtos: Produto[];
 }
 
-export default function ParticipanteDrawer({ open, onClose, participante, eventoId }: ParticipanteDrawerProps) {
+export default function ParticipanteDrawer({ open, onClose, participante, eventoId, produtos }: ParticipanteDrawerProps) {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editarParticipante, { isLoading: isRestoring }] = useEditarParticipanteMutation();
@@ -156,6 +157,7 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
         onClose={() => setOpenEditModal(false)}
         participante={participante}
         eventoId={eventoId}
+        produtos={produtos}
       />
     </>
   );

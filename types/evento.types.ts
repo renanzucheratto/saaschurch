@@ -36,7 +36,8 @@ export interface EventoDetalhes {
 }
 
 export interface ProdutoParticipante {
-  id: string;
+  id: string; // ID da relação ParticipanteProdutos
+  produtoId: string; // ID do produto em si
   nome: string;
   valor: number;
 }

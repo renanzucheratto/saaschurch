@@ -503,6 +503,7 @@ export default function EventoDetalhesModule() {
         onClose={handleCloseDrawer}
         participante={selectedParticipante}
         eventoId={eventoId}
+        produtos={evento.produtos || []}
       />
 
       <EventoDrawer 

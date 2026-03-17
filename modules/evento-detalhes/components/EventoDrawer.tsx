@@ -133,7 +133,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         onClose={onClose}
         PaperProps={{ sx: { width: { xs: '100%', sm: 800 }, p: 0 } }}
       >
-        <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ px: 3, height: 61, display: 'flex', flexShrink: 'inherit', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h6" fontWeight={700}>Editar Evento</Typography>
           <IconButton onClick={onClose} size="small"><IconifyIcon icon="mdi:close" width={24} /></IconButton>
         </Box>
@@ -211,7 +211,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           </Grid>
         </Box>
 
-        <Box sx={{ p: 3, borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant="outlined" disabled={isLoading} onClick={onClose}>Cancelar</Button>
           <Button type="submit" form="evento-form" variant="contained" loading={isLoading} disabled={isLoading} sx={{ bgcolor: "#5B5FED", "&:hover": { bgcolor: "#4A4EDC" } }}>
             {isLoading ? "Salvando..." : "Salvar Alterações"}

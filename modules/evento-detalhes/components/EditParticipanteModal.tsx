@@ -12,15 +12,20 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { useEditarParticipanteMutation } from '@/config/redux/api/eventosApi';
-import { Participante } from '@/types/evento.types';
+import { Participante, Produto } from '@/types/evento.types';
 
 interface EditParticipanteModalProps {
   open: boolean;
   onClose: () => void;
   participante: Participante | null;
   eventoId: string;
+  produtos: Produto[];
 }
 
 export default function EditParticipanteModal({
@@ -28,6 +33,7 @@ export default function EditParticipanteModal({
   onClose,
   participante,
   eventoId,
+  produtos,
 }: EditParticipanteModalProps) {
   const [editarParticipante, { isLoading }] = useEditarParticipanteMutation();
   const [formData, setFormData] = useState({
@@ -37,6 +43,7 @@ export default function EditParticipanteModal({
     rg: '',
     cpf: '',
     termo_assinado: false,
+    produtoId: '',
   });
 
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
@@ -54,11 +61,12 @@ export default function EditParticipanteModal({
         rg: participante.rg || '',
         cpf: participante.cpf || '',
         termo_assinado: participante.termo_assinado || false,
+        produtoId: participante.produtos?.[0]?.produtoId || '',
       });
     }
   }, [participante, open]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: any) => {
     const { name, value, checked, type } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -141,6 +149,26 @@ export default function EditParticipanteModal({
                 fullWidth
                 required
               />
+
+              {produtos.length > 0 && (
+                <FormControl fullWidth required>
+                  <InputLabel id="produto-label">Produto</InputLabel>
+                  <Select
+                    labelId="produto-label"
+                    name="produtoId"
+                    value={formData.produtoId}
+                    onChange={handleChange}
+                    label="Produto"
+                  >
+                    {produtos.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.nome} - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+
               <FormControlLabel
                 control={
                   <Checkbox
