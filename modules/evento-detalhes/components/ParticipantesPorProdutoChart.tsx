@@ -51,7 +51,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
       },
       xAxis: {
         type: "category",
-        data: ["Participantes"], // Placeholder genérico no eixo X
+        data: estatisticas.map(() => "Participantes"),
         axisLabel: {
           show: false // Oculta os nomes abaixo da barra
         },
