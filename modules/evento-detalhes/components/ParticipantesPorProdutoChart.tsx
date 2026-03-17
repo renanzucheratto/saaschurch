@@ -13,8 +13,24 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
   const { data: estatisticas = [], isLoading } = useObterEstatisticasParticipantesPorProdutoQuery(eventoId);
 
   const chartOptions = useMemo(() => {
-    const produtoNomes = estatisticas.map(e => e.produtoNome);
-    const quantidades = estatisticas.map(e => e.quantidadeParticipantes);
+    const legendData = estatisticas.map(e => e.produtoNome);
+    const seriesData = estatisticas.map((e, index) => ({
+      name: e.produtoNome,
+      type: "bar",
+      barMaxWidth: 50,
+      itemStyle: {
+        color: "#7b57df", // Mantendo a cor roxa solicitada anteriormente
+        borderRadius: [4, 4, 0, 0],
+      },
+      data: estatisticas.map((_, i) => (i === index ? e.quantidadeParticipantes : null)),
+      label: {
+        show: true,
+        position: "top",
+        color: "#1A1A1A",
+        fontSize: 12,
+        fontWeight: 600,
+      },
+    }));
 
     return {
       tooltip: {
@@ -22,32 +38,32 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
         axisPointer: {
           type: "shadow",
         },
-        formatter: (params: Array<{ name: string; marker: string; seriesName: string; value: number }>) => {
-          const data = params[0];
-          return `${data.name}<br/>${data.marker}${data.seriesName}: ${data.value}`;
-        },
+      },
+      legend: {
+        bottom: 0,
+        type: "scroll",
+        padding: [20, 0, 0, 0],
+        data: legendData,
       },
       grid: {
         left: "10px",
         right: "10px",
-        bottom: "0px",
+        bottom: "60px", // Espaço extra para a legenda
         top: "30px",
         containLabel: true,
       },
       xAxis: {
         type: "category",
-        data: produtoNomes,
+        data: ["Produtos"], // Placeholder genérico no eixo X
         axisLabel: {
-          interval: 0,
-          rotate: produtoNomes.length > 5 ? 70 : 0,
-          fontSize: 12,
-          color: "#666",
+          show: false // Oculta os nomes abaixo da barra
         },
         axisLine: {
-          lineStyle: {
-            color: "#E0E0E0",
-          },
+          show: false
         },
+        axisTick: {
+          show: false
+        }
       },
       yAxis: {
         type: "value",
@@ -71,31 +87,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
           },
         },
       },
-      series: [
-        {
-          name: "Participantes",
-          type: "bar",
-          data: quantidades,
-          barWidth: 50,
-          itemStyle: {
-            color: "#7b57df",
-            borderRadius: [4, 4, 0, 0],
-          },
-          emphasis: {
-            itemStyle: {
-              color: "#5b3fbd",
-            },
-          },
-          label: {
-            show: true,
-
-            position: "top",
-            color: "#1A1A1A",
-            fontSize: 12,
-            fontWeight: 600,
-          },
-        },
-      ],
+      series: seriesData,
     };
   }, [estatisticas]);
 
@@ -108,17 +100,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
   }
 
   if (!estatisticas || estatisticas.length === 0) {
-    return (
-      <Card variant="outlined">
-        <Typography variant="body1" color="text.secondary">
-          Nenhum dado disponível para exibir
-        </Typography>
-
-        <Typography variant="body1" color="text.secondary">
-          Nenhum dado disponível para exibir
-        </Typography>
-      </Card>
-    );
+    return null;
   }
 
   return (
@@ -126,7 +108,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
         Participantes por produto
       </Typography>
-      <Box sx={{ width: "100%", height: 550 }}>
+      <Box sx={{ width: "100%", height: 300 }}>
         <ReactECharts
           option={chartOptions}
           style={{ height: "100%", width: "100%" }}

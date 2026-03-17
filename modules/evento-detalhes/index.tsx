@@ -403,14 +403,22 @@ export default function EventoDetalhesModule() {
       </Grid>
 
       {/* Gráficos de Participantes */}
-      {eventoId === "65b6b327-c769-454f-b274-2d21dd8b4229" && (
+      {evento.produtos && evento.produtos.length > 0 && (
         <>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <ParticipantesPorProdutoChart eventoId={eventoId} />
-          </Grid>
-          <Grid size={{ xs: 12, md: 5 }}>
-            <ParticipantesPizzaChart eventoId={eventoId} />
-          </Grid>
+          {eventoId === "65b6b327-c769-454f-b274-2d21dd8b4229" ? (
+            <>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <ParticipantesPorProdutoChart eventoId={eventoId} />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <ParticipantesPizzaChart eventoId={eventoId} />
+              </Grid>
+            </>
+          ) : (
+            <Grid size={12}>
+              <ParticipantesPorProdutoChart eventoId={eventoId} />
+            </Grid>
+          )}
         </>
       )}
 
