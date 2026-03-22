@@ -45,6 +45,12 @@ const menuSections: MenuSection[] = [
       { id: "criar-evento", label: "Criar evento", icon: <IconifyIcon icon="material-symbols:add-circle-outline" width={20} />, href: "/eventos/criar" },
     ],
   },
+  {
+    title: "GERENCIAMENTO",
+    items: [
+      { id: "usuarios", label: "Usuários", icon: <IconifyIcon icon="material-symbols:group-outline" width={20} />, href: "/usuarios" },
+    ],
+  },
 ];
 
 const DRAWER_WIDTH = 240;

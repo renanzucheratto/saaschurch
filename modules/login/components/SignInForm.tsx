@@ -131,7 +131,7 @@ export function SignInForm() {
       >
         
         <MuiLink
-          href="#"
+          href="/reset-password"
           sx={{
             fontSize: '0.875rem',
             color: '#666',
