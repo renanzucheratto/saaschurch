@@ -67,17 +67,35 @@ const participantesColumns: GridColDef[] = [
     width: 150,
   },
   {
-    field: "termo_assinado",
-    headerName: "Termo Assinado",
-    width: 150,
-    renderCell: (params) => (
-      <Chip
-        label={params.value ? "Sim" : "Não"}
-        size="small"
-        color={params.value ? "success" : "error"}
-        sx={{ fontWeight: 600 }}
-      />
-    ),
+    field: "status",
+    headerName: "Status de Pagamento",
+    width: 220,
+    renderCell: (params) => {
+      if (!params.row.produtos || params.row.produtos.length === 0) return "-";
+
+      // Determine overall status based on products
+      const statuses = params.row.produtos.map((p: ProdutoParticipante) => p.status || 'PAGO');
+      let finalStatus = 'PAGO';
+      if (statuses.includes('PENDENTE')) finalStatus = 'PENDENTE';
+      else if (statuses.includes('PARCIALMENTE_PAGO')) finalStatus = 'PARCIALMENTE_PAGO';
+      else if (statuses.every((s: string) => s === 'QUITADO' || s === 'PAGO')) finalStatus = statuses.includes('QUITADO') ? 'QUITADO' : 'PAGO';
+
+      let color = 'success';
+      let label = 'Pago';
+
+      if (finalStatus === 'QUITADO') {
+        color = 'success';
+        label = 'Quitado';
+      } else if (finalStatus === 'PARCIALMENTE_PAGO') {
+        color = 'warning';
+        label = 'Parcial. Pago';
+      } else if (finalStatus === 'PENDENTE') {
+        color = 'error';
+        label = 'Pendente';
+      }
+
+      return <Chip label={label} color={color as any} size="small" sx={{ fontWeight: 600 }} />;
+    }
   },
   {
     field: "produto",

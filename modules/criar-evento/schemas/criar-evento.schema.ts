@@ -8,6 +8,7 @@ export const produtoSchema = z.object({
   valor: z.string().min(1, "O valor do produto é obrigatório").refine((val) => formatCurrencyToNumber(val) > 0, {
     message: "O valor deve ser maior que 0",
   }),
+  exigePagamento: z.boolean().optional(),
 });
 
 export const criarEventoSchema = z.object({

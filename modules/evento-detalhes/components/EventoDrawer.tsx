@@ -85,6 +85,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           nome: p.nome,
           descricao: p.descricao || "",
           valor: p.valor.toFixed(2).replace(".", ","),
+          exigePagamento: p.exigePagamento,
         })) || [],
       };
       reset(resetData);
@@ -100,6 +101,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         nome: p.nome,
         descricao: p.descricao,
         valor: typeof p.valor === "string" ? formatCurrencyToNumber(p.valor) : p.valor,
+        exigePagamento: p.exigePagamento || false,
       }));
 
       await editarEvento({
@@ -201,6 +203,14 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Controller name={`produtos.${index}.valor`} control={control} render={({ field }) => (
                           <TextField {...field} label="Valor *" size="small" fullWidth placeholder="R$ 0,00" error={!!(errors.produtos as any)?.[index]?.valor} helperText={(errors.produtos as any)?.[index]?.valor?.message} InputProps={{ inputComponent: CurrencyMaskCustom as any }} slotProps={{ inputLabel: { shrink: true } }} />
+                        )} />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Controller name={`produtos.${index}.exigePagamento`} control={control} render={({ field: { value, onChange } }) => (
+                          <FormControlLabel
+                            control={<Switch checked={!!value} onChange={(e) => onChange(e.target.checked)} size="small" />}
+                            label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Exige Pagamento</Typography>}
+                          />
                         )} />
                       </Grid>
                     </Grid>

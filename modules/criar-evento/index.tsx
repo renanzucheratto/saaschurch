@@ -26,10 +26,13 @@ import { useCadastrarEventoMutation } from "@/config/redux/api/eventosApi";
 import type { ProdutoEventoRequest } from "@/config/redux/api/eventosApi";
 import RichTextEditor from "./components/RichTextEditor";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
+import { useAppSelector } from "@/config/redux/store";
+import { selectCurrentUser } from "@/config/redux/slices/authSlice";
 
 export default function CriarEventoModule() {
   const router = useRouter();
   const [cadastrarEvento, { isLoading }] = useCadastrarEventoMutation();
+  const currentUser = useAppSelector(selectCurrentUser);
 
   const [alert, setAlert] = useState<{
     open: boolean;
@@ -66,6 +69,7 @@ export default function CriarEventoModule() {
         nome: p.nome,
         descricao: p.descricao,
         valor: formatCurrencyToNumber(p.valor),
+        exigePagamento: p.exigePagamento || false,
       }));
 
       const result = await cadastrarEvento({
@@ -75,6 +79,7 @@ export default function CriarEventoModule() {
         descricao: data.descricao || undefined,
         selecao_unica_produto: data.selecao_unica_produto,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
+        instituicaoId: currentUser?.instituicaoId,
       }).unwrap();
 
       setAlert({

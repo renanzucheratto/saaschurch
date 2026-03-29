@@ -14,6 +14,7 @@ import { Participante, Produto } from '@/types/evento.types';
 import { useEditarParticipanteMutation } from '@/config/redux/api/eventosApi';
 import DeleteParticipanteModal from './DeleteParticipanteModal';
 import EditParticipanteModal from './EditParticipanteModal';
+import GerenciarPagamento from './GerenciarPagamento';
 
 interface ParticipanteDrawerProps {
   open: boolean;
@@ -100,9 +101,7 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
               <Typography variant="caption" color="text.secondary" fontWeight={600}>Produtos Adquiridos</Typography>
               <Stack spacing={1} mt={1}>
                 {participante.produtos.map((p) => (
-                  <Typography key={p.id} variant="body2" sx={{ bgcolor: 'grey.100', p: 1, borderRadius: 1 }}>
-                    {p.nome} - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor)}
-                  </Typography>
+                  <GerenciarPagamento key={p.id} eventoId={eventoId} participanteId={participante.id} produto={p} />
                 ))}
               </Stack>
             </Box>

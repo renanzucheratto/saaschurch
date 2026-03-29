@@ -6,6 +6,7 @@ export interface ProdutoEventoRequest {
   nome: string;
   descricao?: string;
   valor: number;
+  exigePagamento?: boolean;
 }
 
 export interface CadastrarEventoRequest {
@@ -16,6 +17,7 @@ export interface CadastrarEventoRequest {
   imagem_url?: string;
   selecao_unica_produto?: boolean;
   produtos?: ProdutoEventoRequest[];
+  instituicaoId?: string;
 }
 
 export type CadastrarEventoResponse = EventoDetalhes;
@@ -134,6 +136,45 @@ export const eventosApi = baseApi.injectEndpoints({
         { type: 'Eventos', id: eventoId },
       ],
     }),
+    atualizarQuantidadeParcelas: builder.mutation<void, { eventoId: string; participanteId: string; produtoId: string; quantidade_parcelas: number }>({
+      query: ({ eventoId, participanteId, produtoId, quantidade_parcelas }) => ({
+        url: `/eventos/${eventoId}/participantes/${participanteId}/produtos/${produtoId}/quantidade-parcelas`,
+        method: 'PUT',
+        body: { quantidade_parcelas },
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Participantes', id: eventoId },
+      ],
+    }),
+    cadastrarParcela: builder.mutation<any, { eventoId: string; participanteId: string; produtoId: string; data: any }>({
+      query: ({ eventoId, participanteId, produtoId, data }) => ({
+        url: `/eventos/${eventoId}/participantes/${participanteId}/produtos/${produtoId}/parcelas`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Participantes', id: eventoId },
+      ],
+    }),
+    editarParcela: builder.mutation<any, { eventoId: string; participanteId: string; produtoId: string; parcelaId: string; data: any }>({
+      query: ({ eventoId, participanteId, produtoId, parcelaId, data }) => ({
+        url: `/eventos/${eventoId}/participantes/${participanteId}/produtos/${produtoId}/parcelas/${parcelaId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Participantes', id: eventoId },
+      ],
+    }),
+    excluirParcela: builder.mutation<any, { eventoId: string; participanteId: string; produtoId: string; parcelaId: string }>({
+      query: ({ eventoId, participanteId, produtoId, parcelaId }) => ({
+        url: `/eventos/${eventoId}/participantes/${participanteId}/produtos/${produtoId}/parcelas/${parcelaId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Participantes', id: eventoId },
+      ],
+    }),
   }),
 });
 
@@ -148,4 +189,8 @@ export const {
   useCadastrarParticipanteMutation,
   useExcluirParticipanteMutation,
   useEditarParticipanteMutation,
+  useAtualizarQuantidadeParcelasMutation,
+  useCadastrarParcelaMutation,
+  useEditarParcelaMutation,
+  useExcluirParcelaMutation,
 } = eventosApi;
