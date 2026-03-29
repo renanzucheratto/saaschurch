@@ -7,6 +7,7 @@ export interface ProdutoEventoRequest {
   descricao?: string;
   valor: number;
   exigePagamento?: boolean;
+  oculto?: boolean;
 }
 
 export interface CadastrarEventoRequest {

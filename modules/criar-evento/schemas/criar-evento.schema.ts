@@ -9,6 +9,7 @@ export const produtoSchema = z.object({
     message: "O valor deve ser maior que 0",
   }),
   exigePagamento: z.boolean().optional(),
+  oculto: z.boolean().optional(),
 });
 
 export const criarEventoSchema = z.object({

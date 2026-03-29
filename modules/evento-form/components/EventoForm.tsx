@@ -288,7 +288,7 @@ export const EventoForm = () => {
                             gap: 1.5,
                           }}
                         >
-                          {evento.produtos.map((produto) => (
+                          {evento.produtos.filter(p => !p.oculto).map((produto) => (
                             <ProductAccordion
                               key={produto.id}
                               produto={produto}

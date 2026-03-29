@@ -369,9 +369,14 @@ export default function EventoDetalhesModule() {
                   {evento.produtos.map((produto) => (
                     <Chip
                       key={produto.id}
-                      label={produto.nome}
+                      label={produto.oculto ? `${produto.nome} (Oculto)` : produto.nome}
                       variant="outlined"
-                      sx={{ fontWeight: 500 }}
+                      color={produto.oculto ? "default" : "primary"}
+                      sx={{ 
+                        fontWeight: 500,
+                        opacity: produto.oculto ? 0.6 : 1,
+                        textDecoration: produto.oculto ? 'line-through' : 'none'
+                      }}
                     />
                   ))}
                 </Box>

@@ -267,7 +267,7 @@ export default function CriarEventoModule() {
                       width={18}
                     />
                   }
-                  onClick={() => append({ nome: "", descricao: "", valor: "" })}
+                  onClick={() => append({ nome: "", descricao: "", valor: "", exigePagamento: false })}
                   sx={{
                     borderRadius: 1.5,
                     textTransform: "none",
@@ -419,6 +419,39 @@ export default function CriarEventoModule() {
                                       borderRadius: 1.5,
                                     },
                                   }}
+                                />
+                              )}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12 }}>
+                            <Controller
+                              name={`produtos.${index}.exigePagamento`}
+                              control={control}
+                              render={({ field: { value, onChange } }) => (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      checked={value || false}
+                                      onChange={(e) => onChange(e.target.checked)}
+                                      size="small"
+                                    />
+                                  }
+                                  label={
+                                    <Box>
+                                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                        Exige pagamento
+                                      </Typography>
+                                      <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                      >
+                                        {value
+                                          ? "O participante deverá realizar o pagamento deste produto"
+                                          : "O pagamento não é obrigatório para este produto"}
+                                      </Typography>
+                                    </Box>
+                                  }
+                                  sx={{ ml: 0 }}
                                 />
                               )}
                             />

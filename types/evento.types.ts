@@ -4,6 +4,7 @@ export interface Produto {
   descricao: string;
   valor: number;
   exigePagamento?: boolean;
+  oculto?: boolean;
 }
 
 export interface EventoListagem {
