@@ -74,8 +74,8 @@ export default function CriarEventoModule() {
 
       const result = await cadastrarEvento({
         nome: data.nome,
-        data_inicio: new Date(data.data_inicio).toISOString(),
-        data_fim: new Date(data.data_fim).toISOString(),
+        data_inicio: data.data_inicio + ':00.000Z',
+        data_fim: data.data_fim + ':00.000Z',
         descricao: data.descricao || undefined,
         selecao_unica_produto: data.selecao_unica_produto,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
