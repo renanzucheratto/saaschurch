@@ -13,6 +13,7 @@ import {
   DialogActions,
   MenuItem,
 } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import { Icon as IconifyIcon } from '@iconify/react';
 import { ProdutoParticipante, Parcela } from '@/types/evento.types';
 import {
@@ -44,8 +45,8 @@ type ParcelaForm = z.infer<typeof parcelaSchema>;
 
 export default function GerenciarPagamento({ eventoId, participanteId, produto }: GerenciarPagamentoProps) {
   const [atualizarQuantidade] = useAtualizarQuantidadeParcelasMutation();
-  const [cadastrarParcela] = useCadastrarParcelaMutation();
-  const [editarParcela] = useEditarParcelaMutation();
+  const [cadastrarParcela, { isLoading: isLoadingCadastrar }] = useCadastrarParcelaMutation();
+  const [editarParcela, { isLoading: isLoadingEditar }] = useEditarParcelaMutation();
   const [excluirParcela] = useExcluirParcelaMutation();
 
   const [isEditingQtde, setIsEditingQtde] = useState(false);
@@ -54,7 +55,7 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
   const [openModal, setOpenModal] = useState(false);
   const [parcelaEmEdicao, setParcelaEmEdicao] = useState<Parcela | null>(null);
 
-  const { control, handleSubmit, reset, watch, setValue } = useForm<ParcelaForm>({
+  const { control, handleSubmit, reset, watch } = useForm<ParcelaForm>({
     resolver: zodResolver(parcelaSchema),
     defaultValues: {
       valor_pago: '',
@@ -70,7 +71,7 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'QUITADO':
-      case 'PAGO':
+      case 'NAO_APLICA':
         return 'success';
       case 'PARCIALMENTE_PAGO':
         return 'warning';
@@ -83,7 +84,7 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
   const getStatusLabel = (status?: string) => {
     switch (status) {
       case 'QUITADO': return 'Quitado';
-      case 'PAGO': return 'Pago';
+      case 'NAO_APLICA': return 'N/A';
       case 'PARCIALMENTE_PAGO': return 'Parcialmente Pago';
       case 'PENDENTE': return 'Pendente';
       default: return 'Pendente';
@@ -182,7 +183,7 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
       <Box sx={{ bgcolor: 'grey.100', p: 2, borderRadius: 2, mb: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="body2" fontWeight={600}>{produto.nome}</Typography>
-          <Chip label="Pago" color="success" size="small" sx={{ fontWeight: 600 }} />
+          <Chip label="N/A" color="success" size="small" sx={{ fontWeight: 600 }} />
         </Stack>
         <Typography variant="caption" color="text.secondary">
           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produto.valor)}
@@ -291,6 +292,7 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
                   {...field}
                   label="Valor Pago *"
                   fullWidth
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   InputProps={{ inputComponent: CurrencyMaskCustom as any }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
@@ -363,10 +365,15 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit(submitForm)} variant="contained" sx={{ bgcolor: '#5B5FED' }}>
+          <Button onClick={() => setOpenModal(false)} disabled={isLoadingCadastrar || isLoadingEditar}>Cancelar</Button>
+          <LoadingButton 
+            onClick={handleSubmit(submitForm)} 
+            variant="contained" 
+            sx={{ bgcolor: '#5B5FED' }}
+            loading={isLoadingCadastrar || isLoadingEditar}
+          >
             Salvar
-          </Button>
+          </LoadingButton>
         </DialogActions>
       </Dialog>
     </Box>

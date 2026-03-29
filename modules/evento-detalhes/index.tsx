@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -20,7 +21,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useObterEventoQuery, useListarParticipantesQuery } from "@/config/redux/api/eventosApi";
 import { ProdutoParticipante } from "@/types/evento.types";
 import ParticipantesPorProdutoChart from "./components/ParticipantesPorProdutoChart";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Tabs, Tab } from "@mui/material";
 import ParticipanteDrawer from "./components/ParticipanteDrawer";
 import ParticipantesPizzaChart from "./components/ParticipantesPizzaChart";
@@ -74,18 +75,21 @@ const participantesColumns: GridColDef[] = [
       if (!params.row.produtos || params.row.produtos.length === 0) return "-";
 
       // Determine overall status based on products
-      const statuses = params.row.produtos.map((p: ProdutoParticipante) => p.status || 'PAGO');
-      let finalStatus = 'PAGO';
+      const statuses = params.row.produtos.map((p: ProdutoParticipante) => p.status || 'NAO_APLICA');
+      let finalStatus = 'NAO_APLICA';
       if (statuses.includes('PENDENTE')) finalStatus = 'PENDENTE';
       else if (statuses.includes('PARCIALMENTE_PAGO')) finalStatus = 'PARCIALMENTE_PAGO';
-      else if (statuses.every((s: string) => s === 'QUITADO' || s === 'PAGO')) finalStatus = statuses.includes('QUITADO') ? 'QUITADO' : 'PAGO';
+      else if (statuses.every((s: string) => s === 'QUITADO' || s === 'NAO_APLICA')) finalStatus = statuses.includes('QUITADO') ? 'QUITADO' : 'NAO_APLICA';
 
       let color = 'success';
-      let label = 'Pago';
+      let label = 'N/A';
 
       if (finalStatus === 'QUITADO') {
         color = 'success';
         label = 'Quitado';
+      } else if (finalStatus === 'NAO_APLICA') {
+        color = 'success';
+        label = 'N/A';
       } else if (finalStatus === 'PARCIALMENTE_PAGO') {
         color = 'warning';
         label = 'Parcial. Pago';
@@ -94,7 +98,7 @@ const participantesColumns: GridColDef[] = [
         label = 'Pendente';
       }
 
-      return <Chip label={label} color={color as any} size="small" sx={{ fontWeight: 600 }} />;
+      return <Chip label={label} color={color as unknown as any} size="small" sx={{ fontWeight: 600 }} />;
     }
   },
   {
@@ -102,7 +106,7 @@ const participantesColumns: GridColDef[] = [
     headerName: "Produto",
     flex: 1,
     minWidth: 250,
-    valueGetter: (value, row) => {
+    valueGetter: (_, row) => {
       return row.produtos && row.produtos.length > 0
         ? row.produtos.map((p: ProdutoParticipante) => p.nome).join(", ")
         : "-";
@@ -112,7 +116,7 @@ const participantesColumns: GridColDef[] = [
     field: "valor",
     headerName: "Valor",
     width: 120,
-    valueGetter: (value, row) => {
+    valueGetter: (_, row) => {
       if (!row.produtos || row.produtos.length === 0) return 0;
       const total = row.produtos.reduce((sum: number, p: ProdutoParticipante) => sum + p.valor, 0);
       return total;
@@ -195,14 +199,14 @@ export default function EventoDetalhesModule() {
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
+  const { data: evento, isLoading: isLoadingEvento, isFetching: isFetchingEvento } = useObterEventoQuery(eventoId);
 
-  const { data: participantesAtivos = [], isLoading: isLoadingAtivos } = useListarParticipantesQuery({
+  const { data: participantesAtivos = [], isLoading: isLoadingAtivos, isFetching: isFetchingAtivos } = useListarParticipantesQuery({
     eventoId,
     isDeleted: false
   });
 
-  const { data: participantesInativos = [], isLoading: isLoadingInativos } = useListarParticipantesQuery({
+  const { data: participantesInativos = [], isLoading: isLoadingInativos, isFetching: isFetchingInativos } = useListarParticipantesQuery({
     eventoId,
     isDeleted: true
   });
@@ -237,7 +241,7 @@ export default function EventoDetalhesModule() {
     );
   }, [evento]);
 
-  const filterParticipantes = (participantes: any[]) => {
+  const filterParticipantes = useCallback((participantes: any[]) => {
     if (!searchTerm) return participantes;
     const lowerSearch = searchTerm.toLowerCase();
     const numericSearch = searchTerm.replace(/\D/g, "");
@@ -272,10 +276,10 @@ export default function EventoDetalhesModule() {
         return false;
       });
     });
-  };
+  }, [searchTerm]);
 
-  const filteredAtivos = useMemo(() => filterParticipantes(participantesAtivos), [participantesAtivos, searchTerm]);
-  const filteredInativos = useMemo(() => filterParticipantes(participantesInativos), [participantesInativos, searchTerm]);
+  const filteredAtivos = useMemo(() => filterParticipantes(participantesAtivos), [filterParticipantes, participantesAtivos]);
+  const filteredInativos = useMemo(() => filterParticipantes(participantesInativos), [filterParticipantes, participantesInativos]);
 
   if (isLoading && !evento) {
     return (
@@ -313,6 +317,9 @@ export default function EventoDetalhesModule() {
             <Typography variant="h6" sx={{ fontWeight: 700, color: "#1A1A1A" }}>
               {evento.nome}
             </Typography>
+            {(isFetchingEvento || isFetchingAtivos || isFetchingInativos) && (
+              <CircularProgress size={20} sx={{ ml: 1 }} />
+            )}
           </Stack>
           <Button
             variant="outlined"
@@ -534,7 +541,7 @@ export default function EventoDetalhesModule() {
               <DataGrid
                 rows={filteredAtivos}
                 columns={gridColumns}
-                loading={isLoadingAtivos}
+                loading={isLoadingAtivos || isFetchingAtivos}
                 initialState={{
                   pagination: {
                     paginationModel: { pageSize: 10, page: 0 },
@@ -598,7 +605,7 @@ export default function EventoDetalhesModule() {
               <DataGrid
                 rows={filteredInativos}
                 columns={gridColumns}
-                loading={isLoadingInativos}
+                loading={isLoadingInativos || isFetchingInativos}
                 initialState={{
                   pagination: {
                     paginationModel: { pageSize: 10, page: 0 },
