@@ -57,7 +57,7 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
         open={open}
         onClose={onClose}
         PaperProps={{
-          sx: { width: { xs: '100%', sm: 400 }, p: 3 },
+          sx: { width: { xs: '100%', sm: 650 }, p: 3 },
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

@@ -135,7 +135,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         anchor="right"
         open={open}
         onClose={onClose}
-        PaperProps={{ sx: { width: { xs: '100%', sm: 800 }, p: 0 } }}
+        PaperProps={{ sx: { width: { xs: '100%', sm: 650 }, p: 0 } }}
       >
         <Box sx={{ px: 3, height: 61, display: 'flex', flexShrink: 'inherit', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h6" fontWeight={700}>Editar Evento</Typography>

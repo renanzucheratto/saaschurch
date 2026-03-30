@@ -71,15 +71,30 @@ const participantesColumns: GridColDef[] = [
     field: "status",
     headerName: "Status de Pagamento",
     width: 220,
-    renderCell: (params) => {
-      if (!params.row.produtos || params.row.produtos.length === 0) return "-";
+    valueGetter: (_, row) => {
+      if (!row.produtos || row.produtos.length === 0) return 'NAO_APLICA';
 
-      // Determine overall status based on products
-      const statuses = params.row.produtos.map((p: ProdutoParticipante) => p.status || 'NAO_APLICA');
+      const statuses = row.produtos.map((p: ProdutoParticipante) => p.status || 'NAO_APLICA');
       let finalStatus = 'NAO_APLICA';
       if (statuses.includes('PENDENTE')) finalStatus = 'PENDENTE';
       else if (statuses.includes('PARCIALMENTE_PAGO')) finalStatus = 'PARCIALMENTE_PAGO';
       else if (statuses.every((s: string) => s === 'QUITADO' || s === 'NAO_APLICA')) finalStatus = statuses.includes('QUITADO') ? 'QUITADO' : 'NAO_APLICA';
+
+      return finalStatus;
+    },
+    sortComparator: (v1, v2) => {
+      const order: Record<string, number> = {
+        'PENDENTE': 1,
+        'PARCIALMENTE_PAGO': 2,
+        'QUITADO': 3,
+        'NAO_APLICA': 4
+      };
+      return (order[v1] || 5) - (order[v2] || 5);
+    },
+    renderCell: (params) => {
+      if (!params.row.produtos || params.row.produtos.length === 0) return "-";
+
+      const finalStatus = params.value;
 
       let color = 'success';
       let label = 'N/A';

@@ -220,7 +220,7 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
               type="number"
               value={qtdeParcelas}
               onChange={(e) => setQtdeParcelas(Number(e.target.value))}
-              sx={{ width: 80, bgcolor: 'white' }}
+              sx={{ width: 80 }}
             />
             <Button size="small" variant="contained" onClick={handleSaveQtde}>Salvar</Button>
             <Button size="small" onClick={() => setIsEditingQtde(false)}>Cancelar</Button>
