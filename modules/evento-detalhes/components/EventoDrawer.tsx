@@ -14,16 +14,34 @@ import {
   Snackbar,
   Alert,
   Card,
+  MenuItem,
 } from '@mui/material';
 import { Icon as IconifyIcon } from '@iconify/react';
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { criarEventoSchema, type CriarEventoSchema } from "@/modules/criar-evento/schemas/criar-evento.schema";
+import { z } from 'zod';
+import { criarEventoSchema } from "@/modules/criar-evento/schemas/criar-evento.schema";
 import { useEditarEventoMutation } from '@/config/redux/api/eventosApi';
 import type { ProdutoEventoRequest } from "@/config/redux/api/eventosApi";
 import { EventoDetalhes } from '@/types/evento.types';
 import RichTextEditor from "@/modules/criar-evento/components/RichTextEditor";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
+
+const eventoDrawerSchema = criarEventoSchema.extend({
+  statusNome: z.enum(['aberto', 'pausado', 'cancelado']),
+  statusJustificativa: z.string().default(''),
+});
+
+type EventoDrawerFormValues = z.infer<typeof eventoDrawerSchema>;
+
+type ProdutoFormValue = {
+  id?: string;
+  nome: string;
+  descricao?: string;
+  valor: string | number;
+  exigePagamento?: boolean;
+  oculto?: boolean;
+};
 
 interface EventoDrawerProps {
   open: boolean;
@@ -47,23 +65,28 @@ const formatDatetimeLocal = (dateString: string) => {
 export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProps) {
   const [editarEvento, { isLoading }] = useEditarEventoMutation();
   const [alert, setAlert] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({ open: false, message: "", severity: "success" });
+  const statusAtual = evento?.statusAtual ?? evento?.status ?? null;
+  const statusAtualLabel = statusAtual?.nome ?? 'aberto';
 
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors, isValid, isDirty },
-    watch,
-  } = useForm({
-    resolver: zodResolver(criarEventoSchema),
+  } = useForm<EventoDrawerFormValues>({
+    resolver: zodResolver(eventoDrawerSchema) as never,
     mode: "onChange",
     defaultValues: {
       nome: "",
       data_inicio: "",
       data_fim: "",
+      data_maxima_inscricao: "",
+      limite_inscricoes: "",
       descricao: "",
       selecao_unica_produto: true,
       produtos: [],
+      statusNome: 'aberto',
+      statusJustificativa: '',
     },
   });
 
@@ -78,6 +101,8 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         nome: evento.nome,
         data_inicio: formatDatetimeLocal(evento.data_inicio || ""),
         data_fim: formatDatetimeLocal(evento.data_fim || ""),
+        data_maxima_inscricao: formatDatetimeLocal(evento.data_maxima_inscricao || ""),
+        limite_inscricoes: evento.limite_inscricoes ? String(evento.limite_inscricoes) : "",
         descricao: evento.descricao || "",
         selecao_unica_produto: evento.selecao_unica_produto,
         produtos: evento.produtos?.map(p => ({
@@ -88,16 +113,21 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           exigePagamento: p.exigePagamento,
           oculto: p.oculto || false,
         })) || [],
+        statusNome: (evento.status?.nome as 'aberto' | 'pausado' | 'cancelado') || 'aberto',
+        statusJustificativa: evento.status?.justificativa || "",
       };
       reset(resetData);
     }
   }, [evento, open, reset]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: EventoDrawerFormValues) => {
     try {
       if (!evento) return;
 
-      const produtosPayload: ProdutoEventoRequest[] = (data.produtos || []).map((p: any) => ({
+      const dataMaximaInscricao = data.data_maxima_inscricao ? `${data.data_maxima_inscricao}:00.000Z` : null;
+      const limiteInscricoes = data.limite_inscricoes ? Number(data.limite_inscricoes) : null;
+
+      const produtosPayload: ProdutoEventoRequest[] = (data.produtos || []).map((p: ProdutoFormValue) => ({
         id: p.id,
         nome: p.nome,
         descricao: p.descricao,
@@ -112,9 +142,13 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           nome: data.nome,
           data_inicio: data.data_inicio + ':00.000Z',
           data_fim: data.data_fim + ':00.000Z',
+          data_maxima_inscricao: dataMaximaInscricao,
+          limite_inscricoes: limiteInscricoes,
           descricao: data.descricao || undefined,
           selecao_unica_produto: data.selecao_unica_produto,
           produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
+          statusNome: data.statusNome,
+          statusJustificativa: data.statusJustificativa || null,
         }
       }).unwrap();
 
@@ -122,8 +156,12 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (error: any) {
-      setAlert({ open: true, message: error?.data?.error || "Erro ao atualizar evento", severity: "error" });
+    } catch (error: unknown) {
+      const errorData = typeof error === 'object' && error !== null && 'data' in error
+        ? (error as { data?: { error?: unknown } }).data
+        : undefined;
+      const errorMessage = typeof errorData?.error === 'string' ? errorData.error : 'Erro ao atualizar evento';
+      setAlert({ open: true, message: errorMessage, severity: "error" });
     }
   };
 
@@ -162,14 +200,45 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
                     <TextField {...field} label="Data de término *" type="datetime-local" fullWidth error={!!errors.data_fim} helperText={errors.data_fim?.message as string} slotProps={{ inputLabel: { shrink: true } }} />
                   )} />
                 </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller name="data_maxima_inscricao" control={control} render={({ field }) => (
+                    <TextField {...field} label="Data máxima de inscrição" type="datetime-local" fullWidth slotProps={{ inputLabel: { shrink: true } }} />
+                  )} />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller name="limite_inscricoes" control={control} render={({ field }) => (
+                    <TextField {...field} label="Limite de inscrições" type="number" fullWidth inputProps={{ min: 1 }} />
+                  )} />
+                </Grid>
                 <Grid size={12}>
                   <Controller name="descricao" control={control} render={({ field }) => (
                     <TextField {...field} label="Descrição" fullWidth multiline minRows={3} />
                   )} />
                 </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name="statusNome"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} select label="Status do evento" fullWidth helperText="Finalizado é calculado automaticamente" >
+                        <MenuItem value="aberto">Aberto</MenuItem>
+                        <MenuItem value="pausado">Pausado</MenuItem>
+                        <MenuItem value="cancelado">Cancelado</MenuItem>
+                      </TextField>
+                    )}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name="statusJustificativa"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField {...field} label="Justificativa do status" fullWidth multiline minRows={3} />
+                    )}
+                  />
+                </Grid>
               </Grid>
             </Grid>
-
             <Grid size={12}>
               <Divider sx={{ my: 2 }} />
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -177,34 +246,43 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Produtos</Typography>
                   <Typography variant="caption" color="text.secondary">Gerencie os produtos do evento</Typography>
                 </Box>
-                <Button variant="outlined" size="small" startIcon={<IconifyIcon icon="material-symbols:add" />} onClick={() => append({ nome: "", descricao: "", valor: "" } as any)}>Adicionar produto</Button>
+                <Stack alignItems="flex-end" spacing={0.5}>
+                  <Typography variant="caption" color="text.secondary">Status atual</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, textTransform: 'capitalize' }}>
+                    {statusAtualLabel}
+                  </Typography>
+                </Stack>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<IconifyIcon icon="material-symbols:add" />}
+                  onClick={() => append({ nome: '', descricao: '', valor: '', exigePagamento: false, oculto: false })}
+                >
+                  Adicionar produto
+                </Button>
               </Stack>
 
-              <Controller name="selecao_unica_produto" control={control} render={({ field: { value, onChange } }) => (
-                <FormControlLabel control={<Switch checked={value} onChange={(e) => onChange(e.target.checked)} />} label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Seleção de produto obrigatória</Typography>} sx={{ mb: 2, ml: 0 }} />
-              )} />
-
               <Stack spacing={2}>
-                {fields.map((field: any, index) => (
-                  <Card key={field.id} variant="outlined" sx={{ p: 2, bgcolor: "#FAFAFA", position: "relative" }}>
-                    <IconButton size="small" onClick={() => remove(index)} sx={{ position: "absolute", top: 8, right: 8, color: "error.main" }}>
+                {fields.map((field, index) => (
+                  <Card key={field.id} variant="outlined" sx={{ p: 2, bgcolor: '#FAFAFA', position: 'relative' }}>
+                    <IconButton size="small" onClick={() => remove(index)} sx={{ position: 'absolute', top: 8, right: 8, color: 'error.main' }}>
                       <IconifyIcon icon="material-symbols:delete-outline" width={18} />
                     </IconButton>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "#666", mb: 1.5, display: "block" }}>Produto {index + 1}</Typography>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#666', mb: 1.5, display: 'block' }}>Produto {index + 1}</Typography>
                     <Grid container spacing={2}>
                       <Grid size={12}>
                         <Controller name={`produtos.${index}.nome`} control={control} render={({ field }) => (
-                          <TextField {...field} label="Nome" size="small" fullWidth error={!!(errors.produtos as any)?.[index]?.nome} helperText={(errors.produtos as any)?.[index]?.nome?.message} />
+                          <TextField {...field} label="Nome" size="small" fullWidth error={!!errors.produtos?.[index]?.nome} helperText={errors.produtos?.[index]?.nome?.message} />
                         )} />
                       </Grid>
                       <Grid size={12}>
                         <Controller name={`produtos.${index}.descricao`} control={control} render={({ field }) => (
-                          <RichTextEditor label="Descrição" value={field.value || ""} onChange={field.onChange} />
+                          <RichTextEditor label="Descrição" value={field.value || ''} onChange={field.onChange} />
                         )} />
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Controller name={`produtos.${index}.valor`} control={control} render={({ field }) => (
-                          <TextField {...field} label="Valor *" size="small" fullWidth placeholder="R$ 0,00" error={!!(errors.produtos as any)?.[index]?.valor} helperText={(errors.produtos as any)?.[index]?.valor?.message} InputProps={{ inputComponent: CurrencyMaskCustom as any }} slotProps={{ inputLabel: { shrink: true } }} />
+                          <TextField {...field} label="Valor *" size="small" fullWidth placeholder="R$ 0,00" error={!!errors.produtos?.[index]?.valor} helperText={errors.produtos?.[index]?.valor?.message} InputProps={{ inputComponent: CurrencyMaskCustom as never }} slotProps={{ inputLabel: { shrink: true } }} />
                         )} />
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -233,7 +311,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
 
         <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant="outlined" disabled={isLoading} onClick={onClose}>Cancelar</Button>
-          <Button type="submit" form="evento-form" variant="contained" loading={isLoading} disabled={isLoading} sx={{ bgcolor: "#5B5FED", "&:hover": { bgcolor: "#4A4EDC" } }}>
+          <Button type="submit" form="evento-form" variant="contained" disabled={isLoading || !isValid || !isDirty} sx={{ bgcolor: "#5B5FED", "&:hover": { bgcolor: "#4A4EDC" } }}>
             {isLoading ? "Salvando..." : "Salvar Alterações"}
           </Button>
         </Box>

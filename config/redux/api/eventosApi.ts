@@ -14,11 +14,15 @@ export interface CadastrarEventoRequest {
   nome: string;
   data_inicio: string;
   data_fim: string;
+  data_maxima_inscricao?: string | null;
+  limite_inscricoes?: number | null;
   descricao?: string;
   imagem_url?: string;
   selecao_unica_produto?: boolean;
   produtos?: ProdutoEventoRequest[];
   instituicaoId?: string;
+  statusNome?: 'aberto' | 'pausado' | 'cancelado';
+  statusJustificativa?: string | null;
 }
 
 export type CadastrarEventoResponse = EventoDetalhes;
@@ -147,7 +151,7 @@ export const eventosApi = baseApi.injectEndpoints({
         { type: 'Participantes', id: eventoId },
       ],
     }),
-    cadastrarParcela: builder.mutation<any, { eventoId: string; participanteId: string; produtoId: string; data: any }>({
+    cadastrarParcela: builder.mutation<unknown, { eventoId: string; participanteId: string; produtoId: string; data: Record<string, unknown> }>({
       query: ({ eventoId, participanteId, produtoId, data }) => ({
         url: `/eventos/${eventoId}/participantes/${participanteId}/produtos/${produtoId}/parcelas`,
         method: 'POST',
@@ -157,7 +161,7 @@ export const eventosApi = baseApi.injectEndpoints({
         { type: 'Participantes', id: eventoId },
       ],
     }),
-    editarParcela: builder.mutation<any, { eventoId: string; participanteId: string; produtoId: string; parcelaId: string; data: any }>({
+    editarParcela: builder.mutation<unknown, { eventoId: string; participanteId: string; produtoId: string; parcelaId: string; data: Record<string, unknown> }>({
       query: ({ eventoId, participanteId, produtoId, parcelaId, data }) => ({
         url: `/eventos/${eventoId}/participantes/${participanteId}/produtos/${produtoId}/parcelas/${parcelaId}`,
         method: 'PUT',
@@ -167,7 +171,7 @@ export const eventosApi = baseApi.injectEndpoints({
         { type: 'Participantes', id: eventoId },
       ],
     }),
-    excluirParcela: builder.mutation<any, { eventoId: string; participanteId: string; produtoId: string; parcelaId: string }>({
+    excluirParcela: builder.mutation<unknown, { eventoId: string; participanteId: string; produtoId: string; parcelaId: string }>({
       query: ({ eventoId, participanteId, produtoId, parcelaId }) => ({
         url: `/eventos/${eventoId}/participantes/${participanteId}/produtos/${produtoId}/parcelas/${parcelaId}`,
         method: 'DELETE',

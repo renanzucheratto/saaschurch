@@ -7,11 +7,18 @@ export interface Produto {
   oculto?: boolean;
 }
 
+export interface StatusEvento {
+  id: string;
+  nome: 'aberto' | 'finalizado' | 'pausado' | 'cancelado';
+  justificativa: string | null;
+}
+
 export interface EventoListagem {
   id: string;
   nome: string;
   data_inicio: string | null;
   data_fim: string | null;
+  data_maxima_inscricao?: string | null;
   descricao: string;
   selecao_unica_produto: boolean;
   imagem_url: string | null;
@@ -19,6 +26,10 @@ export interface EventoListagem {
   createdAt: string;
   updatedAt: string;
   quantidadeParticipantes: number;
+  limite_inscricoes?: number | null;
+  statusId?: string | null;
+  status?: StatusEvento | null;
+  statusAtual?: StatusEvento;
   produtos: Produto[];
 }
 
@@ -27,6 +38,7 @@ export interface EventoDetalhes {
   nome: string;
   data_inicio: string | null;
   data_fim: string | null;
+  data_maxima_inscricao?: string | null;
   descricao: string;
   selecao_unica_produto: boolean;
   imagem_url: string | null;
@@ -34,6 +46,10 @@ export interface EventoDetalhes {
   instituicaoId: string;
   createdAt: string;
   updatedAt: string;
+  limite_inscricoes?: number | null;
+  statusId?: string | null;
+  status?: StatusEvento | null;
+  statusAtual?: StatusEvento;
   produtos: Produto[];
 }
 

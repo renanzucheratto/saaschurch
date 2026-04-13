@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -17,11 +16,11 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useObterEventoQuery, useListarParticipantesQuery } from "@/config/redux/api/eventosApi";
-import { ProdutoParticipante } from "@/types/evento.types";
+import { EventoDetalhes, Participante, ProdutoParticipante } from "@/types/evento.types";
 import ParticipantesPorProdutoChart from "./components/ParticipantesPorProdutoChart";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Tabs, Tab } from "@mui/material";
 import ParticipanteDrawer from "./components/ParticipanteDrawer";
 import ParticipantesPizzaChart from "./components/ParticipantesPizzaChart";
@@ -96,7 +95,7 @@ const participantesColumns: GridColDef[] = [
 
       const finalStatus = params.value;
 
-      let color = 'success';
+      let color: 'success' | 'warning' | 'error' | 'default' = 'success';
       let label = 'N/A';
 
       if (finalStatus === 'QUITADO') {
@@ -113,7 +112,7 @@ const participantesColumns: GridColDef[] = [
         label = 'Pendente';
       }
 
-      return <Chip label={label} color={color as unknown as any} size="small" sx={{ fontWeight: 600 }} />;
+      return <Chip label={label} color={color} size="small" sx={{ fontWeight: 600 }} />;
     }
   },
   {
@@ -215,6 +214,8 @@ export default function EventoDetalhesModule() {
   };
 
   const { data: evento, isLoading: isLoadingEvento, isFetching: isFetchingEvento } = useObterEventoQuery(eventoId);
+  const statusEvento = evento?.statusAtual ?? evento?.status ?? null;
+  const statusJustificativa = statusEvento?.justificativa || 'Sem justificativa informada.';
 
   const { data: participantesAtivos = [], isLoading: isLoadingAtivos, isFetching: isFetchingAtivos } = useListarParticipantesQuery({
     eventoId,
@@ -226,7 +227,7 @@ export default function EventoDetalhesModule() {
     isDeleted: true
   });
 
-  const handleRowClick = (params: any) => {
+  const handleRowClick = (params: GridRowParams<Participante>) => {
     setSelectedParticipanteId(params.row.id);
     setDrawerOpen(true);
   };
@@ -245,18 +246,11 @@ export default function EventoDetalhesModule() {
 
   const isLoading = isLoadingEvento;
 
-  const gridColumns = useMemo(() => {
-    if (!evento) return participantesColumns;
-    const temProdutos = evento.produtos && evento.produtos.length > 0;
+  const participantesColumnsFiltradas = evento?.produtos && evento.produtos.length > 0
+    ? participantesColumns
+    : participantesColumns.filter((col) => col.field !== 'produto' && col.field !== 'valor');
 
-    if (temProdutos) return participantesColumns;
-
-    return participantesColumns.filter(
-      col => col.field !== "produto" && col.field !== "valor"
-    );
-  }, [evento]);
-
-  const filterParticipantes = useCallback((participantes: any[]) => {
+  const filterParticipantes = useCallback((participantes: Participante[]) => {
     if (!searchTerm) return participantes;
     const lowerSearch = searchTerm.toLowerCase();
     const numericSearch = searchTerm.replace(/\D/g, "");
@@ -359,6 +353,23 @@ export default function EventoDetalhesModule() {
           </Typography>
 
           <Box sx={{ display: "grid", gap: 2 }}>
+            <Box>
+              <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
+                Status do Evento
+              </Typography>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5, flexWrap: 'wrap' }}>
+                <Chip
+                  label={(statusEvento?.nome || 'aberto').toUpperCase()}
+                  color={statusEvento?.nome === 'pausado' ? 'warning' : statusEvento?.nome === 'cancelado' ? 'error' : statusEvento?.nome === 'finalizado' ? 'default' : 'success'}
+                  size="small"
+                  sx={{ fontWeight: 700 }}
+                />
+                <Typography variant="body2" sx={{ color: '#444' }}>
+                  {statusJustificativa}
+                </Typography>
+              </Stack>
+            </Box>
+
             <Box>
               <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
                 Data
@@ -560,7 +571,7 @@ export default function EventoDetalhesModule() {
               </Stack>
               <DataGrid
                 rows={filteredAtivos}
-                columns={gridColumns}
+                columns={participantesColumnsFiltradas}
                 loading={isLoadingAtivos || isFetchingAtivos}
                 initialState={{
                   pagination: {
@@ -624,7 +635,7 @@ export default function EventoDetalhesModule() {
               </Stack>
               <DataGrid
                 rows={filteredInativos}
-                columns={gridColumns}
+                columns={participantesColumnsFiltradas}
                 loading={isLoadingInativos || isFetchingInativos}
                 initialState={{
                   pagination: {
@@ -666,7 +677,7 @@ export default function EventoDetalhesModule() {
       <EventoDrawer
         open={eventoDrawerOpen}
         onClose={() => setEventoDrawerOpen(false)}
-        evento={evento as any}
+        evento={evento as EventoDetalhes}
       />
     </Grid>
   );

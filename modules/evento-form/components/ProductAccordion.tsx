@@ -8,10 +8,10 @@ interface ProductAccordionProps {
   produto: ProdutoEvento;
   selected: boolean;
   onSelect: (produtoId: string) => void;
-  hasSelection: boolean;
+  disabled?: boolean;
 }
 
-export const ProductAccordion = ({ produto, selected, onSelect, hasSelection }: ProductAccordionProps) => {
+export const ProductAccordion = ({ produto, selected, onSelect, disabled = false }: ProductAccordionProps) => {
   const [expanded, setExpanded] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -25,6 +25,8 @@ export const ProductAccordion = ({ produto, selected, onSelect, hasSelection }: 
         overflow: 'hidden',
         transition: 'all 0.3s ease',
         bgcolor: selected ? 'primary.50' : 'white',
+        opacity: disabled ? 0.7 : 1,
+        pointerEvents: disabled ? 'none' : 'auto',
         '&:hover': {
           borderColor: 'primary.main',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -47,6 +49,7 @@ export const ProductAccordion = ({ produto, selected, onSelect, hasSelection }: 
             variant={selected ? 'contained' : 'outlined'}
             size="small"
             onClick={() => onSelect(produto.id)}
+            disabled={disabled}
             sx={{
               minWidth: 100,
               fontWeight: 600,
@@ -78,6 +81,7 @@ export const ProductAccordion = ({ produto, selected, onSelect, hasSelection }: 
           <Button
             size="small"
             onClick={() => setExpanded(!expanded)}
+            disabled={disabled}
             sx={{
               textTransform: 'none',
               color: 'text.secondary',
@@ -130,6 +134,7 @@ export const ProductAccordion = ({ produto, selected, onSelect, hasSelection }: 
                 e.stopPropagation();
                 onSelect(produto.id);
               }}
+              disabled={disabled}
               sx={{
                 fontWeight: 600,
                 textTransform: 'none',

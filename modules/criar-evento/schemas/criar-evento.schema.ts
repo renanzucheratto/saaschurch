@@ -16,6 +16,8 @@ export const criarEventoSchema = z.object({
   nome: z.string().min(1, "O nome do evento é obrigatório"),
   data_inicio: z.string().min(1, "A data de início é obrigatória"),
   data_fim: z.string().min(1, "A data de término é obrigatória"),
+  data_maxima_inscricao: z.string().optional(),
+  limite_inscricoes: z.string().optional(),
   descricao: z.string().optional(),
   imagem_url: z.string().optional(),
   selecao_unica_produto: z.boolean(),

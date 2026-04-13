@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -16,7 +16,6 @@ import {
   Alert,
   Stack,
   Divider,
-  InputAdornment,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -40,11 +39,26 @@ export default function CriarEventoModule() {
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
+  const getErrorMessage = (value: unknown): string => {
+    if (typeof value === 'object' && value !== null && 'data' in value) {
+      const data = (value as { data?: unknown }).data;
+
+      if (typeof data === 'object' && data !== null && 'error' in data) {
+        const errorValue = (data as { error?: unknown }).error;
+
+        if (typeof errorValue === 'string') {
+          return errorValue;
+        }
+      }
+    }
+
+    return 'Erro ao criar evento';
+  };
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    watch,
   } = useForm<CriarEventoSchema>({
     resolver: zodResolver(criarEventoSchema),
     mode: "onChange",
@@ -52,6 +66,8 @@ export default function CriarEventoModule() {
       nome: "",
       data_inicio: "",
       data_fim: "",
+      data_maxima_inscricao: "",
+      limite_inscricoes: "",
       descricao: "",
       selecao_unica_produto: true,
       produtos: [],
@@ -76,6 +92,8 @@ export default function CriarEventoModule() {
         nome: data.nome,
         data_inicio: data.data_inicio + ':00.000Z',
         data_fim: data.data_fim + ':00.000Z',
+        data_maxima_inscricao: data.data_maxima_inscricao ? `${data.data_maxima_inscricao}:00.000Z` : null,
+        limite_inscricoes: data.limite_inscricoes ? Number(data.limite_inscricoes) : null,
         descricao: data.descricao || undefined,
         selecao_unica_produto: data.selecao_unica_produto,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
@@ -89,16 +107,16 @@ export default function CriarEventoModule() {
       });
 
       router.push(`${process.env.NEXT_PUBLIC_APP_URL}/eventos/${result.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error);
+
       setAlert({
         open: true,
-        message: error?.data?.error || "Erro ao criar evento",
+        message: errorMessage,
         severity: "error",
       });
     }
   };
-
-  const selecao_unica_produto = watch("selecao_unica_produto");
 
   return (
     <Box>
@@ -188,6 +206,48 @@ export default function CriarEventoModule() {
                         error={!!errors.data_fim}
                         helperText={errors.data_fim?.message}
                         slotProps={{ inputLabel: { shrink: true } }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 1.5,
+                          },
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Controller
+                    name="data_maxima_inscricao"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Data máxima de inscrição"
+                        type="datetime-local"
+                        fullWidth
+                        slotProps={{ inputLabel: { shrink: true } }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 1.5,
+                          },
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Controller
+                    name="limite_inscricoes"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Limite de inscrições"
+                        type="number"
+                        fullWidth
+                        inputProps={{ min: 1 }}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 1.5,
@@ -412,7 +472,7 @@ export default function CriarEventoModule() {
                                     },
                                   }}
                                   InputProps={{
-                                    inputComponent: CurrencyMaskCustom as any,
+                                    inputComponent: CurrencyMaskCustom as never,
                                   }}
                                   sx={{
                                     "& .MuiOutlinedInput-root": {

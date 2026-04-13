@@ -81,7 +81,9 @@ export const EventoForm = () => {
 
   const hasProdutos = !!(evento?.produtos && evento.produtos.length > 0);
   const selecaoUnicaProduto = evento?.selecao_unica_produto;
-  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto);
+  const statusEvento = evento?.statusAtual ?? evento?.status ?? null;
+  const isRegistrationOpen = statusEvento?.nome === 'aberto';
+  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen);
 
   if (isLoadingEvento) {
     return (
@@ -115,6 +117,10 @@ export const EventoForm = () => {
     });
     return `${dateFormatted} às ${timeFormatted}`;
   };
+
+  const statusMensagem = statusEvento?.nome === 'aberto'
+    ? 'As inscrições estão abertas.'
+    : statusEvento?.justificativa || 'Este evento não está disponível para novas inscrições.';
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', bgcolor: '#f8f9fa', overflow: 'hidden' }}>
@@ -175,17 +181,7 @@ export const EventoForm = () => {
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(10px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                }}>
+                <Box sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
                   📅
                 </Box>
                 <Box>
@@ -198,17 +194,7 @@ export const EventoForm = () => {
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(10px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                }}>
+                <Box sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
                   🏁
                 </Box>
                 <Box>
@@ -224,56 +210,35 @@ export const EventoForm = () => {
           </Box>
         </Box>
 
-        <Box
-          sx={{
-            overflowY: 'auto',
-            height: '100vh',
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              width: '100%',
-              maxWidth: 900,
-              p: 2,
-            }}
-          >
-
+        <Box sx={{ overflowY: 'auto', height: '100vh', display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ width: '100%', maxWidth: 900, p: 2 }}>
             <Box component="form" onSubmit={handleSubmit}>
               <Stack mb={4}>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 700,
-                    mb: 1,
-                  }}
-                >
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
                   {isMobile ? evento.nome : 'Inscreva-se no evento'}
-                </Typography >
-                {evento.descricao && isMobile ?
+                </Typography>
+                {evento.descricao && isMobile && (
                   <Typography variant="body2" mb={1}>
                     {evento.descricao}
                   </Typography>
-                  : null}
+                )}
                 <Typography variant="body2">
                   Preencha os dados abaixo para garantir sua participação
                 </Typography>
               </Stack>
 
+              <Alert severity={isRegistrationOpen ? 'success' : 'warning'} sx={{ mb: 3, borderRadius: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  Status do evento: {statusEvento?.nome ?? 'aberto'}
+                </Typography>
+                <Typography variant="body2">
+                  {statusMensagem}
+                </Typography>
+              </Alert>
+
               {hasProdutos && (
                 <Box sx={{ mb: 4 }}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontWeight: 700,
-                      mb: 2,
-                      fontSize: '0.875rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                      color: 'text.primary',
-                    }}
-                  >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'text.primary' }}>
                     Selecione uma opção {selecaoUnicaProduto ? '*' : '(opcional)'}
                   </Typography>
                   <Controller
@@ -281,20 +246,14 @@ export const EventoForm = () => {
                     control={control}
                     render={({ field }) => (
                       <Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 1.5,
-                          }}
-                        >
-                          {evento.produtos.filter(p => !p.oculto).map((produto) => (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                          {evento.produtos.filter((p) => !p.oculto).map((produto) => (
                             <ProductAccordion
                               key={produto.id}
                               produto={produto}
                               selected={field.value === produto.id}
                               onSelect={field.onChange}
-                              hasSelection={!!field.value}
+                              disabled={!isRegistrationOpen}
                             />
                           ))}
                         </Box>
@@ -318,6 +277,7 @@ export const EventoForm = () => {
                       {...field}
                       label="Nome completo"
                       fullWidth
+                      disabled={!isRegistrationOpen}
                       error={!!errors.nome}
                       helperText={errors.nome?.message}
                       variant="outlined"
@@ -348,6 +308,7 @@ export const EventoForm = () => {
                       {...field}
                       label="Telefone"
                       fullWidth
+                      disabled={!isRegistrationOpen}
                       error={!!errors.telefone}
                       helperText={errors.telefone?.message}
                       variant="outlined"
@@ -383,6 +344,7 @@ export const EventoForm = () => {
                       label="Email"
                       type="email"
                       fullWidth
+                      disabled={!isRegistrationOpen}
                       error={!!errors.email}
                       helperText={errors.email?.message}
                       variant="outlined"
@@ -413,6 +375,7 @@ export const EventoForm = () => {
                       {...field}
                       label="RG"
                       fullWidth
+                      disabled={!isRegistrationOpen}
                       error={!!errors.rg}
                       helperText={errors.rg?.message}
                       variant="outlined"
@@ -447,6 +410,7 @@ export const EventoForm = () => {
                       {...field}
                       label="CPF"
                       fullWidth
+                      disabled={!isRegistrationOpen}
                       error={!!errors.cpf}
                       helperText={errors.cpf?.message}
                       variant="outlined"
@@ -472,63 +436,65 @@ export const EventoForm = () => {
                     />
                   )}
                 />
-
-                <Box sx={{ mt: 2 }}>
-                  <Controller
-                    name="termo_assinado"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            {...field}
-                            checked={field.value}
-                          />
-                        }
-                        label={
-                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
-                            Eu declaro estar ciente e concordar com as condições contidas neste formulário de inscrição da Igreja Formosa de Cristo, bem como a responsabilidade do cumprimento com o pagamento do valor escolhido
-                          </Typography>
-                        }
-                      />
-                    )}
-                  />
-                  {errors.termo_assinado && (
-                    <Typography color="error" variant="caption" sx={{ display: 'block', ml: 4 }}>
-                      {errors.termo_assinado.message}
-                    </Typography>
-                  )}
-                </Box>
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  disabled={!isValid || isSubmitting}
-                  sx={{
-                    mb: 6,
-                    py: 1.5,
-                    borderRadius: 1.5,
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    bgcolor: '#1a1a1a',
-                    color: 'white',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      bgcolor: '#000000',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    },
-                    '&:disabled': {
-                      bgcolor: '#e0e0e0',
-                      color: '#9e9e9e',
-                    },
-                  }}
-                >
-                  {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
-                </Button>
               </Box>
+
+              <Box sx={{ mt: 2 }}>
+                <Controller
+                  name="termo_assinado"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={(
+                        <Checkbox
+                          {...field}
+                          checked={field.value}
+                          disabled={!isRegistrationOpen}
+                        />
+                      )}
+                      label={(
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
+                          Eu declaro estar ciente e concordar com as condições contidas neste formulário de inscrição da Igreja Formosa de Cristo, bem como a responsabilidade do cumprimento com o pagamento do valor escolhido
+                        </Typography>
+                      )}
+                    />
+                  )}
+                />
+                {errors.termo_assinado && (
+                  <Typography color="error" variant="caption" sx={{ display: 'block', ml: 4 }}>
+                    {errors.termo_assinado.message}
+                  </Typography>
+                )}
+              </Box>
+
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={!isRegistrationOpen || !isValid || isSubmitting}
+                sx={{
+                  mt: 4,
+                  mb: 6,
+                  py: 1.5,
+                  borderRadius: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  bgcolor: '#1a1a1a',
+                  color: 'white',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    bgcolor: '#000000',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  },
+                  '&:disabled': {
+                    bgcolor: '#e0e0e0',
+                    color: '#9e9e9e',
+                  },
+                }}
+              >
+                {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
+              </Button>
             </Box>
           </Box>
         </Box>

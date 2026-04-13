@@ -13,7 +13,12 @@ interface Alert {
   severity: 'success' | 'error';
 }
 
-export const useEventoForm = (eventoId: string, hasProdutos: boolean = false, selecaoUnicaProduto: boolean = true) => {
+export const useEventoForm = (
+  eventoId: string,
+  hasProdutos: boolean = false,
+  selecaoUnicaProduto: boolean = true,
+  canSubmit: boolean = true,
+) => {
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [cadastrarParticipante, { isLoading: isSubmittingApi }] = useCadastrarParticipanteMutation();
   const [alert, setAlert] = useState<Alert>({
@@ -25,11 +30,9 @@ export const useEventoForm = (eventoId: string, hasProdutos: boolean = false, se
   const {
     control,
     handleSubmit,
-    setError,
     setValue,
     formState: { errors, isSubmitting, isValid },
     reset,
-    getValues,
   } = useForm<EventoFormSchema>({
     resolver: zodResolver(eventoFormSchema),
     mode: 'onTouched',
@@ -54,6 +57,15 @@ export const useEventoForm = (eventoId: string, hasProdutos: boolean = false, se
 
   const onSubmit = async (data: EventoFormSchema) => {
     try {
+      if (!canSubmit) {
+        setAlert({
+          open: true,
+          message: 'Este evento está indisponível para novas inscrições.',
+          severity: 'error',
+        });
+        return;
+      }
+
       // A validação de produtoId agora é feita pelo Zod schema
 
       if (!executeRecaptcha) {
