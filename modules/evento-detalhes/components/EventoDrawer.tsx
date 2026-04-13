@@ -65,8 +65,6 @@ const formatDatetimeLocal = (dateString: string) => {
 export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProps) {
   const [editarEvento, { isLoading }] = useEditarEventoMutation();
   const [alert, setAlert] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({ open: false, message: "", severity: "success" });
-  const statusAtual = evento?.statusAtual ?? evento?.status ?? null;
-  const statusAtualLabel = statusAtual?.nome ?? 'aberto';
 
   const {
     control,
@@ -246,12 +244,6 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Produtos</Typography>
                   <Typography variant="caption" color="text.secondary">Gerencie os produtos do evento</Typography>
                 </Box>
-                <Stack alignItems="flex-end" spacing={0.5}>
-                  <Typography variant="caption" color="text.secondary">Status atual</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700, textTransform: 'capitalize' }}>
-                    {statusAtualLabel}
-                  </Typography>
-                </Stack>
                 <Button
                   variant="outlined"
                   size="small"

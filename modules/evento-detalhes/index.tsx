@@ -67,6 +67,22 @@ const participantesColumns: GridColDef[] = [
     width: 150,
   },
   {
+    field: "createdAt",
+    headerName: "Data de Inscrição",
+    width: 180,
+    valueFormatter: (value) => {
+      if (!value) return "-";
+      const date = new Date(value);
+      return date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    },
+  },
+  {
     field: "status",
     headerName: "Status de Pagamento",
     width: 220,
