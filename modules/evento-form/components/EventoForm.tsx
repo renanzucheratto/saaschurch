@@ -227,14 +227,14 @@ export const EventoForm = () => {
                 </Typography>
               </Stack>
 
-              <Alert severity={isRegistrationOpen ? 'success' : 'warning'} sx={{ mb: 3, borderRadius: 1.5 }}>
+              {!isRegistrationOpen && <Alert severity={isRegistrationOpen ? 'success' : 'warning'} sx={{ mb: 3, borderRadius: 1.5 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                   O evento está {statusEvento?.nome ?? 'aberto'}
                 </Typography>
                 <Typography variant="body2">
                   {statusMensagem}
                 </Typography>
-              </Alert>
+              </Alert>}
 
               {hasProdutos && (
                 <Box sx={{ mb: 4 }}>

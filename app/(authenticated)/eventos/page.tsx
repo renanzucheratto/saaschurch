@@ -41,6 +41,34 @@ const columns: GridColDef[] = [
     valueGetter: (value, row) => formatDateRange(row.data_inicio, row.data_fim),
   },
   {
+    field: "status",
+    headerName: "Status",
+    width: 150,
+    renderCell: (params) => {
+      const statusEvento = params.row.statusAtual ?? params.row.status ?? null;
+      const statusNome = statusEvento?.nome || 'aberto';
+      
+      let color: 'success' | 'warning' | 'error' | 'default' = 'success';
+      let label = 'Aberto';
+      
+      if (statusNome === 'aberto') {
+        color = 'success';
+        label = 'Aberto';
+      } else if (statusNome === 'pausado') {
+        color = 'warning';
+        label = 'Pausado';
+      } else if (statusNome === 'cancelado') {
+        color = 'error';
+        label = 'Cancelado';
+      } else if (statusNome === 'finalizado') {
+        color = 'default';
+        label = 'Finalizado';
+      }
+      
+      return <Chip label={label} color={color} size="small" sx={{ fontWeight: 600 }} />;
+    },
+  },
+  {
     field: "quantidadeParticipantes",
     headerName: "Quantidade de Participantes",
     flex: 1,
