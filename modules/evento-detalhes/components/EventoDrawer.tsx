@@ -331,7 +331,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant="outlined" disabled={isLoading} onClick={onClose}>Cancelar</Button>
           <Button type="submit" form="evento-form" variant="contained" disabled={isLoading} sx={{ bgcolor: "#5B5FED", "&:hover": { bgcolor: "#4A4EDC" } }}>
-            {isLoading ? "Salvando..." : "Salvar Alterações 2"}
+            {isLoading ? "Salvando..." : "Salvar Alterações"}
           </Button>
         </Box>
       </Drawer>
