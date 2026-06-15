@@ -43,6 +43,8 @@ interface CamposCustomizadosManagerProps {
   errors?: FieldErrors<any>;
   // Quando true, campos já salvos (com id) não podem ser removidos, apenas ocultados.
   bloquearRemocaoSalvos?: boolean;
+  // Quando false, nenhum campo pode ser removido (ex: na edição do evento). Default true.
+  permitirRemocao?: boolean;
 }
 
 interface SortableFieldProps {
@@ -52,6 +54,7 @@ interface SortableFieldProps {
   control: Control<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   camposErrors: any;
+  permitirRemocao: boolean;
   removerDesabilitado: boolean;
   isDragDisabled?: boolean;
   onRemove: () => void;
@@ -62,17 +65,16 @@ const SortableField = ({
   index,
   control,
   camposErrors,
+  permitirRemocao,
+  removerDesabilitado,
   isDragDisabled = false,
+  onRemove,
 }: SortableFieldProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id, disabled: isDragDisabled });
 
   const tipo = useWatch({ control, name: `campos_customizados.${index}.tipo` });
   const isAceiteTermo = tipo === "aceite_termo";
-
-  if (isAceiteTermo) {
-    console.log(control)
-  }
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -99,7 +101,6 @@ const SortableField = ({
               name={`campos_customizados.${index}.textoTermo`}
               control={control}
               render={({ field: termoField }) => {
-                console.log('>>>', termoField)
                 return <TextField
                   {...termoField}
                   value={termoField.value ?? ""}
@@ -172,6 +173,21 @@ const SortableField = ({
             </>
           )}
         </Box>
+
+        {permitirRemocao && (
+          <Tooltip title={removerDesabilitado ? "" : "Remover campo"} placement="left">
+            <span>
+              <IconButton
+                size="small"
+                disabled={removerDesabilitado}
+                onClick={onRemove}
+                sx={{ p: 0.5, mt: 0.5, color: "#999", "&:hover": { color: "#d32f2f" } }}
+              >
+                <IconifyIcon icon="material-symbols:delete-outline" width={20} />
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
       </Stack>
     </Card>
   );
@@ -181,6 +197,7 @@ export const CamposCustomizadosManager = ({
   control,
   errors,
   bloquearRemocaoSalvos = false,
+  permitirRemocao = true,
 }: CamposCustomizadosManagerProps) => {
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -327,6 +344,7 @@ export const CamposCustomizadosManager = ({
                     index={index}
                     control={control}
                     camposErrors={camposErrors}
+                    permitirRemocao={permitirRemocao}
                     removerDesabilitado={removerDesabilitado}
                     isDragDisabled={isAceiteTermo}
                     onRemove={() => remove(index)}

@@ -323,7 +323,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
             </Grid>
             <Grid size={12}>
               <Divider sx={{ my: 2 }} />
-              <CamposCustomizadosManager control={control as never} errors={errors} />
+              <CamposCustomizadosManager control={control as never} errors={errors} permitirRemocao={false} />
             </Grid>
           </Grid>
         </Box>
