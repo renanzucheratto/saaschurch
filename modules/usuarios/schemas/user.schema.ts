@@ -6,7 +6,7 @@ export const userSchema = z.object({
   telefone: z.string().optional(),
   rg: z.string().optional(),
   cpf: z.string().optional(),
-  userType: z.enum(['membro', 'backoffice']),
+  userType: z.enum(['membro', 'backoffice', 'lider', 'pastor', 'tesouraria']),
 });
 
 export type UserFormData = z.infer<typeof userSchema>;

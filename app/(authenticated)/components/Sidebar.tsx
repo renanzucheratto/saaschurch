@@ -46,6 +46,13 @@ const menuSections: MenuSection[] = [
     ],
   },
   {
+    title: "PROJETOS",
+    items: [
+      { id: "projetos", label: "Lista de Projetos", icon: <IconifyIcon icon="material-symbols:folder-managed-outline" width={20} />, href: "/projetos" },
+      { id: "criar-projeto", label: "Criar projeto", icon: <IconifyIcon icon="material-symbols:create-new-folder-outline" width={20} />, href: "/projetos/criar" },
+    ],
+  },
+  {
     title: "GERENCIAMENTO",
     items: [
       { id: "usuarios", label: "Usuários", icon: <IconifyIcon icon="material-symbols:group-outline" width={20} />, href: "/usuarios" },

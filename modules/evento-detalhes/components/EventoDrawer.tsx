@@ -22,9 +22,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from 'zod';
 import { criarEventoSchema } from "@/modules/criar-evento/schemas/criar-evento.schema";
 import { useEditarEventoMutation } from '@/config/redux/api/eventosApi';
-import type { ProdutoEventoRequest } from "@/config/redux/api/eventosApi";
+import type { ProdutoEventoRequest, CampoCustomizadoRequest } from "@/config/redux/api/eventosApi";
 import { EventoDetalhes } from '@/types/evento.types';
 import RichTextEditor from "@/modules/criar-evento/components/RichTextEditor";
+import { CamposCustomizadosManager } from "@/modules/criar-evento/components/CamposCustomizadosManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 
 const eventoDrawerSchema = criarEventoSchema.extend({
@@ -70,7 +71,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
     control,
     handleSubmit,
     reset,
-    formState: { errors, isValid, isDirty },
+    formState: { errors },
   } = useForm<EventoDrawerFormValues>({
     resolver: zodResolver(eventoDrawerSchema) as never,
     mode: "onChange",
@@ -83,6 +84,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
       descricao: "",
       selecao_unica_produto: true,
       produtos: [],
+      campos_customizados: [],
       statusNome: 'aberto',
       statusJustificativa: '',
     },
@@ -111,6 +113,15 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           exigePagamento: p.exigePagamento,
           oculto: p.oculto || false,
         })) || [],
+        campos_customizados: evento.campos_customizados?.map(c => ({
+          id: c.id,
+          label: c.label,
+          tipo: c.tipo,
+          obrigatorio: c.obrigatorio,
+          oculto: c.oculto,
+          opcoes: c.opcoes ?? undefined,
+          textoTermo: c.textoTermo ?? (c.tipo === 'aceite_termo' ? c.label : undefined),
+        })) || [],
         statusNome: (evento.status?.nome as 'aberto' | 'pausado' | 'cancelado') || 'aberto',
         statusJustificativa: evento.status?.justificativa || "",
       };
@@ -134,6 +145,17 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         oculto: p.oculto || false,
       }));
 
+      const camposPayload: CampoCustomizadoRequest[] = (data.campos_customizados || []).map((c, index) => ({
+        id: c.id,
+        label: c.tipo === "aceite_termo" ? (c.textoTermo || "Aceite de termo") : (c.label || ""),
+        tipo: c.tipo || "texto",
+        obrigatorio: c.tipo === "aceite_termo" ? true : (c.obrigatorio || false),
+        oculto: c.oculto || false,
+        opcoes: c.opcoes && c.opcoes.length > 0 ? c.opcoes : null,
+        textoTermo: c.tipo === "aceite_termo" ? (c.textoTermo || null) : null,
+        ordem: index,
+      }));
+
       await editarEvento({
         eventoId: evento.id,
         data: {
@@ -145,6 +167,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           descricao: data.descricao || undefined,
           selecao_unica_produto: data.selecao_unica_produto,
           produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
+          campos_customizados: camposPayload,
           statusNome: data.statusNome,
           statusJustificativa: data.statusJustificativa || null,
         }
@@ -178,7 +201,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           <IconButton onClick={onClose} size="small"><IconifyIcon icon="mdi:close" width={24} /></IconButton>
         </Box>
 
-        <Box sx={{ p: 3, overflowY: 'auto', flexGrow: 1 }} component="form" id="evento-form" onSubmit={handleSubmit(onSubmit)}>
+        <Box sx={{ p: 3, overflowY: 'auto', flexGrow: 1 }} component="form" id="evento-form" onSubmit={handleSubmit(onSubmit, (errs) => console.error('Form validation errors:', errs))}>
           <Grid container spacing={3}>
             <Grid size={12}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Informações Básicas</Typography>
@@ -298,13 +321,17 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
                 ))}
               </Stack>
             </Grid>
+            <Grid size={12}>
+              <Divider sx={{ my: 2 }} />
+              <CamposCustomizadosManager control={control as never} errors={errors} />
+            </Grid>
           </Grid>
         </Box>
 
         <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant="outlined" disabled={isLoading} onClick={onClose}>Cancelar</Button>
-          <Button type="submit" form="evento-form" variant="contained" disabled={isLoading || !isValid || !isDirty} sx={{ bgcolor: "#5B5FED", "&:hover": { bgcolor: "#4A4EDC" } }}>
-            {isLoading ? "Salvando..." : "Salvar Alterações"}
+          <Button type="submit" form="evento-form" variant="contained" disabled={isLoading} sx={{ bgcolor: "#5B5FED", "&:hover": { bgcolor: "#4A4EDC" } }}>
+            {isLoading ? "Salvando..." : "Salvar Alterações 2"}
           </Button>
         </Box>
       </Drawer>

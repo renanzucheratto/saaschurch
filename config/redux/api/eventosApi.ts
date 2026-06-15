@@ -1,5 +1,5 @@
 import { baseApi } from './baseApi';
-import { EventoListagem, EventoDetalhes, Participante, Produto } from '@/types/evento.types';
+import { EventoListagem, EventoDetalhes, Participante, Produto, TipoCampoCustomizado } from '@/types/evento.types';
 
 export interface ProdutoEventoRequest {
   id?: string;
@@ -8,6 +8,17 @@ export interface ProdutoEventoRequest {
   valor: number;
   exigePagamento?: boolean;
   oculto?: boolean;
+}
+
+export interface CampoCustomizadoRequest {
+  id?: string;
+  label: string;
+  tipo: TipoCampoCustomizado;
+  obrigatorio?: boolean;
+  oculto?: boolean;
+  opcoes?: string[] | null;
+  textoTermo?: string | null;
+  ordem?: number;
 }
 
 export interface CadastrarEventoRequest {
@@ -20,6 +31,7 @@ export interface CadastrarEventoRequest {
   imagem_url?: string;
   selecao_unica_produto?: boolean;
   produtos?: ProdutoEventoRequest[];
+  campos_customizados?: CampoCustomizadoRequest[];
   instituicaoId?: string;
   statusNome?: 'aberto' | 'pausado' | 'cancelado';
   statusJustificativa?: string | null;
@@ -38,15 +50,22 @@ export interface ProdutoSelecionado {
   valor_pago?: number;
 }
 
+export interface RespostaCustomizadaRequest {
+  campoId: string;
+  valor?: string | null;
+  valores?: string[] | null;
+}
+
 export interface ParticipanteRequest {
-  nome: string;
-  email: string;
-  telefone: string;
-  rg: string;
-  cpf: string;
-  termo_assinado: boolean;
+  nome?: string;
+  email?: string;
+  telefone?: string;
+  rg?: string;
+  cpf?: string;
+  termo_assinado?: boolean;
   recaptchaToken: string;
   produtos_selecionados: ProdutoSelecionado[];
+  respostas_customizadas?: RespostaCustomizadaRequest[];
 }
 
 export interface EstatisticaParticipantesPorProduto {

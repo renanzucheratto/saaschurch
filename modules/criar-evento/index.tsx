@@ -22,8 +22,9 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { criarEventoSchema, type CriarEventoSchema } from "./schemas/criar-evento.schema";
 import { useCadastrarEventoMutation } from "@/config/redux/api/eventosApi";
-import type { ProdutoEventoRequest } from "@/config/redux/api/eventosApi";
+import type { ProdutoEventoRequest, CampoCustomizadoRequest } from "@/config/redux/api/eventosApi";
 import RichTextEditor from "./components/RichTextEditor";
+import { CamposCustomizadosManager } from "./components/CamposCustomizadosManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 import { useAppSelector } from "@/config/redux/store";
 import { selectCurrentUser } from "@/config/redux/slices/authSlice";
@@ -71,6 +72,13 @@ export default function CriarEventoModule() {
       descricao: "",
       selecao_unica_produto: true,
       produtos: [],
+      campos_customizados: [
+        { label: "Nome", tipo: "texto", obrigatorio: true, oculto: false },
+        { label: "Telefone", tipo: "texto", obrigatorio: true, oculto: false },
+        { label: "E-mail", tipo: "texto", obrigatorio: true, oculto: false },
+        { label: "RG", tipo: "texto", obrigatorio: true, oculto: false },
+        { label: "CPF", tipo: "texto", obrigatorio: true, oculto: false },
+      ],
     },
   });
 
@@ -88,6 +96,16 @@ export default function CriarEventoModule() {
         exigePagamento: p.exigePagamento || false,
       }));
 
+      const camposPayload: CampoCustomizadoRequest[] = (data.campos_customizados || []).map((c, index) => ({
+        label: c.tipo === "aceite_termo" ? (c.textoTermo || "Aceite de termo") : (c.label || ""),
+        tipo: c.tipo || "texto",
+        obrigatorio: c.tipo === "aceite_termo" ? true : (c.obrigatorio || false),
+        oculto: c.oculto || false,
+        opcoes: c.opcoes && c.opcoes.length > 0 ? c.opcoes : null,
+        textoTermo: c.tipo === "aceite_termo" ? (c.textoTermo || null) : null,
+        ordem: index,
+      }));
+
       const result = await cadastrarEvento({
         nome: data.nome,
         data_inicio: data.data_inicio + ':00.000Z',
@@ -97,6 +115,7 @@ export default function CriarEventoModule() {
         descricao: data.descricao || undefined,
         selecao_unica_produto: data.selecao_unica_produto,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
+        campos_customizados: camposPayload.length > 0 ? camposPayload : undefined,
         instituicaoId: currentUser?.instituicaoId,
       }).unwrap();
 
@@ -295,6 +314,11 @@ export default function CriarEventoModule() {
                 </Grid> */}
               </Grid>
             </Card>
+          </Grid>
+
+          {/* Campos customizados */}
+          <Grid size={12}>
+            <CamposCustomizadosManager control={control as never} errors={errors} />
           </Grid>
 
           {/* Produtos */}

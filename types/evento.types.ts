@@ -7,6 +7,25 @@ export interface Produto {
   oculto?: boolean;
 }
 
+export type TipoCampoCustomizado = 'texto' | 'radio' | 'checkbox' | 'select' | 'aceite_termo' | 'email' | 'cpf' | 'rg' | 'telefone';
+
+export interface CampoCustomizado {
+  id: string;
+  label: string;
+  tipo: TipoCampoCustomizado;
+  obrigatorio: boolean;
+  oculto: boolean;
+  opcoes?: string[] | null;
+  textoTermo?: string | null;
+  ordem: number;
+}
+
+export interface RespostaCustomizada {
+  campoId: string;
+  valor?: string | null;
+  valores?: string[] | null;
+}
+
 export interface StatusEvento {
   id: string;
   nome: 'aberto' | 'finalizado' | 'pausado' | 'cancelado';
@@ -31,6 +50,7 @@ export interface EventoListagem {
   status?: StatusEvento | null;
   statusAtual?: StatusEvento;
   produtos: Produto[];
+  campos_customizados?: CampoCustomizado[];
 }
 
 export interface EventoDetalhes {
@@ -51,6 +71,7 @@ export interface EventoDetalhes {
   status?: StatusEvento | null;
   statusAtual?: StatusEvento;
   produtos: Produto[];
+  campos_customizados?: CampoCustomizado[];
 }
 
 export interface Parcela {
@@ -78,14 +99,15 @@ export interface ProdutoParticipante {
 export interface Participante {
   id: string;
   eventoId: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  rg: string;
-  cpf: string;
-  termo_assinado: boolean;
+  nome: string | null;
+  email: string | null;
+  telefone: string | null;
+  rg: string | null;
+  cpf: string | null;
+  termo_assinado: boolean | null;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
   produtos: ProdutoParticipante[];
+  respostas_customizadas?: RespostaCustomizada[];
 }

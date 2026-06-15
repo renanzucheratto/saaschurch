@@ -262,9 +262,43 @@ export default function EventoDetalhesModule() {
 
   const isLoading = isLoadingEvento;
 
-  const participantesColumnsFiltradas = evento?.produtos && evento.produtos.length > 0
-    ? participantesColumns
-    : participantesColumns.filter((col) => col.field !== 'produto' && col.field !== 'valor');
+  const construirColunas = (): GridColDef[] => {
+    const camposCustomizados = evento?.campos_customizados ?? [];
+    const temCampos = camposCustomizados.length > 0;
+    const temProdutos = !!(evento?.produtos && evento.produtos.length > 0);
+
+    if (!temCampos) {
+      return temProdutos
+        ? participantesColumns
+        : participantesColumns.filter((col) => col.field !== 'produto' && col.field !== 'valor');
+    }
+
+    // Com campos customizados: os campos padrão são nulos. Exibe uma coluna por campo.
+    const camposCols: GridColDef[] = camposCustomizados.map((campo) => ({
+      field: `campo_${campo.id}`,
+      headerName: `${campo.label}${campo.oculto ? ' (oculto)' : ''}`,
+      flex: 1,
+      minWidth: 180,
+      sortable: false,
+      valueGetter: (_, row: Participante) => {
+        const resposta = row.respostas_customizadas?.find((r) => r.campoId === campo.id);
+        if (!resposta) return '—';
+        if (resposta.valores && resposta.valores.length > 0) return resposta.valores.join(', ');
+        return resposta.valor || '—';
+      },
+    }));
+
+    const baseCols = participantesColumns.filter((col) =>
+      ['createdAt', 'status', 'produto', 'valor'].includes(col.field)
+    );
+    const baseColsFiltradas = temProdutos
+      ? baseCols
+      : baseCols.filter((col) => col.field !== 'produto' && col.field !== 'valor');
+
+    return [...camposCols, ...baseColsFiltradas];
+  };
+
+  const participantesColumnsFiltradas = construirColunas();
 
   const filterParticipantes = useCallback((participantes: Participante[]) => {
     if (!searchTerm) return participantes;
@@ -688,6 +722,7 @@ export default function EventoDetalhesModule() {
         participante={selectedParticipante}
         eventoId={eventoId}
         produtos={evento.produtos || []}
+        campos={evento.campos_customizados || []}
       />
 
       <EventoDrawer

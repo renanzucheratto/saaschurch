@@ -7,6 +7,7 @@ import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackba
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
 import { ProductAccordion } from './ProductAccordion';
+import { CampoRenderer } from './CampoRenderer';
 import React from 'react';
 
 interface CustomProps {
@@ -83,7 +84,10 @@ export const EventoForm = () => {
   const selecaoUnicaProduto = evento?.selecao_unica_produto;
   const statusEvento = evento?.statusAtual ?? evento?.status ?? null;
   const isRegistrationOpen = statusEvento?.nome === 'aberto';
-  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen);
+  const campos = evento?.campos_customizados ?? [];
+  const temCamposCustomizados = campos.length > 0;
+  const camposVisiveis = campos.filter((c) => !c.oculto);
+  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen, campos);
 
   if (isLoadingEvento) {
     return (
@@ -268,6 +272,21 @@ export const EventoForm = () => {
                 </Box>
               )}
 
+              {temCamposCustomizados && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                  {camposVisiveis.map((campo) => (
+                    <CampoRenderer
+                      key={campo.id}
+                      campo={campo}
+                      control={control}
+                      disabled={!isRegistrationOpen}
+                    />
+                  ))}
+                </Box>
+              )}
+
+              {!temCamposCustomizados && (
+              <>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                 <Controller
                   name="nome"
@@ -465,6 +484,8 @@ export const EventoForm = () => {
                   </Typography>
                 )}
               </Box>
+              </>
+              )}
 
               <Button
                 type="submit"

@@ -12,6 +12,32 @@ export const produtoSchema = z.object({
   oculto: z.boolean().optional(),
 });
 
+export const campoCustomizadoSchema = z.object({
+  id: z.string().optional(),
+  label: z.string().optional(),
+  tipo: z.enum(["texto", "radio", "checkbox", "select", "aceite_termo", "email", "cpf", "rg", "telefone"]),
+  obrigatorio: z.boolean().optional(),
+  oculto: z.boolean().optional(),
+  opcoes: z.array(z.string()).optional(),
+  textoTermo: z.string().optional(),
+}).superRefine((campo, ctx) => {
+  if (campo.tipo === "aceite_termo") {
+    if (!campo.textoTermo || campo.textoTermo.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "O texto do aceite é obrigatório",
+        path: ["textoTermo"],
+      });
+    }
+  } else if (!campo.label || campo.label.trim().length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "O rótulo do campo é obrigatório",
+      path: ["label"],
+    });
+  }
+});
+
 export const criarEventoSchema = z.object({
   nome: z.string().min(1, "O nome do evento é obrigatório"),
   data_inicio: z.string().min(1, "A data de início é obrigatória"),
@@ -22,6 +48,7 @@ export const criarEventoSchema = z.object({
   imagem_url: z.string().optional(),
   selecao_unica_produto: z.boolean(),
   produtos: z.array(produtoSchema).optional(),
+  campos_customizados: z.array(campoCustomizadoSchema).optional(),
 }).refine((data) => {
   if (data.data_inicio && data.data_fim) {
     return new Date(data.data_inicio) <= new Date(data.data_fim);
@@ -34,3 +61,4 @@ export const criarEventoSchema = z.object({
 
 export type CriarEventoSchema = z.infer<typeof criarEventoSchema>;
 export type ProdutoForm = z.infer<typeof produtoSchema>;
+export type CampoCustomizadoForm = z.infer<typeof campoCustomizadoSchema>;

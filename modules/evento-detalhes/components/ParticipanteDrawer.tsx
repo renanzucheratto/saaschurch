@@ -10,7 +10,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Icon as IconifyIcon } from '@iconify/react';
-import { Participante, Produto } from '@/types/evento.types';
+import { Participante, Produto, CampoCustomizado } from '@/types/evento.types';
 import { useEditarParticipanteMutation } from '@/config/redux/api/eventosApi';
 import DeleteParticipanteModal from './DeleteParticipanteModal';
 import EditParticipanteModal from './EditParticipanteModal';
@@ -22,14 +22,24 @@ interface ParticipanteDrawerProps {
   participante: Participante | null;
   eventoId: string;
   produtos: Produto[];
+  campos?: CampoCustomizado[];
 }
 
-export default function ParticipanteDrawer({ open, onClose, participante, eventoId, produtos }: ParticipanteDrawerProps) {
+export default function ParticipanteDrawer({ open, onClose, participante, eventoId, produtos, campos = [] }: ParticipanteDrawerProps) {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editarParticipante, { isLoading: isRestoring }] = useEditarParticipanteMutation();
 
   if (!participante) return null;
+
+  const temCamposCustomizados = campos.length > 0;
+
+  const getRespostaTexto = (campo: CampoCustomizado): string => {
+    const resposta = participante.respostas_customizadas?.find((r) => r.campoId === campo.id);
+    if (!resposta) return '—';
+    if (resposta.valores && resposta.valores.length > 0) return resposta.valores.join(', ');
+    return resposta.valor || '—';
+  };
 
   const handleSuccessDelete = () => {
     // Fecha o modal de delete e o drawer após a exclusão lógica
@@ -72,30 +82,51 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
         <Divider sx={{ mb: 3 }} />
 
         <Stack spacing={3} sx={{ flexGrow: 1 }}>
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>Nome</Typography>
-            <Typography variant="body1">{participante.nome}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>E-mail</Typography>
-            <Typography variant="body1">{participante.email}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>Telefone</Typography>
-            <Typography variant="body1">{participante.telefone}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>CPF</Typography>
-            <Typography variant="body1">{participante.cpf}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>RG</Typography>
-            <Typography variant="body1">{participante.rg}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>Termo Assinado</Typography>
-            <Typography variant="body1">{participante.termo_assinado ? 'Sim' : 'Não'}</Typography>
-          </Box>
+          {temCamposCustomizados ? (
+            <>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Data de inscrição</Typography>
+                <Typography variant="body1">
+                  {participante.createdAt ? new Date(participante.createdAt).toLocaleString('pt-BR') : '—'}
+                </Typography>
+              </Box>
+              {campos.map((campo) => (
+                <Box key={campo.id}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    {campo.label}{campo.oculto ? ' (oculto)' : ''}
+                  </Typography>
+                  <Typography variant="body1">{getRespostaTexto(campo)}</Typography>
+                </Box>
+              ))}
+            </>
+          ) : (
+            <>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Nome</Typography>
+                <Typography variant="body1">{participante.nome}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>E-mail</Typography>
+                <Typography variant="body1">{participante.email}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Telefone</Typography>
+                <Typography variant="body1">{participante.telefone}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>CPF</Typography>
+                <Typography variant="body1">{participante.cpf}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>RG</Typography>
+                <Typography variant="body1">{participante.rg}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Termo Assinado</Typography>
+                <Typography variant="body1">{participante.termo_assinado ? 'Sim' : 'Não'}</Typography>
+              </Box>
+            </>
+          )}
           {participante.produtos && participante.produtos.length > 0 && (
             <Box>
               <Typography variant="caption" color="text.secondary" fontWeight={600}>Produtos Adquiridos</Typography>
@@ -146,7 +177,7 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
         open={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
         participanteId={participante.id}
-        participanteNome={participante.nome}
+        participanteNome={participante.nome || 'Participante'}
         eventoId={eventoId}
         onSuccess={handleSuccessDelete}
       />
@@ -157,6 +188,7 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
         participante={participante}
         eventoId={eventoId}
         produtos={produtos}
+        campos={campos}
       />
     </>
   );

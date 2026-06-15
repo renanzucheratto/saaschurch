@@ -1,5 +1,7 @@
 import { baseApi } from './baseApi';
 
+export type UserType = 'membro' | 'backoffice' | 'lider' | 'pastor' | 'tesouraria';
+
 export interface User {
   id: string;
   email: string;
@@ -7,7 +9,7 @@ export interface User {
   telefone?: string;
   rg?: string;
   cpf?: string;
-  userType: 'membro' | 'backoffice';
+  userType: UserType;
   instituicaoId: string;
   instituicao?: {
     id: string;
