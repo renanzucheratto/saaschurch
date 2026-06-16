@@ -74,10 +74,10 @@ export default function CriarEventoModule() {
       produtos: [],
       campos_customizados: [
         { label: "Nome", tipo: "texto", obrigatorio: true, oculto: false },
-        { label: "Telefone", tipo: "texto", obrigatorio: true, oculto: false },
-        { label: "E-mail", tipo: "texto", obrigatorio: true, oculto: false },
-        { label: "RG", tipo: "texto", obrigatorio: true, oculto: false },
-        { label: "CPF", tipo: "texto", obrigatorio: true, oculto: false },
+        { label: "Telefone", tipo: "telefone", obrigatorio: true, oculto: false },
+        { label: "E-mail", tipo: "email", obrigatorio: true, oculto: false },
+        { label: "RG", tipo: "rg", obrigatorio: true, oculto: false },
+        { label: "CPF", tipo: "cpf", obrigatorio: true, oculto: false },
       ],
     },
   });
