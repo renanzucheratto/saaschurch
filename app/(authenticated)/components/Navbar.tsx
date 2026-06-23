@@ -3,7 +3,9 @@
 import { AppBar, Toolbar, Box, IconButton, Tooltip, Button, Stack, Typography, Avatar, Menu, MenuItem } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { signOut } from "next-auth/react";
+import { useDispatch } from "react-redux";
 import { useAppSelector } from "@/config/redux/store";
+import { logout } from "@/config/redux/slices/authSlice";
 import { BORDER_RADIUS } from "@/config/utils/contants";
 import { formatFirstLastName } from "@/config/helpers/name-formatter";
 import { useState } from "react";
@@ -16,10 +18,12 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const userName = user?.nome;
   const email = user?.email;
   const handleLogout = async () => {
     setAnchorEl(null);
+    dispatch(logout());
     await signOut({ callbackUrl: "/login" });
   };
 
