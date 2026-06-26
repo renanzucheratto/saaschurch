@@ -47,6 +47,7 @@ export const criarEventoSchema = z.object({
   descricao: z.string().optional(),
   imagem_url: z.string().optional(),
   selecao_unica_produto: z.boolean(),
+  enviar_email_qr_code: z.boolean(),
   produtos: z.array(produtoSchema).optional(),
   campos_customizados: z.array(campoCustomizadoSchema).optional(),
 }).refine((data) => {

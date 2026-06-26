@@ -158,6 +158,19 @@ const participantesColumns: GridColDef[] = [
       }).format(value);
     },
   },
+  {
+    field: "presenca_confirmada",
+    headerName: "Presença",
+    width: 140,
+    renderCell: (params) => (
+      <Chip
+        label={params.value ? "Confirmada" : "Pendente"}
+        color={params.value ? "success" : "default"}
+        size="small"
+        sx={{ fontWeight: 600 }}
+      />
+    ),
+  },
 ];
 
 interface TabPanelProps {
@@ -289,7 +302,7 @@ export default function EventoDetalhesModule() {
     }));
 
     const baseCols = participantesColumns.filter((col) =>
-      ['createdAt', 'status', 'produto', 'valor'].includes(col.field)
+      ['createdAt', 'status', 'produto', 'valor', 'presenca_confirmada'].includes(col.field)
     );
     const baseColsFiltradas = temProdutos
       ? baseCols

@@ -8,10 +8,11 @@ import {
   Stack,
   Button,
   CircularProgress,
+  Chip,
 } from '@mui/material';
 import { Icon as IconifyIcon } from '@iconify/react';
 import { Participante, Produto, CampoCustomizado } from '@/types/evento.types';
-import { useEditarParticipanteMutation } from '@/config/redux/api/eventosApi';
+import { useEditarParticipanteMutation, useConfirmarPresencaManualMutation } from '@/config/redux/api/eventosApi';
 import DeleteParticipanteModal from './DeleteParticipanteModal';
 import EditParticipanteModal from './EditParticipanteModal';
 import GerenciarPagamento from './GerenciarPagamento';
@@ -29,6 +30,7 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editarParticipante, { isLoading: isRestoring }] = useEditarParticipanteMutation();
+  const [confirmarPresenca, { isLoading: isConfirmando }] = useConfirmarPresencaManualMutation();
 
   if (!participante) return null;
 
@@ -39,6 +41,14 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
     if (!resposta) return '—';
     if (resposta.valores && resposta.valores.length > 0) return resposta.valores.join(', ');
     return resposta.valor || '—';
+  };
+
+  const handleConfirmarPresenca = async () => {
+    try {
+      await confirmarPresenca({ eventoId, participanteId: participante.id }).unwrap();
+    } catch (error) {
+      console.error('Erro ao confirmar presença:', error);
+    }
   };
 
   const handleSuccessDelete = () => {
@@ -138,6 +148,48 @@ export default function ParticipanteDrawer({ open, onClose, participante, evento
             </Box>
           )}
         </Stack>
+
+        {!participante.isDeleted && (
+          <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: participante.presenca_confirmada ? '#E8F5E9' : '#F5F5F5' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                  Presença
+                </Typography>
+                {participante.presenca_confirmada ? (
+                  <>
+                    <Chip
+                      label="Confirmada"
+                      color="success"
+                      size="small"
+                      icon={<IconifyIcon icon="mdi:check-circle" width={16} />}
+                      sx={{ mt: 0.5 }}
+                    />
+                    {participante.presenca_confirmada_em && (
+                      <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
+                        {new Date(participante.presenca_confirmada_em).toLocaleString('pt-BR')}
+                      </Typography>
+                    )}
+                  </>
+                ) : (
+                  <Chip label="Pendente" size="small" sx={{ mt: 0.5, bgcolor: '#E0E0E0' }} />
+                )}
+              </Box>
+              {!participante.presenca_confirmada && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="success"
+                  onClick={handleConfirmarPresenca}
+                  disabled={isConfirmando}
+                  startIcon={isConfirmando ? <CircularProgress size={14} color="inherit" /> : <IconifyIcon icon="mdi:check" width={16} />}
+                >
+                  {isConfirmando ? 'Confirmando...' : 'Confirmar Presença'}
+                </Button>
+              )}
+            </Box>
+          </Box>
+        )}
 
         <Box sx={{ mt: 4, pt: 2, display: 'flex', gap: 2, borderTop: '1px solid', borderColor: 'divider' }}>
           <Button

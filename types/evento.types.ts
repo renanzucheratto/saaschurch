@@ -40,6 +40,7 @@ export interface EventoListagem {
   data_maxima_inscricao?: string | null;
   descricao: string;
   selecao_unica_produto: boolean;
+  enviar_email_qr_code?: boolean;
   imagem_url: string | null;
   userId: string | null;
   createdAt: string;
@@ -61,6 +62,7 @@ export interface EventoDetalhes {
   data_maxima_inscricao?: string | null;
   descricao: string;
   selecao_unica_produto: boolean;
+  enviar_email_qr_code?: boolean;
   imagem_url: string | null;
   userId: string | null;
   instituicaoId: string;
@@ -106,6 +108,8 @@ export interface Participante {
   cpf: string | null;
   termo_assinado: boolean | null;
   isDeleted: boolean;
+  presenca_confirmada: boolean;
+  presenca_confirmada_em: string | null;
   createdAt: string;
   updatedAt: string;
   produtos: ProdutoParticipante[];

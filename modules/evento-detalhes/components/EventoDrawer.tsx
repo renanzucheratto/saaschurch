@@ -83,6 +83,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
       limite_inscricoes: "",
       descricao: "",
       selecao_unica_produto: true,
+      enviar_email_qr_code: false,
       produtos: [],
       campos_customizados: [],
       statusNome: 'aberto',
@@ -105,6 +106,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         limite_inscricoes: evento.limite_inscricoes ? String(evento.limite_inscricoes) : "",
         descricao: evento.descricao || "",
         selecao_unica_produto: evento.selecao_unica_produto,
+        enviar_email_qr_code: evento.enviar_email_qr_code ?? false,
         produtos: evento.produtos?.map(p => ({
           id: p.id,
           nome: p.nome,

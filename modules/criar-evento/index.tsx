@@ -71,6 +71,7 @@ export default function CriarEventoModule() {
       limite_inscricoes: "",
       descricao: "",
       selecao_unica_produto: true,
+      enviar_email_qr_code: false,
       produtos: [],
       campos_customizados: [
         { label: "Nome", tipo: "texto", obrigatorio: true, oculto: false },
@@ -114,6 +115,7 @@ export default function CriarEventoModule() {
         limite_inscricoes: data.limite_inscricoes ? Number(data.limite_inscricoes) : null,
         descricao: data.descricao || undefined,
         selecao_unica_produto: data.selecao_unica_produto,
+        enviar_email_qr_code: data.enviar_email_qr_code,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
         campos_customizados: camposPayload.length > 0 ? camposPayload : undefined,
         instituicaoId: currentUser?.instituicaoId,
@@ -293,6 +295,36 @@ export default function CriarEventoModule() {
                             borderRadius: 1.5,
                           },
                         }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid size={12}>
+                  <Controller
+                    name="enviar_email_qr_code"
+                    control={control}
+                    render={({ field: { value, onChange } }) => (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={value}
+                            onChange={(e) => onChange(e.target.checked)}
+                          />
+                        }
+                        label={
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              Enviar QR Code por e-mail
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {value
+                                ? "O participante receberá o QR Code de confirmação de presença por e-mail após a inscrição"
+                                : "Ative para que os participantes recebam o QR Code por email"}
+                            </Typography>
+                          </Box>
+                        }
+                        sx={{ ml: 0 }}
                       />
                     )}
                   />

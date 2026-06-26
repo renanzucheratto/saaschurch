@@ -30,6 +30,7 @@ export interface CadastrarEventoRequest {
   descricao?: string;
   imagem_url?: string;
   selecao_unica_produto?: boolean;
+  enviar_email_qr_code?: boolean;
   produtos?: ProdutoEventoRequest[];
   campos_customizados?: CampoCustomizadoRequest[];
   instituicaoId?: string;
@@ -199,6 +200,27 @@ export const eventosApi = baseApi.injectEndpoints({
         { type: 'Participantes', id: eventoId },
       ],
     }),
+    confirmarPresencaToken: builder.mutation<
+      { jaConfirmado: boolean; participante: { nome: string | null }; evento: { nome: string }; presenca_confirmada_em: string | null },
+      { token: string }
+    >({
+      query: ({ token }) => ({
+        url: '/eventos/confirmar-presenca',
+        method: 'POST',
+        body: { token },
+      }),
+    }),
+    confirmarPresencaManual: builder.mutation<Participante, { eventoId: string; participanteId: string }>({
+      query: ({ eventoId, participanteId }) => ({
+        url: `/eventos/${eventoId}/participantes/${participanteId}/confirmar-presenca`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: (result, error, { eventoId }) => [
+        { type: 'Participantes', id: eventoId },
+        { type: 'Participantes', id: `${eventoId}-false` },
+        { type: 'Participantes', id: `${eventoId}-true` },
+      ],
+    }),
   }),
 });
 
@@ -217,4 +239,6 @@ export const {
   useCadastrarParcelaMutation,
   useEditarParcelaMutation,
   useExcluirParcelaMutation,
+  useConfirmarPresencaTokenMutation,
+  useConfirmarPresencaManualMutation,
 } = eventosApi;
