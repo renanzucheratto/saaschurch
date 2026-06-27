@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Box } from "@mui/material";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
+import { UserSync } from "./components/UserSync";
 
 export default function LayoutAuthenticated({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -18,6 +19,7 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#FAFAFA" }}>
+      <UserSync />
       {/* Sidebar */}
       <Sidebar mobileOpen={mobileOpen} onClose={handleDrawerClose} />
 

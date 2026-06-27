@@ -166,9 +166,6 @@ export function CreateUserForm({ onSuccess, onCancel }: CreateUserFormProps) {
               >
                 <MenuItem value="membro">Membro</MenuItem>
                 <MenuItem value="backoffice">Backoffice</MenuItem>
-                <MenuItem value="lider">Líder</MenuItem>
-                <MenuItem value="pastor">Pastor</MenuItem>
-                <MenuItem value="tesouraria">Tesouraria</MenuItem>
               </TextField>
             )}
           />

@@ -23,7 +23,7 @@ export interface AuthUser {
   telefone?: string;
   rg?: string;
   cpf?: string;
-  userType: 'membro' | 'backoffice';
+  userType: 'membro' | 'backoffice' | 'lider';
   instituicaoId: string;
   instituicao: {
     id: string;
@@ -77,6 +77,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
     getCurrentUser: builder.query<AuthUser, void>({
       query: () => '/auth/me',
+      providesTags: ['Me'],
     }),
     refreshToken: builder.mutation<{ session: AuthSession }, { refresh_token: string }>({
       query: (data) => ({

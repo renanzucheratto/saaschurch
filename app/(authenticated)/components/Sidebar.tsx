@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
+import { useAppSelector } from "@/config/redux/store";
+import { selectCurrentUser } from "@/config/redux/slices/authSlice";
 import {
   Box,
   List,
@@ -56,6 +58,7 @@ const menuSections: MenuSection[] = [
     title: "GERENCIAMENTO",
     items: [
       { id: "usuarios", label: "Usuários", icon: <IconifyIcon icon="material-symbols:group-outline" width={20} />, href: "/usuarios" },
+      { id: "areas", label: "Áreas", icon: <IconifyIcon icon="material-symbols:group-work-outline" width={20} />, href: "/areas" },
     ],
   },
 ];
@@ -72,6 +75,9 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const currentUser = useAppSelector(selectCurrentUser);
+  const isBackoffice = currentUser?.userType === "backoffice";
+  const isLiderOrBackoffice = currentUser?.userType === "lider" || isBackoffice;
 
   const drawerContent = (
     <Box
@@ -104,7 +110,14 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       </Box>
 
       <Box sx={{ flex: 1, overflowY: "auto", py: 2 }}>
-        {menuSections.map((section) => (
+        {menuSections.map((section) => {
+          const visibleItems = section.items.filter((item) => {
+            if (["usuarios", "projetos", "criar-projeto"].includes(item.id)) return isBackoffice;
+            if (["eventos", "criar-evento"].includes(item.id)) return isLiderOrBackoffice;
+            return true;
+          });
+          if (visibleItems.length === 0) return null;
+          return (
           <Box key={section.title} sx={{ mb: 3 }}>
             {section.title && (
               <Typography
@@ -122,7 +135,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               </Typography>
             )}
             <List sx={{ px: 1.5 }}>
-              {section.items.map((item) => (
+              {visibleItems.map((item) => (
                 <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
                   <ListItemButton
                     selected={pathname === item.href}
@@ -211,7 +224,8 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               ))}
             </List>
           </Box>
-        ))}
+          );
+        })}
       </Box>
     </Box>
   );

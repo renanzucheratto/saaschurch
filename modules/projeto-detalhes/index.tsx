@@ -92,9 +92,8 @@ export default function ProjetoDetalhesModule() {
   const userType = currentUser?.userType || "";
   const ehDono = projeto.liderUserId === currentUser?.id;
   const ehBackoffice = userType === "backoffice";
-  const ehPastor = userType === "pastor";
-  const ehTesouraria = userType === "tesouraria";
-  const podeAprovar = ehPastor || ehTesouraria || ehBackoffice;
+  const ehLiderOuBackoffice = userType === "lider" || ehBackoffice;
+  const podeAprovar = ehLiderOuBackoffice;
 
   const status = projeto.status?.nome || "em_analise";
   const statusInfo = getStatusInfo(status);
@@ -106,7 +105,7 @@ export default function ProjetoDetalhesModule() {
     (ehDono || ehBackoffice) && ["aprovado", "em_reembolso"].includes(status);
   const mostrarComprovantes = ["em_reembolso", "liquidado", "finalizado"].includes(status);
   const podeGerenciarComprovantes =
-    (ehTesouraria || ehBackoffice) && ["em_reembolso", "liquidado"].includes(status);
+    ehLiderOuBackoffice && ["em_reembolso", "liquidado"].includes(status);
 
   // Botões de ação de status conforme o status atual
   const acoes: StatusAction[] = [];
@@ -132,7 +131,7 @@ export default function ProjetoDetalhesModule() {
       confirmColor: "primary",
     });
   }
-  if (status === "em_reembolso" && (ehTesouraria || ehBackoffice)) {
+  if (status === "em_reembolso" && ehLiderOuBackoffice) {
     acoes.push({
       novoStatus: "liquidado",
       titulo: "Liquidar projeto",
@@ -140,7 +139,7 @@ export default function ProjetoDetalhesModule() {
       confirmColor: "success",
     });
   }
-  if (status === "liquidado" && (ehTesouraria || ehBackoffice)) {
+  if (status === "liquidado" && ehLiderOuBackoffice) {
     acoes.push({
       novoStatus: "finalizado",
       titulo: "Finalizar projeto",

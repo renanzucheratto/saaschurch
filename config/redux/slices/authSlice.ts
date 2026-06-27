@@ -42,6 +42,11 @@ export const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
     },
+    updateUserRole: (state, action: PayloadAction<string>) => {
+      if (state.user) {
+        state.user.userType = action.payload;
+      }
+    },
     logout: (state) => {
       state.accessToken = null;
       state.refreshToken = null;
@@ -50,7 +55,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, updateAccessToken, updateTokens, logout } = authSlice.actions;
+export const { setCredentials, updateAccessToken, updateTokens, updateUserRole, logout } = authSlice.actions;
 
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;
 export const selectRefreshToken = (state: RootState) => state.auth.refreshToken;
