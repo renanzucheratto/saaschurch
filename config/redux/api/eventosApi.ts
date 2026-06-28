@@ -1,5 +1,5 @@
 import { baseApi } from './baseApi';
-import { EventoListagem, EventoDetalhes, Participante, Produto, TipoCampoCustomizado } from '@/types/evento.types';
+import { EventoListagem, EventoDetalhes, Participante, Produto, TipoCampoCustomizado, FaqItem } from '@/types/evento.types';
 
 export interface ProdutoEventoRequest {
   id?: string;
@@ -29,6 +29,7 @@ export interface CadastrarEventoRequest {
   limite_inscricoes?: number | null;
   descricao?: string;
   imagem_url?: string;
+  faq?: FaqItem[] | null;
   selecao_unica_produto?: boolean;
   enviar_email_qr_code?: boolean;
   produtos?: ProdutoEventoRequest[];

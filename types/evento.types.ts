@@ -1,3 +1,8 @@
+export interface FaqItem {
+  pergunta: string;
+  resposta: string;
+}
+
 export interface Produto {
   id: string;
   nome: string;
@@ -39,6 +44,7 @@ export interface EventoListagem {
   data_fim: string | null;
   data_maxima_inscricao?: string | null;
   descricao: string;
+  faq?: FaqItem[] | null;
   selecao_unica_produto: boolean;
   enviar_email_qr_code?: boolean;
   imagem_url: string | null;
@@ -61,6 +67,7 @@ export interface EventoDetalhes {
   data_fim: string | null;
   data_maxima_inscricao?: string | null;
   descricao: string;
+  faq?: FaqItem[] | null;
   selecao_unica_produto: boolean;
   enviar_email_qr_code?: boolean;
   imagem_url: string | null;

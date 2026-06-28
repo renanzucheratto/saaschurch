@@ -38,6 +38,11 @@ export const campoCustomizadoSchema = z.object({
   }
 });
 
+export const faqItemSchema = z.object({
+  pergunta: z.string().min(1, "A pergunta é obrigatória"),
+  resposta: z.string().min(1, "A resposta é obrigatória"),
+});
+
 export const criarEventoSchema = z.object({
   nome: z.string().min(1, "O nome do evento é obrigatório"),
   data_inicio: z.string().min(1, "A data de início é obrigatória"),
@@ -46,6 +51,7 @@ export const criarEventoSchema = z.object({
   limite_inscricoes: z.string().optional(),
   descricao: z.string().optional(),
   imagem_url: z.string().optional(),
+  faq: z.array(faqItemSchema).optional(),
   selecao_unica_produto: z.boolean(),
   enviar_email_qr_code: z.boolean(),
   produtos: z.array(produtoSchema).optional(),
@@ -63,3 +69,4 @@ export const criarEventoSchema = z.object({
 export type CriarEventoSchema = z.infer<typeof criarEventoSchema>;
 export type ProdutoForm = z.infer<typeof produtoSchema>;
 export type CampoCustomizadoForm = z.infer<typeof campoCustomizadoSchema>;
+export type FaqItemForm = z.infer<typeof faqItemSchema>;

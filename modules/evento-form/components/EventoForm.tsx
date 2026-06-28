@@ -1,84 +1,36 @@
 'use client';
 
+import { useRef } from 'react';
 import { Controller } from 'react-hook-form';
-import { IMaskInput } from 'react-imask';
 import { useEventoForm } from '../hooks/useEventoForm';
-import { TextField, Checkbox, FormControlLabel, Button, Box, Typography, Snackbar, Alert, CircularProgress, Container, useMediaQuery, useTheme, Stack } from '@mui/material';
+import {
+  TextField,
+  Checkbox,
+  FormControlLabel,
+  Button,
+  Box,
+  Typography,
+  Snackbar,
+  Alert,
+  CircularProgress,
+  Container,
+} from '@mui/material';
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
 import { ProductAccordion } from './ProductAccordion';
 import { CampoRenderer } from './CampoRenderer';
-import React from 'react';
+import { Countdown } from './Countdown';
+import { CPFMaskCustom, RGMaskCustom, TelefoneMaskCustom } from './MaskInputs';
+import { FaqSection } from './FaqSection';
 
-interface CustomProps {
-  onChange: (event: { target: { name: string; value: string } }) => void;
-  name: string;
-}
-
-const TextMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
-  function TextMaskCustom(props, ref) {
-    const { onChange, ...other } = props;
-    return (
-      <IMaskInput
-        {...other}
-        mask="(00) 00000-0000"
-        definitions={{
-          '0': /[0-9]/,
-        }}
-        inputRef={ref}
-        onAccept={(value: unknown, _mask: unknown, event?: Event) => {
-          if (event) onChange({ target: { name: props.name, value: value as string } });
-        }}
-      />
-    );
-  },
-);
-
-const CPFMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
-  function CPFMaskCustom(props, ref) {
-    const { onChange, ...other } = props;
-    return (
-      <IMaskInput
-        {...other}
-        mask="000.000.000-00"
-        definitions={{
-          '0': /[0-9]/,
-        }}
-        inputRef={ref}
-        onAccept={(value: unknown, _mask: unknown, event?: Event) => {
-          if (event) onChange({ target: { name: props.name, value: value as string } });
-        }}
-      />
-    );
-  },
-);
-
-const RGMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
-  function RGMaskCustom(props, ref) {
-    const { onChange, ...other } = props;
-    return (
-      <IMaskInput
-        {...other}
-        mask="00.000.000-0"
-        definitions={{
-          '0': /[0-9]/,
-        }}
-        inputRef={ref}
-        onAccept={(value: unknown, _mask: unknown, event?: Event) => {
-          if (event) onChange({ target: { name: props.name, value: value as string } });
-        }}
-      />
-    );
-  },
-);
+const BRAND = '#513B89';
 
 export const EventoForm = () => {
   const params = usePathname();
   const eventoId = params?.split('/').pop() ?? '';
+  const formRef = useRef<HTMLDivElement>(null);
 
   const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
 
   const hasProdutos = !!(evento?.produtos && evento.produtos.length > 0);
   const selecaoUnicaProduto = evento?.selecao_unica_produto;
@@ -87,12 +39,26 @@ export const EventoForm = () => {
   const campos = evento?.campos_customizados ?? [];
   const temCamposCustomizados = campos.length > 0;
   const camposVisiveis = campos.filter((c) => !c.oculto);
-  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } = useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen, campos);
+
+  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } =
+    useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen, campos);
+
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    const d = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const t = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `${d} às ${t}`;
+  };
+
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   if (isLoadingEvento) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress size={60} />
+        <CircularProgress size={60} sx={{ color: BRAND }} />
       </Box>
     );
   }
@@ -107,186 +73,244 @@ export const EventoForm = () => {
     );
   }
 
-  const formatDateTime = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    const dateFormatted = date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-    const timeFormatted = date.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    return `${dateFormatted} às ${timeFormatted}`;
+  const dataInicio = formatDateTime(evento.data_inicio);
+  const statusMensagem =
+    statusEvento?.nome === 'aberto'
+      ? 'As inscrições estão abertas.'
+      : statusEvento?.justificativa || 'Este evento não está disponível para novas inscrições.';
+
+  const fieldSx = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 1.5,
+      bgcolor: '#fafafa',
+      '&:hover': { bgcolor: '#f5f5f5' },
+      '&.Mui-focused': { bgcolor: 'white' },
+    },
+    '& .MuiInputLabel-root': { fontSize: '0.95rem' },
   };
 
-  const statusMensagem = statusEvento?.nome === 'aberto'
-    ? 'As inscrições estão abertas.'
-    : statusEvento?.justificativa || 'Este evento não está disponível para novas inscrições.';
-
   return (
-    <Box sx={{ height: '100vh', display: 'flex', bgcolor: '#f8f9fa', overflow: 'hidden' }}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '35fr 65fr' }, width: '100%', height: '100%' }}>
+    <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh' }}>
+      {/* ── HERO IMAGE ── */}
+      {evento.imagem_url && (
+        <Box sx={{ px: { xs: 2, md: 6 }, maxWidth: 1100, mx: 'auto', pt: 2, mb: 4 }}>
+          <Box
+            sx={{
+              borderRadius: 4,
+              overflow: 'hidden',
+              boxShadow: '0 16px 64px rgba(0,0,0,0.12)',
+              aspectRatio: '16/7',
+              backgroundImage: `url(${evento.imagem_url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+        </Box>
+      )}
+
+      {/* ── HERO TEXT ── */}
+      <Box
+        sx={{
+          pt: evento.imagem_url ? 0 : { xs: 4 },
+          pb: 4,
+          px: 3,
+          textAlign: 'center',
+          maxWidth: 820,
+          mx: 'auto',
+        }}
+      >
+        {/* Badge */}
         <Box
           sx={{
-            ...(evento.imagem_url ? { backgroundImage: `url(${evento.imagem_url})` } : { backgroundColor: 'rgba(81, 59, 137, 1)' }),
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            display: { xs: 'none', lg: 'flex' },
-            flexDirection: 'column',
-            justifyContent: 'center',
-            p: 6,
-            color: 'white',
-            position: 'relative',
-            overflow: 'hidden',
-            height: '100vh',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: '#000724bc',
-              zIndex: 0,
-            },
+            display: 'inline-block',
+            border: `1.5px solid ${BRAND}`,
+            borderRadius: 99,
+            px: 2.5,
+            py: 0.5,
+            mb: 4,
           }}
         >
-          <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Typography
-              variant="h2"
-              component="h1"
-              sx={{
-                fontWeight: 900,
-                fontSize: { lg: '3rem', xl: '3.5rem' },
-                lineHeight: 1.2,
-                mb: 3,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              {evento.nome}
-            </Typography>
-
-            <Typography
-              variant="h6"
-              sx={{
-                mb: 4,
-                opacity: 0.9,
-                fontWeight: 400,
-                lineHeight: 1.6,
-                fontSize: '1.1rem',
-              }}
-            >
-              {evento.descricao || 'Participe deste evento incrível e faça parte de uma experiência única.'}
-            </Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                  📅
-                </Box>
-                <Box>
-                  <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Data de Início
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-                    {formatDateTime(evento.data_inicio)}
-                  </Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                  🏁
-                </Box>
-                <Box>
-                  <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Data de Término
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-                    {formatDateTime(evento.data_fim)}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
+          <Typography
+            sx={{
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              color: BRAND,
+              textTransform: 'uppercase',
+              letterSpacing: '0.12em',
+            }}
+          >
+            {isRegistrationOpen ? 'Inscrições abertas' : (statusEvento?.nome ?? 'Evento')}
+          </Typography>
         </Box>
 
-        <Box sx={{ overflowY: 'auto', height: '100vh', display: 'flex', justifyContent: 'center' }}>
-          <Box sx={{ width: '100%', maxWidth: 900, p: 2 }}>
-            <Box component="form" onSubmit={handleSubmit}>
-              <Stack mb={4}>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                  {isMobile ? evento.nome : 'Inscreva-se no evento'}
-                </Typography>
-                {evento.descricao && isMobile && (
-                  <Typography variant="body2" mb={1}>
-                    {evento.descricao}
-                  </Typography>
+        {/* Title */}
+        <Typography
+          component="h1"
+          sx={{
+            fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+            fontWeight: 900,
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+            color: '#0f0f1a',
+            mb: 2,
+          }}
+        >
+          {evento.nome}
+        </Typography>
+
+        {/* Description */}
+        {evento.descricao && (
+          <Box
+            dangerouslySetInnerHTML={{ __html: evento.descricao }}
+            sx={{
+              fontSize: { xs: '0.95rem', md: '1.05rem' },
+              color: 'text.secondary',
+              lineHeight: 1.7,
+              maxWidth: 620,
+              mb: 4,
+              mx: 'auto',
+              whiteSpace: 'pre-line',
+              // textAlign: 'left',
+              '& p': { margin: '0.5em 0' },
+              '& strong, & b': { color: '#1a1a2e' },
+              '& a': { color: BRAND },
+            }}
+          />
+        )}
+
+        {/* Date line */}
+        {dataInicio && (
+          <Typography
+            sx={{
+              fontSize: { xs: '0.9rem', md: '1rem' },
+              fontWeight: 700,
+              color: '#1a1a2e',
+              mb: 4,
+            }}
+          >
+            {`${dataInicio} • Vagas limitadas`}
+          </Typography>
+        )}
+
+        {/* Countdown */}
+        {evento.data_inicio && (
+          <Box sx={{ mb: 4 }}>
+            <Countdown targetDate={evento.data_inicio} />
+          </Box>
+        )}
+
+        {/* CTA */}
+        {isRegistrationOpen && (
+          <Button
+            onClick={scrollToForm}
+            variant="contained"
+            size="large"
+            sx={{
+              bgcolor: BRAND,
+              color: 'white',
+              borderRadius: 99,
+              px: { xs: 4, md: 6 },
+              py: { xs: 1.5, md: 2 },
+              fontSize: { xs: '0.95rem', md: '1.05rem' },
+              fontWeight: 700,
+              textTransform: 'none',
+              boxShadow: `0 6px 24px ${BRAND}55`,
+              '&:hover': {
+                bgcolor: '#3e2c6b',
+                boxShadow: `0 8px 32px ${BRAND}77`,
+              },
+            }}
+          >
+            Inscrever-se Agora — Garantir Vaga
+          </Button>
+        )}
+      </Box>
+
+      {/* ── FAQ SECTION ── */}
+      {evento.faq && evento.faq.length > 0 && (
+        <FaqSection faq={evento.faq} />
+      )}
+
+      {/* ── FORM SECTION ── */}
+      <Box ref={formRef} id="formulario" sx={{ maxWidth: 680, mx: 'auto', px: { xs: 2, md: 3 }, pb: 12, mt: 6 }}>
+        <Typography
+          component="h2"
+          sx={{
+            fontSize: { xs: '1.5rem', md: '2rem' },
+            fontWeight: 800,
+            color: '#0f0f1a',
+            mb: 1,
+          }}
+        >
+          Faça sua inscrição
+        </Typography>
+        <Typography sx={{ color: 'text.secondary', mb: 4, fontSize: '0.95rem' }}>
+          Preencha os dados abaixo para garantir sua participação
+        </Typography>
+
+        {!isRegistrationOpen && (
+          <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              O evento está {statusEvento?.nome ?? 'indisponível'}
+            </Typography>
+            <Typography variant="body2">{statusMensagem}</Typography>
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={handleSubmit}>
+          {/* Products */}
+          {hasProdutos && (
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  mb: 2,
+                  fontSize: '0.8rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'text.primary',
+                }}
+              >
+                Selecione uma opção {selecaoUnicaProduto ? '*' : '(opcional)'}
+              </Typography>
+              <Controller
+                name="produtoId"
+                control={control}
+                render={({ field }) => (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    {evento.produtos.filter((p) => !p.oculto).map((produto) => (
+                      <ProductAccordion
+                        key={produto.id}
+                        produto={produto}
+                        selected={field.value === produto.id}
+                        onSelect={field.onChange}
+                        disabled={!isRegistrationOpen}
+                      />
+                    ))}
+                  </Box>
                 )}
-                <Typography variant="body2">
-                  Preencha os dados abaixo para garantir sua participação
+              />
+              {errors.produtoId && (
+                <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+                  {errors.produtoId.message}
                 </Typography>
-              </Stack>
-
-              {!isRegistrationOpen && <Alert severity={isRegistrationOpen ? 'success' : 'warning'} sx={{ mb: 3, borderRadius: 1.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  O evento está {statusEvento?.nome ?? 'aberto'}
-                </Typography>
-                <Typography variant="body2">
-                  {statusMensagem}
-                </Typography>
-              </Alert>}
-
-              {hasProdutos && (
-                <Box sx={{ mb: 4 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'text.primary' }}>
-                    Selecione uma opção {selecaoUnicaProduto ? '*' : '(opcional)'}
-                  </Typography>
-                  <Controller
-                    name="produtoId"
-                    control={control}
-                    render={({ field }) => (
-                      <Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                          {evento.produtos.filter((p) => !p.oculto).map((produto) => (
-                            <ProductAccordion
-                              key={produto.id}
-                              produto={produto}
-                              selected={field.value === produto.id}
-                              onSelect={field.onChange}
-                              disabled={!isRegistrationOpen}
-                            />
-                          ))}
-                        </Box>
-                      </Box>
-                    )}
-                  />
-                  {errors.produtoId && (
-                    <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
-                      {errors.produtoId.message}
-                    </Typography>
-                  )}
-                </Box>
               )}
+            </Box>
+          )}
 
-              {temCamposCustomizados && (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-                  {camposVisiveis.map((campo) => (
-                    <CampoRenderer
-                      key={campo.id}
-                      campo={campo}
-                      control={control}
-                      disabled={!isRegistrationOpen}
-                    />
-                  ))}
-                </Box>
-              )}
+          {/* Custom fields */}
+          {temCamposCustomizados && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              {camposVisiveis.map((campo) => (
+                <CampoRenderer key={campo.id} campo={campo} control={control} disabled={!isRegistrationOpen} />
+              ))}
+            </Box>
+          )}
 
-              {!temCamposCustomizados && (
-              <>
+          {/* Default fields */}
+          {!temCamposCustomizados && (
+            <>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                 <Controller
                   name="nome"
@@ -300,21 +324,7 @@ export const EventoForm = () => {
                       error={!!errors.nome}
                       helperText={errors.nome?.message}
                       variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 1.5,
-                          bgcolor: '#fafafa',
-                          '&:hover': {
-                            bgcolor: '#f5f5f5',
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: 'white',
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          fontSize: '0.95rem',
-                        },
-                      }}
+                      sx={fieldSx}
                     />
                   )}
                 />
@@ -332,24 +342,8 @@ export const EventoForm = () => {
                       helperText={errors.telefone?.message}
                       variant="outlined"
                       placeholder="(00) 00000-0000"
-                      InputProps={{
-                        inputComponent: TextMaskCustom as never,
-                      }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 1.5,
-                          bgcolor: '#fafafa',
-                          '&:hover': {
-                            bgcolor: '#f5f5f5',
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: 'white',
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          fontSize: '0.95rem',
-                        },
-                      }}
+                      InputProps={{ inputComponent: TelefoneMaskCustom as never }}
+                      sx={fieldSx}
                     />
                   )}
                 />
@@ -367,21 +361,7 @@ export const EventoForm = () => {
                       error={!!errors.email}
                       helperText={errors.email?.message}
                       variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 1.5,
-                          bgcolor: '#fafafa',
-                          '&:hover': {
-                            bgcolor: '#f5f5f5',
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: 'white',
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          fontSize: '0.95rem',
-                        },
-                      }}
+                      sx={fieldSx}
                     />
                   )}
                 />
@@ -399,24 +379,8 @@ export const EventoForm = () => {
                       helperText={errors.rg?.message}
                       variant="outlined"
                       placeholder="00.000.000-0"
-                      InputProps={{
-                        inputComponent: RGMaskCustom as never,
-                      }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 1.5,
-                          bgcolor: '#fafafa',
-                          '&:hover': {
-                            bgcolor: '#f5f5f5',
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: 'white',
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          fontSize: '0.95rem',
-                        },
-                      }}
+                      InputProps={{ inputComponent: RGMaskCustom as never }}
+                      sx={fieldSx}
                     />
                   )}
                 />
@@ -434,24 +398,8 @@ export const EventoForm = () => {
                       helperText={errors.cpf?.message}
                       variant="outlined"
                       placeholder="000.000.000-00"
-                      InputProps={{
-                        inputComponent: CPFMaskCustom as never,
-                      }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 1.5,
-                          bgcolor: '#fafafa',
-                          '&:hover': {
-                            bgcolor: '#f5f5f5',
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: 'white',
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          fontSize: '0.95rem',
-                        },
-                      }}
+                      InputProps={{ inputComponent: CPFMaskCustom as never }}
+                      sx={fieldSx}
                     />
                   )}
                 />
@@ -463,18 +411,14 @@ export const EventoForm = () => {
                   control={control}
                   render={({ field }) => (
                     <FormControlLabel
-                      control={(
-                        <Checkbox
-                          {...field}
-                          checked={field.value}
-                          disabled={!isRegistrationOpen}
-                        />
-                      )}
-                      label={(
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
-                          Eu declaro estar ciente e concordar com as condições contidas neste formulário de inscrição da Igreja Formosa de Cristo, bem como a responsabilidade do cumprimento com o pagamento do valor escolhido
+                      control={<Checkbox {...field} checked={field.value} disabled={!isRegistrationOpen} />}
+                      label={
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                          Eu declaro estar ciente e concordar com as condições contidas neste formulário de inscrição da
+                          Igreja Formosa de Cristo, bem como a responsabilidade do cumprimento com o pagamento do valor
+                          escolhido
                         </Typography>
-                      )}
+                      }
                     />
                   )}
                 />
@@ -484,40 +428,38 @@ export const EventoForm = () => {
                   </Typography>
                 )}
               </Box>
-              </>
-              )}
+            </>
+          )}
 
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                fullWidth
-                disabled={!isRegistrationOpen || !isValid || isSubmitting}
-                sx={{
-                  mt: 4,
-                  mb: 6,
-                  py: 1.5,
-                  borderRadius: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  bgcolor: '#1a1a1a',
-                  color: 'white',
-                  boxShadow: 'none',
-                  '&:hover': {
-                    bgcolor: '#000000',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  },
-                  '&:disabled': {
-                    bgcolor: '#e0e0e0',
-                    color: '#9e9e9e',
-                  },
-                }}
-              >
-                {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
-              </Button>
-            </Box>
-          </Box>
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            disabled={!isRegistrationOpen || !isValid || isSubmitting}
+            sx={{
+              mt: 4,
+              py: 1.75,
+              borderRadius: 2,
+              fontSize: '1rem',
+              fontWeight: 700,
+              textTransform: 'none',
+              bgcolor: BRAND,
+              color: 'white',
+              boxShadow: `0 4px 16px ${BRAND}44`,
+              '&:hover': {
+                bgcolor: '#3e2c6b',
+                boxShadow: `0 6px 24px ${BRAND}66`,
+              },
+              '&:disabled': {
+                bgcolor: '#e0e0e0',
+                color: '#9e9e9e',
+                boxShadow: 'none',
+              },
+            }}
+          >
+            {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
+          </Button>
         </Box>
       </Box>
 
@@ -527,12 +469,7 @@ export const EventoForm = () => {
         onClose={handleCloseAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert
-          onClose={handleCloseAlert}
-          severity={alert.severity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleCloseAlert} severity={alert.severity} variant="filled" sx={{ width: '100%' }}>
           {alert.message}
         </Alert>
       </Snackbar>

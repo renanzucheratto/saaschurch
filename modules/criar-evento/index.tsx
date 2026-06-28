@@ -25,6 +25,7 @@ import { useCadastrarEventoMutation } from "@/config/redux/api/eventosApi";
 import type { ProdutoEventoRequest, CampoCustomizadoRequest } from "@/config/redux/api/eventosApi";
 import RichTextEditor from "./components/RichTextEditor";
 import { CamposCustomizadosManager } from "./components/CamposCustomizadosManager";
+import { FaqManager } from "./components/FaqManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 import { useAppSelector } from "@/config/redux/store";
 import { selectCurrentUser } from "@/config/redux/slices/authSlice";
@@ -72,6 +73,7 @@ export default function CriarEventoModule() {
       descricao: "",
       selecao_unica_produto: true,
       enviar_email_qr_code: false,
+      faq: [],
       produtos: [],
       campos_customizados: [
         { label: "Nome", tipo: "texto", obrigatorio: true, oculto: false },
@@ -114,6 +116,7 @@ export default function CriarEventoModule() {
         data_maxima_inscricao: data.data_maxima_inscricao ? `${data.data_maxima_inscricao}:00.000Z` : null,
         limite_inscricoes: data.limite_inscricoes ? Number(data.limite_inscricoes) : null,
         descricao: data.descricao || undefined,
+        faq: data.faq && data.faq.length > 0 ? data.faq : null,
         selecao_unica_produto: data.selecao_unica_produto,
         enviar_email_qr_code: data.enviar_email_qr_code,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
@@ -351,6 +354,11 @@ export default function CriarEventoModule() {
           {/* Campos customizados */}
           <Grid size={12}>
             <CamposCustomizadosManager control={control as never} errors={errors} />
+          </Grid>
+
+          {/* FAQ */}
+          <Grid size={12}>
+            <FaqManager control={control as never} errors={errors as never} />
           </Grid>
 
           {/* Produtos */}

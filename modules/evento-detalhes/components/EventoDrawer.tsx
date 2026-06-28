@@ -26,6 +26,7 @@ import type { ProdutoEventoRequest, CampoCustomizadoRequest } from "@/config/red
 import { EventoDetalhes } from '@/types/evento.types';
 import RichTextEditor from "@/modules/criar-evento/components/RichTextEditor";
 import { CamposCustomizadosManager } from "@/modules/criar-evento/components/CamposCustomizadosManager";
+import { FaqManager } from "@/modules/criar-evento/components/FaqManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 
 const eventoDrawerSchema = criarEventoSchema.extend({
@@ -84,6 +85,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
       descricao: "",
       selecao_unica_produto: true,
       enviar_email_qr_code: false,
+      faq: [],
       produtos: [],
       campos_customizados: [],
       statusNome: 'aberto',
@@ -124,6 +126,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           opcoes: c.opcoes ?? undefined,
           textoTermo: c.textoTermo ?? (c.tipo === 'aceite_termo' ? c.label : undefined),
         })) || [],
+        faq: evento.faq || [],
         statusNome: (evento.status?.nome as 'aberto' | 'pausado' | 'cancelado') || 'aberto',
         statusJustificativa: evento.status?.justificativa || "",
       };
@@ -167,6 +170,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           data_maxima_inscricao: dataMaximaInscricao,
           limite_inscricoes: limiteInscricoes,
           descricao: data.descricao || undefined,
+          faq: data.faq && data.faq.length > 0 ? data.faq : null,
           selecao_unica_produto: data.selecao_unica_produto,
           produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
           campos_customizados: camposPayload,
@@ -326,6 +330,9 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
             <Grid size={12}>
               <Divider sx={{ my: 2 }} />
               <CamposCustomizadosManager control={control as never} errors={errors} permitirRemocao={false} />
+            </Grid>
+            <Grid size={12}>
+              <FaqManager control={control as never} errors={errors as never} />
             </Grid>
           </Grid>
         </Box>
