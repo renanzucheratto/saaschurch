@@ -4,6 +4,7 @@ export interface DashboardStats {
   cards: {
     totalMembrosAtivos: number;
     eventosMes: number;
+    eventosMesDescricao?: string;
     participantesMes: number;
   };
   crescimentoMembros: { mes: string; total: number }[];
