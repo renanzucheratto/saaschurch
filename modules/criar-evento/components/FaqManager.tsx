@@ -12,6 +12,7 @@ import {
 import { Icon as IconifyIcon } from '@iconify/react';
 import type { Control, FieldErrors } from 'react-hook-form';
 import type { CriarEventoSchema } from '../schemas/criar-evento.schema';
+import RichTextEditor from './RichTextEditor';
 
 interface FaqManagerProps {
   control: Control<CriarEventoSchema>;
@@ -88,16 +89,12 @@ export function FaqManager({ control, errors }: FaqManagerProps) {
                 name={`faq.${index}.resposta`}
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
+                  <RichTextEditor
                     label="Resposta"
-                    fullWidth
-                    multiline
-                    minRows={2}
-                    size="small"
+                    value={field.value || ''}
+                    onChange={field.onChange}
                     error={!!errors.faq?.[index]?.resposta}
                     helperText={errors.faq?.[index]?.resposta?.message}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                   />
                 )}
               />

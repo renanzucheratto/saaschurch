@@ -183,9 +183,9 @@ export const EventoForm = () => {
 
         {/* Date line */}
         {dataInicio && (
-          <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', 
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
               mb: 4, gap: 1 }}>
-            <Icon icon="lucide:calendar" /> 
+            <Icon icon="lucide:calendar" />
           <Typography variant="body1">
             {dataInicio}
           </Typography>

@@ -239,7 +239,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
                 </Grid>
                 <Grid size={12}>
                   <Controller name="descricao" control={control} render={({ field }) => (
-                    <TextField {...field} label="Descrição" fullWidth multiline minRows={3} />
+                    <RichTextEditor label="Descrição" value={field.value || ''} onChange={field.onChange} />
                   )} />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>

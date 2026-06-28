@@ -446,7 +446,10 @@ export default function EventoDetalhesModule() {
               <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
                 Descrição
               </Typography>
-              <Typography variant="body1">{evento.descricao}</Typography>
+              <Box
+                sx={{ '& p': { margin: 0 }, '& ul, & ol': { pl: 2 } }}
+                dangerouslySetInnerHTML={{ __html: evento.descricao || '' }}
+              />
             </Box>
 
             {evento.produtos && evento.produtos.length > 0 && (

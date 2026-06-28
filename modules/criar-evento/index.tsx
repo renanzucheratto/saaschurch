@@ -287,17 +287,10 @@ export default function CriarEventoModule() {
                     name="descricao"
                     control={control}
                     render={({ field }) => (
-                      <TextField
-                        {...field}
+                      <RichTextEditor
                         label="Descrição"
-                        fullWidth
-                        multiline
-                        minRows={3}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: 1.5,
-                          },
-                        }}
+                        value={field.value || ''}
+                        onChange={field.onChange}
                       />
                     )}
                   />

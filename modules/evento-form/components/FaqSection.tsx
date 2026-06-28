@@ -99,17 +99,19 @@ export function FaqSection({ faq }: FaqSectionProps) {
                   borderTop: `1px solid ${BRAND}22`,
                 }}
               >
-                <Typography
+                <Box
+                  dangerouslySetInnerHTML={{ __html: item.resposta }}
                   sx={{
                     fontSize: '0.9rem',
                     color: 'text.secondary',
                     lineHeight: 1.75,
-                    whiteSpace: 'pre-line',
                     pt: 1,
+                    '& p': { margin: '0.4em 0' },
+                    '& strong, & b': { color: '#1a1a2e' },
+                    '& a': { color: BRAND },
+                    '& ul, & ol': { pl: 2.5, my: 0.5 },
                   }}
-                >
-                  {item.resposta}
-                </Typography>
+                />
               </AccordionDetails>
             </Accordion>
           ))}
