@@ -5,7 +5,7 @@ import { type UserRole, canAccessRoute } from '@/lib/permissions';
 
 const publicPaths = ['/login', '/signup', '/externo', '/reset-password', '/forgot-password', '/set-password'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const token = await getToken({
