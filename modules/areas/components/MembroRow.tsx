@@ -14,26 +14,26 @@ import { Icon } from '@iconify/react';
 import { useState } from 'react';
 import { useAtualizarPapelMutation, useRemoverMembroMutation } from '@/config/redux/api/areasApi';
 import { AreaMembro, RoleNaArea } from '@/types/area.types';
+import { usePermissions } from '@/lib/hooks/usePermissions';
 
 interface Props {
   areaId: string;
   membro: AreaMembro;
   roleNaArea: RoleNaArea;
   podeGerenciar: boolean;
-  userType: string;
 }
 
-export function MembroRow({ areaId, membro, roleNaArea, podeGerenciar, userType }: Props) {
+export function MembroRow({ areaId, membro, roleNaArea, podeGerenciar }: Props) {
   const [editingRole, setEditingRole] = useState(false);
   const [atualizarPapel, { isLoading: updatingPapel }] = useAtualizarPapelMutation();
   const [removerMembro, { isLoading: removendo }] = useRemoverMembroMutation();
 
-  const isBackoffice = userType === 'backoffice';
+  const { can, is } = usePermissions();
 
   // Líderes só podem ser gerenciados por backoffice
   // Membros podem ser removidos por backoffice ou lider da área, mas papel só backoffice altera
-  const podeRemover = roleNaArea === 'lider' ? isBackoffice : podeGerenciar;
-  const podeAlterarPapel = isBackoffice;
+  const podeRemover = roleNaArea === 'lider' ? is('backoffice') : podeGerenciar;
+  const podeAlterarPapel = can('alterarPapelMembro');
 
   const handleRoleChange = async (novoRole: RoleNaArea) => {
     try {

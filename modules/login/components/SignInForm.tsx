@@ -36,7 +36,7 @@ export function SignInForm() {
           component="h1"
           sx={{
             fontWeight: 700,
-            color: '#1a1a2e',
+            color: 'text.primary',
             fontSize: '2.5rem',
             lineHeight: 1.2,
             mb: 1,
@@ -134,10 +134,10 @@ export function SignInForm() {
           href="/reset-password"
           sx={{
             fontSize: '0.875rem',
-            color: '#666',
+            color: 'text.secondary',
             textDecoration: 'none',
             '&:hover': {
-              color: '#6366f1',
+              color: 'primary.main',
             },
           }}
         >
@@ -148,23 +148,15 @@ export function SignInForm() {
       <Button
         type="submit"
         fullWidth
+        variant="contained"
+        color="primary"
         disabled={isLoading}
         sx={{
           mt: 1,
           py: 1.5,
-          backgroundColor: '#6366f1',
-          borderRadius: 2,
           textTransform: 'none',
-          color: '#fff',
           fontSize: '1rem',
           fontWeight: 500,
-          '&:hover': {
-            backgroundColor: '#4f46e5',
-          },
-          '&:disabled': {
-            backgroundColor: '#6366f1',
-            opacity: 0.7,
-          },
         }}
       >
         {isLoading ? (

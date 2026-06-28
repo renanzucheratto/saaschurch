@@ -26,6 +26,7 @@ import { Icon as IconifyIcon } from "@iconify/react";
 import { useObterProjetoQuery } from "@/config/redux/api/projetosApi";
 import { useAppSelector } from "@/config/redux/store";
 import { selectCurrentUser } from "@/config/redux/slices/authSlice";
+import { usePermissions } from "@/lib/hooks/usePermissions";
 import { getStatusInfo } from "@/config/helpers/projeto-status";
 import { formatNumberToCurrency } from "@/config/helpers/currency-mask";
 import type { StatusProjetoNome } from "@/types/projeto.types";
@@ -56,6 +57,7 @@ export default function ProjetoDetalhesModule() {
 
   const { data: projeto, isLoading } = useObterProjetoQuery(projetoId, { skip: !projetoId });
   const currentUser = useAppSelector(selectCurrentUser);
+  const { is, can } = usePermissions();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [statusAction, setStatusAction] = useState<StatusAction | null>(null);
@@ -89,11 +91,10 @@ export default function ProjetoDetalhesModule() {
     );
   }
 
-  const userType = currentUser?.userType || "";
   const ehDono = projeto.liderUserId === currentUser?.id;
-  const ehBackoffice = userType === "backoffice";
-  const ehLiderOuBackoffice = userType === "lider" || ehBackoffice;
-  const podeAprovar = ehLiderOuBackoffice;
+  const ehBackoffice = is("backoffice");
+  const ehLiderOuBackoffice = is("lider", "backoffice");
+  const podeAprovar = can("aprovarProjeto");
 
   const status = projeto.status?.nome || "em_analise";
   const statusInfo = getStatusInfo(status);

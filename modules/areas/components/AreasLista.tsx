@@ -19,9 +19,8 @@ import {
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { useAppSelector } from '@/config/redux/store';
-import { selectCurrentUser } from '@/config/redux/slices/authSlice';
 import { useListarAreasQuery, useCriarAreaMutation } from '@/config/redux/api/areasApi';
+import { usePermissions } from '@/lib/hooks/usePermissions';
 import { BORDER_RADIUS } from '@/config/utils/contants';
 
 interface Props {
@@ -29,16 +28,14 @@ interface Props {
 }
 
 export function AreasLista({ onSelectArea }: Props) {
-  const currentUser = useAppSelector(selectCurrentUser);
-  const userType = currentUser?.userType;
+  const { can } = usePermissions();
+  const podeGerenciar = can('gerenciarArea');
 
   const { data: areas = [], isLoading, error } = useListarAreasQuery();
   const [criarArea, { isLoading: criando, error: erroCriar }] = useCriarAreaMutation();
 
   const [openDialog, setOpenDialog] = useState(false);
   const [novoNome, setNovoNome] = useState('');
-
-  const podeGerenciar = userType === 'backoffice' || userType === 'lider';
 
   const handleCriar = async () => {
     if (!novoNome.trim()) return;

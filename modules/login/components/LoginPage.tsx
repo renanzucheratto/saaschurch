@@ -32,7 +32,7 @@ export function LoginPage() {
         sx={{
           flex: 1,
           display: { xs: 'none', md: 'flex' },
-          background: 'linear-gradient(180deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%)',
+          background: 'linear-gradient(160deg, #9b78ef 0%, #7b57df 55%, #5b3fbf 100%)',
           justifyContent: 'center',
           alignItems: 'center',
           position: 'relative',

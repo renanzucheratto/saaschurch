@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { useAppSelector } from '@/config/redux/store';
 import { selectCurrentUser } from '@/config/redux/slices/authSlice';
 import { useBuscarAreaQuery, useAtualizarAreaMutation, useRemoverAreaMutation } from '@/config/redux/api/areasApi';
+import { usePermissions } from '@/lib/hooks/usePermissions';
 import { MembroRow } from './MembroRow';
 import { AdicionarMembroDialog } from './AdicionarMembroDialog';
 
@@ -27,7 +28,7 @@ interface Props {
 
 export function AreaDetalhes({ areaId, onVoltar }: Props) {
   const currentUser = useAppSelector(selectCurrentUser);
-  const userType = currentUser?.userType ?? '';
+  const { is } = usePermissions();
 
   const { data: area, isLoading, error } = useBuscarAreaQuery(areaId);
   const [atualizarArea, { isLoading: salvando }] = useAtualizarAreaMutation();
@@ -37,10 +38,10 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
   const [novoNome, setNovoNome] = useState('');
   const [openAdicionarDialog, setOpenAdicionarDialog] = useState(false);
 
-  const isBackoffice = userType === 'backoffice';
+  const isBackoffice = is('backoffice');
   const isLiderDaArea = !!area?.lideres.some((l) => l.id === currentUser?.id);
-  const podeGerenciar = isBackoffice || (userType === 'lider' && isLiderDaArea);
-  const podeEditar = isBackoffice || (userType === 'lider' && isLiderDaArea);
+  const podeGerenciar = isBackoffice || (is('lider') && isLiderDaArea);
+  const podeEditar = isBackoffice || (is('lider') && isLiderDaArea);
 
   const handleEditarNome = () => {
     setNovoNome(area?.nome ?? '');
@@ -168,7 +169,6 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
               membro={l}
               roleNaArea="lider"
               podeGerenciar={podeGerenciar}
-              userType={userType}
             />
           ))
         )}
@@ -196,7 +196,6 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
               membro={m}
               roleNaArea="membro"
               podeGerenciar={podeGerenciar}
-              userType={userType}
             />
           ))
         )}
@@ -206,7 +205,6 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
         areaId={areaId}
         open={openAdicionarDialog}
         onClose={() => setOpenAdicionarDialog(false)}
-        isBackoffice={isBackoffice}
         podeGerenciar={podeGerenciar}
       />
     </Box>

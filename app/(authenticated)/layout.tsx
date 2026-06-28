@@ -18,7 +18,7 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#FAFAFA" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
       <UserSync />
       {/* Sidebar */}
       <Sidebar mobileOpen={mobileOpen} onClose={handleDrawerClose} />
@@ -42,7 +42,7 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
             flex: 1,
             px: 2.5,
             py: 2,
-            bgcolor: "#FAFAFA",
+            bgcolor: "background.default",
             overflowY: "auto",
           }}
         >

@@ -6,8 +6,7 @@ import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { ptBR } from "@mui/x-data-grid/locales";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { useListarProjetosQuery } from "@/config/redux/api/projetosApi";
-import { useAppSelector } from "@/config/redux/store";
-import { selectCurrentUser } from "@/config/redux/slices/authSlice";
+import { usePermissions } from "@/lib/hooks/usePermissions";
 import { getStatusInfo } from "@/config/helpers/projeto-status";
 import { formatNumberToCurrency } from "@/config/helpers/currency-mask";
 
@@ -67,9 +66,8 @@ const columns: GridColDef[] = [
 export default function ProjetosPage() {
   const router = useRouter();
   const { data: projetos = [], isLoading } = useListarProjetosQuery();
-  const currentUser = useAppSelector(selectCurrentUser);
-
-  const podeCriar = ["lider", "backoffice"].includes(currentUser?.userType || "");
+  const { can } = usePermissions();
+  const podeCriar = can("criarProjeto");
 
   const handleRowClick = (params: GridRowParams) => {
     router.push(`/projetos/${params.id}`);

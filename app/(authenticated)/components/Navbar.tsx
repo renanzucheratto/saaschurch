@@ -36,8 +36,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
       position="static"
       elevation={0}
       sx={{
-        bgcolor: "white",
-        borderBottom: "1px solid #E0E0E0",
+        borderBottom: "1px solid",
+        borderColor: "divider",
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between", px: '16px!important', minHeight: {

@@ -24,11 +24,10 @@ interface Props {
   areaId: string;
   open: boolean;
   onClose: () => void;
-  isBackoffice: boolean;
   podeGerenciar: boolean;
 }
 
-export function AdicionarMembroDialog({ areaId, open, onClose, isBackoffice, podeGerenciar }: Props) {
+export function AdicionarMembroDialog({ areaId, open, onClose, podeGerenciar }: Props) {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [roleNaArea, setRoleNaArea] = useState<RoleNaArea>('membro');
 

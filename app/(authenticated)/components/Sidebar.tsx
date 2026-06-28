@@ -1,8 +1,6 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useAppSelector } from "@/config/redux/store";
-import { selectCurrentUser } from "@/config/redux/slices/authSlice";
 import {
   Box,
   List,
@@ -18,6 +16,8 @@ import {
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { BORDER_RADIUS } from "@/config/utils/contants";
+import { usePermissions } from "@/lib/hooks/usePermissions";
+import type { UserRole } from "@/lib/permissions";
 
 interface MenuItem {
   id: string;
@@ -26,6 +26,7 @@ interface MenuItem {
   href?: string;
   badge?: number;
   isBeta?: boolean;
+  allowedRoles?: UserRole[];
 }
 
 interface MenuSection {
@@ -43,22 +44,22 @@ const menuSections: MenuSection[] = [
   {
     title: "EVENTOS",
     items: [
-      { id: "eventos", label: "Lista de Eventos", icon: <IconifyIcon icon="material-symbols:event-outline" width={20} />, href: "/eventos" },
-      { id: "criar-evento", label: "Criar evento", icon: <IconifyIcon icon="material-symbols:add-circle-outline" width={20} />, href: "/eventos/criar" },
+      { id: "eventos", label: "Lista de Eventos", icon: <IconifyIcon icon="material-symbols:event-outline" width={20} />, href: "/eventos", allowedRoles: ["lider", "backoffice"] },
+      { id: "criar-evento", label: "Criar evento", icon: <IconifyIcon icon="material-symbols:add-circle-outline" width={20} />, href: "/eventos/criar", allowedRoles: ["lider", "backoffice"] },
     ],
   },
   {
     title: "PROJETOS",
     items: [
-      { id: "projetos", label: "Lista de Projetos", icon: <IconifyIcon icon="material-symbols:folder-managed-outline" width={20} />, href: "/projetos" },
-      { id: "criar-projeto", label: "Criar projeto", icon: <IconifyIcon icon="material-symbols:create-new-folder-outline" width={20} />, href: "/projetos/criar" },
+      { id: "projetos", label: "Lista de Projetos", icon: <IconifyIcon icon="material-symbols:folder-managed-outline" width={20} />, href: "/projetos", allowedRoles: ["lider", "backoffice"] },
+      { id: "criar-projeto", label: "Criar projeto", icon: <IconifyIcon icon="material-symbols:create-new-folder-outline" width={20} />, href: "/projetos/criar", allowedRoles: ["lider", "backoffice"] },
     ],
   },
   {
     title: "GERENCIAMENTO",
     items: [
-      { id: "usuarios", label: "Usuários", icon: <IconifyIcon icon="material-symbols:group-outline" width={20} />, href: "/usuarios" },
-      { id: "areas", label: "Áreas", icon: <IconifyIcon icon="material-symbols:group-work-outline" width={20} />, href: "/areas" },
+      { id: "usuarios", label: "Usuários", icon: <IconifyIcon icon="material-symbols:group-outline" width={20} />, href: "/usuarios", allowedRoles: ["backoffice"] },
+      { id: "areas", label: "Áreas", icon: <IconifyIcon icon="material-symbols:group-work-outline" width={20} />, href: "/areas", allowedRoles: ["lider", "backoffice", "membro"] },
     ],
   },
 ];
@@ -75,15 +76,12 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const currentUser = useAppSelector(selectCurrentUser);
-  const isBackoffice = currentUser?.userType === "backoffice";
-  const isLiderOrBackoffice = currentUser?.userType === "lider" || isBackoffice;
+  const { is } = usePermissions();
 
   const drawerContent = (
     <Box
       sx={{
         height: "100%",
-        bgcolor: "#FFFFFF",
         display: "flex",
         flexDirection: "column",
       }}
@@ -99,7 +97,8 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: "1px solid #E0E0E0",
+          borderBottom: "1px solid",
+        borderColor: "divider",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -111,11 +110,9 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
       <Box sx={{ flex: 1, overflowY: "auto", py: 2 }}>
         {menuSections.map((section) => {
-          const visibleItems = section.items.filter((item) => {
-            if (["usuarios", "projetos", "criar-projeto"].includes(item.id)) return isBackoffice;
-            if (["eventos", "criar-evento"].includes(item.id)) return isLiderOrBackoffice;
-            return true;
-          });
+          const visibleItems = section.items.filter((item) =>
+            item.allowedRoles ? is(...item.allowedRoles) : true
+          );
           if (visibleItems.length === 0) return null;
           return (
           <Box key={section.title} sx={{ mb: 3 }}>
@@ -251,7 +248,6 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: DRAWER_WIDTH,
-            borderRight: "1px solid #E0E0E0",
           },
         }}
       >
@@ -266,7 +262,6 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: DRAWER_WIDTH,
-            borderRight: "1px solid #E0E0E0",
           },
         }}
         open

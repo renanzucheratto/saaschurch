@@ -1,6 +1,7 @@
 import { baseApi } from './baseApi';
+import type { UserRole } from '@/lib/permissions';
 
-export type UserType = 'membro' | 'backoffice' | 'lider';
+export type UserType = UserRole;
 
 export interface User {
   id: string;

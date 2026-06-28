@@ -1,4 +1,5 @@
 import { baseApi } from './baseApi';
+import type { UserRole } from '@/lib/permissions';
 
 export interface SignUpData {
   email: string;
@@ -23,7 +24,7 @@ export interface AuthUser {
   telefone?: string;
   rg?: string;
   cpf?: string;
-  userType: 'membro' | 'backoffice' | 'lider';
+  userType: UserRole;
   instituicaoId: string;
   instituicao: {
     id: string;

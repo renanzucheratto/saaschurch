@@ -9,10 +9,10 @@ export const textFieldOverrides: Components<Theme> = {
         styleOverrides: {
             root: ({ theme }) => ({
                 '.MuiInputBase-root:not(.MuiInputBase-multiline)': {
-                    borderRadius: `${theme.spacing(BORDER_RADIUS.full)} !important`,
+                    borderRadius: `${theme.spacing(BORDER_RADIUS.default)} !important`,
                 },
                 '.MuiInputBase-multiline': {
-                    borderRadius: `${theme.spacing(BORDER_RADIUS.small)} !important`,
+                    borderRadius: `${theme.spacing(BORDER_RADIUS.default)} !important`,
                 }
             }),
         },
