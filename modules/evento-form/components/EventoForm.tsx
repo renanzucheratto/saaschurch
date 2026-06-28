@@ -14,6 +14,8 @@ import {
   Alert,
   CircularProgress,
   Container,
+  Stack,
+  Divider,
 } from '@mui/material';
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
@@ -112,7 +114,7 @@ export const EventoForm = () => {
       <Box
         sx={{
           pt: evento.imagem_url ? 0 : { xs: 4 },
-          pb: 4,
+          pb: 0,
           px: 3,
           textAlign: 'center',
           maxWidth: 820,
@@ -228,11 +230,14 @@ export const EventoForm = () => {
 
       {/* ── FAQ SECTION ── */}
       {evento.faq && evento.faq.length > 0 && (
-        <FaqSection faq={evento.faq} />
+        <Stack sx={{my: 6, gap: 4, width: '100%'}}>
+          
+          <FaqSection faq={evento.faq} />
+        </Stack>
       )}
 
       {/* ── FORM SECTION ── */}
-      <Box ref={formRef} id="formulario" sx={{ maxWidth: 680, mx: 'auto', px: { xs: 2, md: 3 }, pb: 12, mt: 6 }}>
+      <Box ref={formRef} id="formulario" sx={{ maxWidth: 680, mx: 'auto', px: { xs: 2, md: 3 }, pb: 12 }}>
         <Typography
           component="h2"
           sx={{

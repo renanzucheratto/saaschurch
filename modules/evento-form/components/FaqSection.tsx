@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Box, Typography, Collapse } from '@mui/material';
+import { Box, Typography, Collapse, Divider, Stack } from '@mui/material';
 import { Icon as IconifyIcon } from '@iconify/react';
 import type { FaqItem } from '@/types/evento.types';
 
@@ -16,20 +16,21 @@ export function FaqSection({ faq }: FaqSectionProps) {
   if (!faq || faq.length === 0) return null;
 
   return (
-    <Box sx={{ maxWidth: 820, mx: 'auto', px: { xs: 2, md: 3 }, pb: 8 }}>
+    <Stack sx={{ px: { xs: 2, md: 3 }, gap: 6, backgroundColor: '#fbf5ff' }}>
+      <Divider />
+      <Box sx={{maxWidth: 820, mx: 'auto', width: '100%'}}>
       <Typography
         component="h2"
         sx={{
           fontSize: { xs: '1.5rem', md: '1.75rem' },
           fontWeight: 800,
           color: '#0f0f1a',
-          mb: 1,
           textAlign: 'center',
         }}
       >
         Perguntas Frequentes
       </Typography>
-      <Typography sx={{ color: 'text.secondary', mb: 5, fontSize: '0.95rem', textAlign: 'center' }}>
+      <Typography sx={{ color: 'text.secondary', mb: 3, fontSize: '0.95rem', textAlign: 'center' }}>
         Tire suas dúvidas sobre o evento
       </Typography>
 
@@ -109,6 +110,8 @@ export function FaqSection({ faq }: FaqSectionProps) {
           );
         })}
       </Box>
-    </Box>
+      </Box>
+      <Divider />
+    </Stack>
   );
 }
