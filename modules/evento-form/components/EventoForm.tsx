@@ -24,6 +24,7 @@ import { CampoRenderer } from './CampoRenderer';
 import { Countdown } from './Countdown';
 import { CPFMaskCustom, RGMaskCustom, TelefoneMaskCustom } from './MaskInputs';
 import { FaqSection } from './FaqSection';
+import { Icon } from "@iconify/react";
 
 const BRAND = '#513B89';
 
@@ -182,16 +183,13 @@ export const EventoForm = () => {
 
         {/* Date line */}
         {dataInicio && (
-          <Typography
-            sx={{
-              fontSize: { xs: '0.9rem', md: '1rem' },
-              fontWeight: 700,
-              color: '#1a1a2e',
-              mb: 4,
-            }}
-          >
-            {`${dataInicio} • Vagas limitadas`}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', 
+              mb: 4, gap: 1 }}>
+            <Icon icon="lucide:calendar" /> 
+          <Typography variant="body1">
+            {dataInicio}
           </Typography>
+          </Stack>
         )}
 
         {/* Countdown */}
