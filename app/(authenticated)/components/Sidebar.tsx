@@ -198,7 +198,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                     fontWeight: 700,
                     fontSize: 11,
                     letterSpacing: 0.8,
-                    mb: 0.5,
+                    mb: 0.7,
                   }}
                 >
                   {section.title}
@@ -221,10 +221,11 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                         }}
                         sx={{
                           borderRadius: 2,
-                          px: 1.25,
-                          py: 0.9,
+                          px: 1,
+                          py: 0.7,
+                          border: "1px solid transparent",
                           "&.Mui-selected": {
-                            bgcolor: "background.paper",
+                            bgcolor: "secondary",
                             color: "primary.main",
                             border: "1px solid",
                             borderColor: "divider",
@@ -233,7 +234,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                               color: "primary.main",
                             },
                             "&:hover": {
-                              bgcolor: "background.paper",
+                              bgcolor: "secondary",
                             },
                           },
                           "&:hover": {

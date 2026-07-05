@@ -39,6 +39,10 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
           display: "flex",
           flexDirection: "column",
           gap: { sm: 1 },
+          backgroundColor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 3,
         }}
       >
         {/* Header */}
