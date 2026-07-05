@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Box,
@@ -11,12 +12,22 @@ import {
   Typography,
   Chip,
   Drawer,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
+import { signOut } from "next-auth/react";
+import { useDispatch } from "react-redux";
 import { BORDER_RADIUS } from "@/config/utils/contants";
 import { usePermissions } from "@/lib/hooks/usePermissions";
+import { useAppSelector } from "@/config/redux/store";
+import { logout } from "@/config/redux/slices/authSlice";
+import { formatFirstLastName } from "@/config/helpers/name-formatter";
+import { useGetCurrentUserQuery } from "@/config/redux/api/authApi";
 import type { UserRole } from "@/lib/permissions";
 
 interface MenuItem {
@@ -64,7 +75,7 @@ const menuSections: MenuSection[] = [
   },
 ];
 
-const DRAWER_WIDTH = 240;
+const DRAWER_WIDTH = 280;
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -77,6 +88,31 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { is } = usePermissions();
+  const dispatch = useDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const { data: currentUser } = useGetCurrentUserQuery();
+
+  const userName = user?.nome;
+  const email = user?.email;
+
+  const instituicaoNome = currentUser?.instituicao?.nome ?? "";
+  const instituicaoLogo = currentUser?.instituicao?.logoUrl ?? null;
+  const instituicaoIniciais =
+    instituicaoNome
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase() || "?";
+
+  const handleLogout = async () => {
+    setAnchorEl(null);
+    dispatch(logout());
+    await signOut({ callbackUrl: "/login" });
+  };
 
   const drawerContent = (
     <Box
@@ -86,188 +122,264 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         flexDirection: "column",
       }}
     >
-      {/* Logo */}
-      <Box
-        sx={{
-          minHeight: {
-            xs: 52,
-            sm: 61,
-          },
-          px: 3,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid",
-        borderColor: "divider",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body1" sx={{ fontWeight: 700, color: "#1A1A1A" }}>
-            IFC Maravilhas
-          </Typography>
+      {/* Marca */}
+      <Box sx={{ p: 2, pb: 1.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            p: 1.25,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 3,
+          }}
+        >
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 2,
+              bgcolor: instituicaoLogo ? "transparent" : "primary.main",
+              color: "primary.contrastText",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              fontWeight: 700,
+              fontSize: 16,
+              overflow: "hidden",
+            }}
+          >
+            {instituicaoLogo ? (
+              <Box
+                component="img"
+                src={instituicaoLogo}
+                alt={instituicaoNome}
+                sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              instituicaoIniciais
+            )}
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="body1" sx={{ fontWeight: 700, lineHeight: 1.2 }} noWrap>
+              {instituicaoNome}
+            </Typography>
+          </Box>
         </Box>
       </Box>
 
-      <Box sx={{ flex: 1, overflowY: "auto", py: 2 }}>
+      {/* Navegação */}
+      <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
         {menuSections.map((section) => {
           const visibleItems = section.items.filter((item) =>
             item.allowedRoles ? is(...item.allowedRoles) : true
           );
           if (visibleItems.length === 0) return null;
           return (
-          <Box key={section.title} sx={{ mb: 3 }}>
-            {section.title && (
-              <Typography
-                variant="caption"
-                sx={{
-                  px: 2.5,
-                  display: "block",
-                  color: "#999",
-                  fontWeight: 600,
-                  fontSize: 11,
-                  letterSpacing: 0.5,
-                }}
-              >
-                {section.title}
-              </Typography>
-            )}
-            <List sx={{ px: 1.5 }}>
-              {visibleItems.map((item) => (
-                <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
-                  <ListItemButton
-                    selected={pathname === item.href}
-                    onClick={() => {
-                      if (item.href) {
-                        router.push(item.href);
-                      }
-                      if (isMobile) {
-                        onClose();
-                      }
-                    }}
-                    sx={{
-                      borderRadius: BORDER_RADIUS.small,
-                      p: 0.5,
-                      py: 0.75,
-                      "&.Mui-selected": {
-                        bgcolor: "#EDEDFE",
-                        color: "#5B5FED",
-                        "& .MuiListItemIcon-root": {
-                          color: "#5B5FED",
-                        },
-                        "&:hover": {
-                          bgcolor: "#E5E5FD",
-                        },
-                        "::before": {
-                          content: '""',
-                          position: "absolute",
-                          top: 0,
-                          left: "-12px",
-                          height: "100%",
-                          width: "4px",
-                          borderTopRightRadius: BORDER_RADIUS.full,
-                          borderBottomRightRadius: BORDER_RADIUS.full,
-                          bgcolor: "#5B5FED",
-                        },
-                      },
-                      "&:hover": {
-                        bgcolor: "#F5F5F5",
-                      },
-                    }}
-                  >
-                    <ListItemIcon
-                      sx={{
-                        color: "#666",
-                        justifyContent: "center",
-                        minWidth: 35,
-                      }}
-                    >
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.label}
-                      primaryTypographyProps={{
-                        fontSize: 14,
-                        fontWeight: 500,
-                      }}
-                    />
-                    {item.badge && (
-                      <Chip
-                        label={item.badge}
-                        size="small"
-                        sx={{
-                          height: 20,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          bgcolor: "#F5F5F5",
-                          color: "#666",
+            <Box key={section.title || "root"} sx={{ mb: 2.5 }}>
+              {section.title && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    px: 2.5,
+                    display: "block",
+                    color: "text.secondary",
+                    fontWeight: 700,
+                    fontSize: 11,
+                    letterSpacing: 0.8,
+                    mb: 0.5,
+                  }}
+                >
+                  {section.title}
+                </Typography>
+              )}
+              <List sx={{ px: 1.5, py: 0 }}>
+                {visibleItems.map((item) => {
+                  const selected = pathname === item.href;
+                  return (
+                    <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
+                      <ListItemButton
+                        selected={selected}
+                        onClick={() => {
+                          if (item.href) {
+                            router.push(item.href);
+                          }
+                          if (isMobile) {
+                            onClose();
+                          }
                         }}
-                      />
-                    )}
-                    {item.isBeta && (
-                      <Chip
-                        label="BETA"
-                        size="small"
                         sx={{
-                          height: 20,
-                          fontSize: 10,
-                          fontWeight: 700,
-                          bgcolor: "#E8E8FF",
-                          color: "#5B5FED",
+                          borderRadius: 2,
+                          px: 1.25,
+                          py: 0.9,
+                          "&.Mui-selected": {
+                            bgcolor: "background.paper",
+                            color: "primary.main",
+                            border: "1px solid",
+                            borderColor: "divider",
+                            boxShadow: "0 1px 2px rgba(16,12,40,0.06)",
+                            "& .MuiListItemIcon-root": {
+                              color: "primary.main",
+                            },
+                            "&:hover": {
+                              bgcolor: "background.paper",
+                            },
+                          },
+                          "&:hover": {
+                            bgcolor: "action.hover",
+                          },
                         }}
-                      />
-                    )}
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
+                      >
+                        <ListItemIcon
+                          sx={{
+                            color: "text.secondary",
+                            justifyContent: "center",
+                            minWidth: 34,
+                          }}
+                        >
+                          {item.icon}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={item.label}
+                          primaryTypographyProps={{
+                            fontSize: 14,
+                            fontWeight: selected ? 600 : 500,
+                          }}
+                        />
+                        {item.badge && (
+                          <Chip
+                            label={item.badge}
+                            size="small"
+                            sx={{
+                              height: 20,
+                              fontSize: 11,
+                              fontWeight: 600,
+                              bgcolor: "action.hover",
+                              color: "text.secondary",
+                            }}
+                          />
+                        )}
+                        {item.isBeta && (
+                          <Chip
+                            label="BETA"
+                            size="small"
+                            sx={{
+                              height: 20,
+                              fontSize: 10,
+                              fontWeight: 700,
+                              bgcolor: "action.selected",
+                              color: "primary.main",
+                            }}
+                          />
+                        )}
+                      </ListItemButton>
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </Box>
           );
         })}
+      </Box>
+
+      {/* Perfil */}
+      <Box sx={{ p: 2, pt: 1.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.25,
+            p: 1,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 3,
+          }}
+        >
+          <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", fontSize: 15 }}>
+            {userName ? userName.charAt(0).toUpperCase() : "?"}
+          </Avatar>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }} noWrap>
+              {formatFirstLastName(userName || "")}
+            </Typography>
+            {email && (
+              <Typography variant="caption" sx={{ color: "text.secondary" }} noWrap component="div">
+                {email}
+              </Typography>
+            )}
+          </Box>
+          <IconButton
+            size="small"
+            aria-label="conta"
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            sx={{ color: "text.secondary", flexShrink: 0 }}
+          >
+            <IconifyIcon icon="material-symbols:more-vert" width={20} />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            transformOrigin={{ vertical: "bottom", horizontal: "right" }}
+            sx={{
+              ".MuiPaper-root": {
+                minWidth: 180,
+                boxShadow: "0 0 30px rgba(0,0,0,0.12)",
+                borderRadius: BORDER_RADIUS.medium,
+              },
+            }}
+          >
+            <MenuItem onClick={handleLogout} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <IconifyIcon icon="material-symbols:logout" width={18} />
+              <Typography variant="body2">Sair</Typography>
+            </MenuItem>
+          </Menu>
+        </Box>
       </Box>
     </Box>
   );
 
   return (
-    <Box
-      component="nav"
-      sx={{
-        width: { sm: DRAWER_WIDTH },
-        flexShrink: { sm: 0 },
-      }}
-    >
+    <>
       {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
         onClose={onClose}
-        ModalProps={{
-          keepMounted: true,
-        }}
+        ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: "block", sm: "none" },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: DRAWER_WIDTH,
+            border: "none",
           },
         }}
       >
         {drawerContent}
       </Drawer>
 
-      {/* Desktop Drawer */}
-      <Drawer
-        variant="permanent"
+      {/* Desktop: card flutuante */}
+      <Box
+        component="nav"
         sx={{
-          display: { xs: "none", sm: "block" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: DRAWER_WIDTH,
-          },
+          display: { xs: "none", sm: "flex" },
+          flexDirection: "column",
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 4,
+          boxShadow: "0 1px 3px rgba(16,12,40,0.04)",
+          overflow: "hidden",
         }}
-        open
       >
         {drawerContent}
-      </Drawer>
-    </Box>
+      </Box>
+    </>
   );
 }

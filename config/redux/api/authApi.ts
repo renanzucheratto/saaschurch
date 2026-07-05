@@ -29,6 +29,7 @@ export interface AuthUser {
   instituicao: {
     id: string;
     nome: string;
+    logoUrl?: string | null;
   };
   createdAt: string;
   updatedAt: string;

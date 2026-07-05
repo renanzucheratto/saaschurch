@@ -18,31 +18,39 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
+    <Box
+      sx={{
+        display: "flex",
+        height: "100vh",
+        bgcolor: "background.default",
+        p: { xs: 0, sm: 1.5 },
+        gap: { sm: 1.5 },
+      }}
+    >
       <UserSync />
       {/* Sidebar */}
       <Sidebar mobileOpen={mobileOpen} onClose={handleDrawerClose} />
 
-      {/* Main Content Area */}
+      {/* Área de conteúdo */}
       <Box
         sx={{
           flex: 1,
+          minWidth: 0,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
+          gap: { sm: 1 },
         }}
       >
-        {/* Navbar */}
+        {/* Header */}
         <Navbar onMenuClick={handleDrawerToggle} />
 
-        {/* Page Content */}
+        {/* Conteúdo da página */}
         <Box
           component="main"
           sx={{
             flex: 1,
-            px: 2.5,
+            px: { xs: 2, sm: 2.5 },
             py: 2,
-            bgcolor: "background.default",
             overflowY: "auto",
           }}
         >
