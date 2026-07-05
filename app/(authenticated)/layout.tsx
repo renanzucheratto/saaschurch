@@ -22,7 +22,7 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
       sx={{
         display: "flex",
         height: "100vh",
-        bgcolor: "background.default",
+        bgcolor: "#f2f2f2",
         p: { xs: 0, sm: 1.5 },
         gap: { sm: 1.5 },
       }}

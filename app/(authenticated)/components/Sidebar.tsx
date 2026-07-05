@@ -19,6 +19,7 @@ import {
   Skeleton,
   useTheme,
   useMediaQuery,
+  Button,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { signOut } from "next-auth/react";
@@ -223,18 +224,14 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                           borderRadius: 2,
                           px: 1,
                           py: 0.7,
-                          border: "1px solid transparent",
                           "&.Mui-selected": {
-                            bgcolor: "secondary",
-                            color: "primary.main",
-                            border: "1px solid",
-                            borderColor: "divider",
-                            boxShadow: "0 1px 2px rgba(16,12,40,0.06)",
+                            bgcolor: "primary.main",
+                            color: "white",
                             "& .MuiListItemIcon-root": {
-                              color: "primary.main",
+                              color: "white",
                             },
                             "&:hover": {
-                              bgcolor: "secondary",
+                              bgcolor: "primary.dark",
                             },
                           },
                           "&:hover": {
@@ -295,17 +292,22 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       </Box>
 
       {/* Perfil */}
-      <Box sx={{ p: 2, pt: 1.5 }}>
+      <Box sx={{ p: 2, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "start",
+            textAlign: 'left',
+            textTransform: 'none',
             gap: 1.25,
-            p: 1,
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 3,
+            backgroundColor: 'background.paper'
           }}
+          component={Button}
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          fullWidth
         >
           <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", fontSize: 15 }}>
             {userName ? userName.charAt(0).toUpperCase() : "?"}
@@ -320,34 +322,26 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               </Typography>
             )}
           </Box>
-          <IconButton
-            size="small"
-            aria-label="conta"
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            sx={{ color: "text.secondary", flexShrink: 0 }}
-          >
-            <IconifyIcon icon="material-symbols:more-vert" width={20} />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(null)}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            transformOrigin={{ vertical: "bottom", horizontal: "right" }}
-            sx={{
-              ".MuiPaper-root": {
-                minWidth: 180,
-                boxShadow: "0 0 30px rgba(0,0,0,0.12)",
-                borderRadius: BORDER_RADIUS.medium,
-              },
-            }}
-          >
-            <MenuItem onClick={handleLogout} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconifyIcon icon="material-symbols:logout" width={18} />
-              <Typography variant="body2">Sair</Typography>
-            </MenuItem>
-          </Menu>
         </Box>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          transformOrigin={{ vertical: "bottom", horizontal: "right" }}
+          sx={{
+            ".MuiPaper-root": {
+              minWidth: 220,
+              boxShadow: "0 0 30px rgba(0,0,0,0.12)",
+              borderRadius: BORDER_RADIUS.medium,
+            },
+          }}
+        >
+          <MenuItem onClick={handleLogout} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconifyIcon icon="material-symbols:logout" width={18} />
+            <Typography variant="body2">Sair</Typography>
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );
@@ -380,7 +374,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           flexDirection: "column",
           width: DRAWER_WIDTH,
           flexShrink: 0,
-          bgcolor: "background.paper",
+          bgcolor: "#fbfbfb",
           border: "1px solid",
           borderColor: "divider",
           borderRadius: 4,
