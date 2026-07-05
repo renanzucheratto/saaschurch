@@ -14,8 +14,6 @@ import {
   Alert,
   CircularProgress,
   Container,
-  Stack,
-  Divider,
 } from '@mui/material';
 import { useObterEventoQuery } from '@/config/redux';
 import { usePathname } from 'next/navigation';
@@ -24,9 +22,14 @@ import { CampoRenderer } from './CampoRenderer';
 import { Countdown } from './Countdown';
 import { CPFMaskCustom, RGMaskCustom, TelefoneMaskCustom } from './MaskInputs';
 import { FaqSection } from './FaqSection';
-import { Icon } from "@iconify/react";
+import { Icon } from '@iconify/react';
+import type { TipoCampoCustomizado } from '@/types/evento.types';
 
 const BRAND = '#513B89';
+const HERO_FALLBACK = 'linear-gradient(135deg, #2a1f47 0%, #513B89 100%)';
+
+// Tipos de campo customizado que devem ocupar a linha inteira do grid.
+const FULL_WIDTH_TIPOS: TipoCampoCustomizado[] = ['radio', 'checkbox', 'aceite_termo'];
 
 export const EventoForm = () => {
   const params = usePathname();
@@ -46,16 +49,18 @@ export const EventoForm = () => {
   const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } =
     useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen, campos);
 
-  const formatDateTime = (dateString: string | null) => {
+  const formatDate = (dateString: string | null) => {
     if (!dateString) return null;
-    const date = new Date(dateString);
-    const d = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const t = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    return `${d} às ${t}`;
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
   };
 
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const formatTime = (dateString: string | null) => {
+    if (!dateString) return null;
+    return new Date(dateString).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
   if (isLoadingEvento) {
@@ -76,7 +81,11 @@ export const EventoForm = () => {
     );
   }
 
-  const dataInicio = formatDateTime(evento.data_inicio);
+  const dataLabel = formatDate(evento.data_inicio);
+  const inicioHora = formatTime(evento.data_inicio);
+  const fimHora = formatTime(evento.data_fim);
+  const horarioLabel = inicioHora ? (fimHora ? `${inicioHora} às ${fimHora}` : inicioHora) : null;
+
   const statusMensagem =
     statusEvento?.nome === 'aberto'
       ? 'As inscrições estão abertas.'
@@ -94,377 +103,412 @@ export const EventoForm = () => {
 
   return (
     <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh' }}>
-      {/* ── HERO IMAGE ── */}
-      {evento.imagem_url && (
-        <Box sx={{ px: { xs: 2, md: 6 }, maxWidth: 1100, mx: 'auto', pt: 2, mb: 4 }}>
-          <Box
-            sx={{
-              borderRadius: 4,
-              overflow: 'hidden',
-              boxShadow: '0 16px 64px rgba(0,0,0,0.12)',
-              aspectRatio: '16/7',
-              backgroundImage: `url(${evento.imagem_url})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
-        </Box>
-      )}
-
-      {/* ── HERO TEXT ── */}
+      {/* ── HERO BAND ── */}
       <Box
         sx={{
-          pt: evento.imagem_url ? 0 : { xs: 4 },
-          pb: 0,
-          px: 3,
-          textAlign: 'center',
-          maxWidth: 820,
-          mx: 'auto',
+          position: 'relative',
+          overflow: 'hidden',
+          background: evento.imagem_url ? undefined : HERO_FALLBACK,
+          ...(evento.imagem_url && {
+            backgroundImage: `url(${evento.imagem_url})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }),
+          '&::before': evento.imagem_url
+            ? {
+                content: '""',
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(135deg, rgba(15,15,26,0.82) 0%, rgba(81,59,137,0.72) 100%)',
+              }
+            : undefined,
         }}
       >
-        {/* Badge */}
-        <Box
-          sx={{
-            display: 'inline-block',
-            border: `1.5px solid ${BRAND}`,
-            borderRadius: 99,
-            px: 2.5,
-            py: 0.5,
-            mb: 4,
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              color: BRAND,
-              textTransform: 'uppercase',
-              letterSpacing: '0.12em',
-            }}
-          >
-            {isRegistrationOpen ? 'Inscrições abertas' : (statusEvento?.nome ?? 'Evento')}
-          </Typography>
-        </Box>
-
-        {/* Title */}
-        <Typography
-          component="h1"
-          sx={{
-            fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-            fontWeight: 900,
-            lineHeight: 1.15,
-            letterSpacing: '-0.02em',
-            color: '#0f0f1a',
-            mb: 2,
-          }}
-        >
-          {evento.nome}
-        </Typography>
-
-        {/* Description */}
-        {evento.descricao && (
+        <Container maxWidth="lg" sx={{ position: 'relative', py: 7 }}>
           <Box
-            dangerouslySetInnerHTML={{ __html: evento.descricao }}
             sx={{
-              fontSize: { xs: '0.95rem', md: '1.05rem' },
-              color: 'text.secondary',
-              lineHeight: 1.7,
-              maxWidth: 620,
-              mb: 4,
-              mx: 'auto',
-              whiteSpace: 'pre-line',
-              // textAlign: 'left',
-              '& p': { margin: '0.5em 0' },
-              '& strong, & b': { color: '#1a1a2e' },
-              '& a': { color: BRAND },
-            }}
-          />
-        )}
-
-        {/* Date line */}
-        {dataInicio && (
-          <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-              mb: 4, gap: 1 }}>
-            <Icon icon="lucide:calendar" />
-          <Typography variant="body1">
-            {dataInicio}
-          </Typography>
-          </Stack>
-        )}
-
-        {/* Countdown */}
-        {evento.data_inicio && (
-          <Box sx={{ mb: 4 }}>
-            <Countdown targetDate={evento.data_inicio} />
-          </Box>
-        )}
-
-        {/* CTA */}
-        {isRegistrationOpen && (
-          <Button
-            onClick={scrollToForm}
-            variant="contained"
-            size="large"
-            sx={{
-              bgcolor: BRAND,
-              color: 'white',
-              borderRadius: 99,
-              px: { xs: 4, md: 6 },
-              py: { xs: 1.5, md: 2 },
-              fontSize: { xs: '0.95rem', md: '1.05rem' },
-              fontWeight: 700,
-              textTransform: 'none',
-              boxShadow: `0 6px 24px ${BRAND}55`,
-              '&:hover': {
-                bgcolor: '#3e2c6b',
-                boxShadow: `0 8px 32px ${BRAND}77`,
-              },
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: { xs: 'flex-start', md: 'center' },
+              justifyContent: 'space-between',
+              gap: { xs: 4, md: 6 },
             }}
           >
-            Inscrever-se Agora — Garantir Vaga
-          </Button>
-        )}
-      </Box>
-
-      {/* ── FAQ SECTION ── */}
-      {evento.faq && evento.faq.length > 0 && (
-        <Stack sx={{my: 6, gap: 4, width: '100%'}}>
-          
-          <FaqSection faq={evento.faq} />
-        </Stack>
-      )}
-
-      {/* ── FORM SECTION ── */}
-      <Box ref={formRef} id="formulario" sx={{ maxWidth: 680, mx: 'auto', px: { xs: 2, md: 3 }, pb: 12 }}>
-        <Typography
-          component="h2"
-          sx={{
-            fontSize: { xs: '1.5rem', md: '2rem' },
-            fontWeight: 800,
-            color: '#0f0f1a',
-            mb: 1,
-          }}
-        >
-          Faça sua inscrição
-        </Typography>
-        <Typography sx={{ color: 'text.secondary', mb: 4, fontSize: '0.95rem' }}>
-          Preencha os dados abaixo para garantir sua participação
-        </Typography>
-
-        {!isRegistrationOpen && (
-          <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-              O evento está {statusEvento?.nome ?? 'indisponível'}
-            </Typography>
-            <Typography variant="body2">{statusMensagem}</Typography>
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleSubmit}>
-          {/* Products */}
-          {hasProdutos && (
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="subtitle2"
+            {/* Título + badge */}
+            <Box sx={{ flex: 1 }}>
+              <Box
                 sx={{
-                  fontWeight: 700,
-                  mb: 2,
-                  fontSize: '0.8rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'text.primary',
+                  display: 'inline-block',
+                  border: '1.5px solid rgba(255,255,255,0.5)',
+                  borderRadius: 99,
+                  px: 2.5,
+                  py: 0.5,
+                  mb: 3,
                 }}
               >
-                Selecione uma opção {selecaoUnicaProduto ? '*' : '(opcional)'}
-              </Typography>
-              <Controller
-                name="produtoId"
-                control={control}
-                render={({ field }) => (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    {evento.produtos.filter((p) => !p.oculto).map((produto) => (
-                      <ProductAccordion
-                        key={produto.id}
-                        produto={produto}
-                        selected={field.value === produto.id}
-                        onSelect={field.onChange}
-                        disabled={!isRegistrationOpen}
-                      />
-                    ))}
-                  </Box>
-                )}
-              />
-              {errors.produtoId && (
-                <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
-                  {errors.produtoId.message}
+                <Typography
+                  sx={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.12em',
+                  }}
+                >
+                  {isRegistrationOpen ? 'Inscrições abertas' : statusEvento?.nome ?? 'Evento'}
                 </Typography>
-              )}
-            </Box>
-          )}
-
-          {/* Custom fields */}
-          {temCamposCustomizados && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-              {camposVisiveis.map((campo) => (
-                <CampoRenderer key={campo.id} campo={campo} control={control} disabled={!isRegistrationOpen} />
-              ))}
-            </Box>
-          )}
-
-          {/* Default fields */}
-          {!temCamposCustomizados && (
-            <>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-                <Controller
-                  name="nome"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Nome completo"
-                      fullWidth
-                      disabled={!isRegistrationOpen}
-                      error={!!errors.nome}
-                      helperText={errors.nome?.message}
-                      variant="outlined"
-                      sx={fieldSx}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="telefone"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Telefone"
-                      fullWidth
-                      disabled={!isRegistrationOpen}
-                      error={!!errors.telefone}
-                      helperText={errors.telefone?.message}
-                      variant="outlined"
-                      placeholder="(00) 00000-0000"
-                      InputProps={{ inputComponent: TelefoneMaskCustom as never }}
-                      sx={fieldSx}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="email"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Email"
-                      type="email"
-                      fullWidth
-                      disabled={!isRegistrationOpen}
-                      error={!!errors.email}
-                      helperText={errors.email?.message}
-                      variant="outlined"
-                      sx={fieldSx}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="rg"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="RG"
-                      fullWidth
-                      disabled={!isRegistrationOpen}
-                      error={!!errors.rg}
-                      helperText={errors.rg?.message}
-                      variant="outlined"
-                      placeholder="00.000.000-0"
-                      InputProps={{ inputComponent: RGMaskCustom as never }}
-                      sx={fieldSx}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="cpf"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="CPF"
-                      fullWidth
-                      disabled={!isRegistrationOpen}
-                      error={!!errors.cpf}
-                      helperText={errors.cpf?.message}
-                      variant="outlined"
-                      placeholder="000.000.000-00"
-                      InputProps={{ inputComponent: CPFMaskCustom as never }}
-                      sx={fieldSx}
-                    />
-                  )}
-                />
               </Box>
 
-              <Box sx={{ mt: 2 }}>
-                <Controller
-                  name="termo_assinado"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Checkbox {...field} checked={field.value} disabled={!isRegistrationOpen} />}
-                      label={
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                          Eu declaro estar ciente e concordar com as condições contidas neste formulário de inscrição da
-                          Igreja Formosa de Cristo, bem como a responsabilidade do cumprimento com o pagamento do valor
-                          escolhido
-                        </Typography>
-                      }
-                    />
-                  )}
-                />
-                {errors.termo_assinado && (
-                  <Typography color="error" variant="caption" sx={{ display: 'block', ml: 4 }}>
-                    {errors.termo_assinado.message}
-                  </Typography>
-                )}
-              </Box>
-            </>
-          )}
+              <Typography
+                component="h1"
+                sx={{
+                  fontSize: { xs: '2rem', sm: '2.75rem', md: '3.25rem' },
+                  fontWeight: 900,
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.02em',
+                  color: '#ffffff',
+                }}
+              >
+                {evento.nome}
+              </Typography>
+            </Box>
 
-          <Button
-            type="submit"
-            variant="contained"
-            size="large"
-            fullWidth
-            disabled={!isRegistrationOpen || !isValid || isSubmitting}
-            sx={{
-              mt: 4,
-              py: 1.75,
-              borderRadius: 2,
-              fontSize: '1rem',
-              fontWeight: 700,
-              textTransform: 'none',
-              bgcolor: BRAND,
-              color: 'white',
-              boxShadow: `0 4px 16px ${BRAND}44`,
-              '&:hover': {
-                bgcolor: '#3e2c6b',
-                boxShadow: `0 6px 24px ${BRAND}66`,
-              },
-              '&:disabled': {
-                bgcolor: '#e0e0e0',
-                color: '#9e9e9e',
-                boxShadow: 'none',
-              },
-            }}
-          >
-            {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
-          </Button>
-        </Box>
+            {/* Countdown */}
+            {evento.data_inicio && (
+              <Box sx={{ flexShrink: 0 }}>
+                <Countdown targetDate={evento.data_inicio} />
+              </Box>
+            )}
+          </Box>
+        </Container>
       </Box>
+
+      {/* ── DUAS COLUNAS ── */}
+      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' },
+            gap: { xs: 4, md: 6 },
+            alignItems: 'start',
+          }}
+        >
+          {/* ── COLUNA ESQUERDA ── */}
+          <Box>
+                <Typography
+                  component="h2"
+                  sx={{
+                    fontSize: { xs: '1.5rem', md: '2rem' },
+                    fontWeight: 800,
+                    color: '#0f0f1a',
+                    mb: 2.5,
+                  }}
+                >
+                  Informações do evento
+                </Typography>
+            {/* Card detalhes do evento */}
+
+            {(dataLabel || horarioLabel) && (
+              <Box
+                sx={{
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 3,
+                  bgcolor: '#faf9fc',
+                  p: { xs: 3, md: 3 },
+                  mb: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2.5, md: 4 } }}>
+                  {dataLabel && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Icon icon="lucide:calendar" width={20} color={BRAND} />
+                      <Typography sx={{ fontSize: '0.95rem', color: 'text.primary' }}>{dataLabel}</Typography>
+                    </Box>
+                  )}
+                  {horarioLabel && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Icon icon="lucide:clock" width={20} color={BRAND} />
+                      <Typography sx={{ fontSize: '0.95rem', color: 'text.primary' }}>{horarioLabel}</Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            )}
+            
+
+            {/* O que você vai aprender */}
+            {evento.descricao && (
+              <>
+                <Box
+                  dangerouslySetInnerHTML={{ __html: evento.descricao }}
+                  sx={{
+                    fontSize: { xs: '0.95rem', md: '1.05rem' },
+                    color: 'text.secondary',
+                    lineHeight: 1.7,
+                    whiteSpace: 'pre-line',
+                    '& p': { margin: '0.5em 0' },
+                    '& strong, & b': { color: '#1a1a2e' },
+                    '& a': { color: BRAND },
+                  }}
+                />
+              </>
+            )}
+          </Box>
+
+          {/* ── COLUNA DIREITA (FORMULÁRIO) ── */}
+          <Box ref={formRef} id="formulario">
+            <Typography
+              component="h2"
+              sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, fontWeight: 800, color: '#0f0f1a', mb: 1 }}
+            >
+              Inscreva-se
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', mb: 4, fontSize: '0.95rem' }}>
+              Preencha os dados abaixo para garantir sua participação
+            </Typography>
+
+            {!isRegistrationOpen && (
+              <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  O evento está {statusEvento?.nome ?? 'indisponível'}
+                </Typography>
+                <Typography variant="body2">{statusMensagem}</Typography>
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit}>
+              {/* Produtos */}
+              {hasProdutos && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 2,
+                      fontSize: '0.8rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'text.primary',
+                    }}
+                  >
+                    Selecione uma opção {selecaoUnicaProduto ? '*' : '(opcional)'}
+                  </Typography>
+                  <Controller
+                    name="produtoId"
+                    control={control}
+                    render={({ field }) => (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                        {evento.produtos
+                          .filter((p) => !p.oculto)
+                          .map((produto) => (
+                            <ProductAccordion
+                              key={produto.id}
+                              produto={produto}
+                              selected={field.value === produto.id}
+                              onSelect={field.onChange}
+                              disabled={!isRegistrationOpen}
+                            />
+                          ))}
+                      </Box>
+                    )}
+                  />
+                  {errors.produtoId && (
+                    <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+                      {errors.produtoId.message}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+
+              {/* Campos customizados (grid 2 colunas) */}
+              {temCamposCustomizados && (
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                    gap: 2.5,
+                  }}
+                >
+                  {camposVisiveis.map((campo) => (
+                    <Box
+                      key={campo.id}
+                      sx={{ gridColumn: FULL_WIDTH_TIPOS.includes(campo.tipo) ? '1 / -1' : 'auto' }}
+                    >
+                      <CampoRenderer campo={campo} control={control} disabled={!isRegistrationOpen} />
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
+              {/* Campos padrão (grid 2 colunas) */}
+              {!temCamposCustomizados && (
+                <>
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                      gap: 2.5,
+                    }}
+                  >
+                    <Controller
+                      name="nome"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="Nome completo"
+                          fullWidth
+                          disabled={!isRegistrationOpen}
+                          error={!!errors.nome}
+                          helperText={errors.nome?.message}
+                          variant="outlined"
+                          sx={{ ...fieldSx, gridColumn: { sm: '1 / -1' } }}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="telefone"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="Telefone"
+                          fullWidth
+                          disabled={!isRegistrationOpen}
+                          error={!!errors.telefone}
+                          helperText={errors.telefone?.message}
+                          variant="outlined"
+                          placeholder="(00) 00000-0000"
+                          InputProps={{ inputComponent: TelefoneMaskCustom as never }}
+                          sx={fieldSx}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="email"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="Email"
+                          type="email"
+                          fullWidth
+                          disabled={!isRegistrationOpen}
+                          error={!!errors.email}
+                          helperText={errors.email?.message}
+                          variant="outlined"
+                          sx={fieldSx}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="rg"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="RG"
+                          fullWidth
+                          disabled={!isRegistrationOpen}
+                          error={!!errors.rg}
+                          helperText={errors.rg?.message}
+                          variant="outlined"
+                          placeholder="00.000.000-0"
+                          InputProps={{ inputComponent: RGMaskCustom as never }}
+                          sx={fieldSx}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="cpf"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="CPF"
+                          fullWidth
+                          disabled={!isRegistrationOpen}
+                          error={!!errors.cpf}
+                          helperText={errors.cpf?.message}
+                          variant="outlined"
+                          placeholder="000.000.000-00"
+                          InputProps={{ inputComponent: CPFMaskCustom as never }}
+                          sx={fieldSx}
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  <Box sx={{ mt: 2 }}>
+                    <Controller
+                      name="termo_assinado"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={<Checkbox {...field} checked={field.value} disabled={!isRegistrationOpen} />}
+                          label={
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                              Eu declaro estar ciente e concordar com as condições contidas neste formulário de
+                              inscrição da Igreja Formosa de Cristo, bem como a responsabilidade do cumprimento com o
+                              pagamento do valor escolhido
+                            </Typography>
+                          }
+                        />
+                      )}
+                    />
+                    {errors.termo_assinado && (
+                      <Typography color="error" variant="caption" sx={{ display: 'block', ml: 4 }}>
+                        {errors.termo_assinado.message}
+                      </Typography>
+                    )}
+                  </Box>
+                </>
+              )}
+
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={!isRegistrationOpen || !isValid || isSubmitting}
+                sx={{
+                  mt: 4,
+                  py: 1.75,
+                  borderRadius: 2,
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  bgcolor: BRAND,
+                  color: 'white',
+                  boxShadow: `0 4px 16px ${BRAND}44`,
+                  '&:hover': {
+                    bgcolor: '#3e2c6b',
+                    boxShadow: `0 6px 24px ${BRAND}66`,
+                  },
+                  '&:disabled': {
+                    bgcolor: '#e0e0e0',
+                    color: '#9e9e9e',
+                    boxShadow: 'none',
+                  },
+                }}
+              >
+                {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* ── FAQ (full-width) ── */}
+        {evento.faq && evento.faq.length > 0 && (
+          <Box sx={{ mt: 8 }}>
+            <FaqSection faq={evento.faq} />
+          </Box>
+        )}
+      </Container>
 
       <Snackbar
         open={alert.open}
