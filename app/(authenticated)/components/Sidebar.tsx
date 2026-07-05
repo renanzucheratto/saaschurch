@@ -16,6 +16,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Skeleton,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
@@ -92,7 +93,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const { user } = useAppSelector((state) => state.auth);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const { data: currentUser } = useGetCurrentUserQuery();
+  const { data: currentUser, isLoading: isLoadingCurrentUser } = useGetCurrentUserQuery();
 
   const userName = user?.nome;
   const email = user?.email;
@@ -135,37 +136,45 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             borderRadius: 3,
           }}
         >
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
-              bgcolor: instituicaoLogo ? "transparent" : "primary.main",
-              color: "primary.contrastText",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              fontWeight: 700,
-              fontSize: 16,
-              overflow: "hidden",
-            }}
-          >
-            {instituicaoLogo ? (
-              <Box
-                component="img"
-                src={instituicaoLogo}
-                alt={instituicaoNome}
-                sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
+          {isLoadingCurrentUser ? (
+            <Skeleton variant="rounded" width={30} height={30} sx={{ borderRadius: 2, flexShrink: 0 }} />
+          ) : (
+            <Box
+              sx={{
+                width: 30,
+                height: 30,
+                borderRadius: 2,
+                bgcolor: instituicaoLogo ? "transparent" : "primary.main",
+                color: "primary.contrastText",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                fontWeight: 700,
+                fontSize: 14,
+                overflow: "hidden",
+              }}
+            >
+              {instituicaoLogo ? (
+                <Box
+                  component="img"
+                  src={instituicaoLogo}
+                  alt={instituicaoNome}
+                  sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                instituicaoIniciais
+              )}
+            </Box>
+          )}
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            {isLoadingCurrentUser ? (
+              <Skeleton variant="text" width="70%" sx={{ fontSize: 14 }} />
             ) : (
-              instituicaoIniciais
+              <Typography sx={{ fontWeight: 700, fontSize: 14, lineHeight: 1.2 }} noWrap>
+                {instituicaoNome}
+              </Typography>
             )}
-          </Box>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="body1" sx={{ fontWeight: 700, lineHeight: 1.2 }} noWrap>
-              {instituicaoNome}
-            </Typography>
           </Box>
         </Box>
       </Box>
