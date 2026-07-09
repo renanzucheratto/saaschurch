@@ -292,7 +292,6 @@ export default function EventoDetalhesModule() {
       headerName: `${campo.label}${campo.oculto ? ' (oculto)' : ''}`,
       flex: 1,
       minWidth: 180,
-      sortable: false,
       valueGetter: (_, row: Participante) => {
         const resposta = row.respostas_customizadas?.find((r) => r.campoId === campo.id);
         if (!resposta) return '—';
@@ -341,6 +340,21 @@ export default function EventoDetalhesModule() {
             return (
               prodString.includes(lowerSearch) ||
               (numericSearch && prodDigits.includes(numericSearch))
+            );
+          });
+        }
+
+        // Busca em respostas de campos customizados
+        if (key === "respostas_customizadas" && Array.isArray(value)) {
+          return value.some((resposta) => {
+            const respostaTexto = [resposta.valor, ...(resposta.valores || [])]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+            const respostaDigits = respostaTexto.replace(/\D/g, "");
+            return (
+              respostaTexto.includes(lowerSearch) ||
+              (numericSearch && respostaDigits.length > 0 && respostaDigits.includes(numericSearch))
             );
           });
         }
