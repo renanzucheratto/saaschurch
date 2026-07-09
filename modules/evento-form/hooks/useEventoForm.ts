@@ -6,12 +6,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { buildEventoFormSchema, EventoFormValues } from '../schemas/evento-form.schema';
 import { useCadastrarParticipanteMutation } from '@/config/redux';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { CampoCustomizado } from '@/types/evento.types';
+import { CampoCustomizado, Produto } from '@/types/evento.types';
 
 interface Alert {
   open: boolean;
   message: string;
   severity: 'success' | 'error';
+}
+
+/** Etapa de pagamento aberta depois da inscrição, quando o produto escolhido é cobrável. */
+interface Checkout {
+  participanteId: string;
+  produtoIds: string[];
 }
 
 export const useEventoForm = (
@@ -20,9 +26,11 @@ export const useEventoForm = (
   selecaoUnicaProduto: boolean = true,
   canSubmit: boolean = true,
   campos: CampoCustomizado[] = [],
+  produtos: Produto[] = [],
 ) => {
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [cadastrarParticipante, { isLoading: isSubmittingApi }] = useCadastrarParticipanteMutation();
+  const [checkout, setCheckout] = useState<Checkout | null>(null);
   const [alert, setAlert] = useState<Alert>({
     open: false,
     message: '',
@@ -153,7 +161,16 @@ export const useEventoForm = (
         };
       }
 
-      await cadastrarParticipante({ eventId: eventoId, data: payload as Parameters<typeof cadastrarParticipante>[0]['data'] }).unwrap();
+      const participante = await cadastrarParticipante({ eventId: eventoId, data: payload as Parameters<typeof cadastrarParticipante>[0]['data'] }).unwrap();
+
+      // Evento sem produto cobrável conclui aqui: o checkout nem é montado, e
+      // `GET /pagamentos/checkout-config` nem chega a ser chamado.
+      const produtoEscolhido = produtos.find((produto) => produto.id === data.produtoId);
+
+      if (produtoEscolhido?.exigePagamento && participante?.id) {
+        setCheckout({ participanteId: participante.id, produtoIds: [produtoEscolhido.id] });
+        return;
+      }
 
       setAlert({
         open: true,
@@ -193,5 +210,6 @@ export const useEventoForm = (
     isValid,
     alert,
     handleCloseAlert,
+    checkout,
   };
 };

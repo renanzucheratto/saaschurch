@@ -1,105 +1,153 @@
 ---
 name: new-rtk-service
 description: >-
-  Scaffold de um novo domínio RTK Query no Portal Vixtra em
-  src/redux/services/<domain>/ (index.ts com api.injectEndpoints + types.ts),
-  preservando o hardening de segurança da base api.ts (prefixo Bearer, header
-  portfolio/companytoken, reauth 401/403). Use quando o usuário pedir "novo
-  serviço RTK", "novo endpoint de API", "criar service em redux/services",
-  "domínio RTK Query", ou invocar /new-rtk-service. NÃO use para páginas de
-  módulo (use /new-module) nem para Axios legacy.
+  Scaffold de um novo domínio RTK Query no saaschurch em
+  config/redux/api/<dominio>Api.ts, injetando na baseApi compartilhada e
+  preservando o hardening de segurança dela (Bearer, refresh 401, logout
+  federado). Use quando o usuário pedir "novo serviço RTK", "novo endpoint de
+  API", "criar service em config/redux/api", "domínio RTK Query", ou invocar
+  /new-rtk-service. NÃO use para páginas de módulo (use /new-module).
 ---
 
 # New RTK Service — scaffold de domínio RTK Query
 
-Gera um domínio RTK Query que injeta na base `api` compartilhada. Referência
-viva: `src/redux/services/troca-garantia/` e a base `src/redux/services/api.ts`.
+Gera um domínio RTK Query que injeta na `baseApi` compartilhada.
+
+Referência viva real: `config/redux/api/areasApi.ts` (domínio completo, com
+tags por id) e `config/redux/api/dashboardApi.ts` (query simples). A base é
+`config/redux/api/baseApi.ts`.
 
 ## Argumento
 
-`/new-rtk-service <domain>` — `domain` em kebab-case.
-Ex.: `/new-rtk-service extrato`, `/new-rtk-service painel-cambio`.
+`/new-rtk-service <dominio>` — `dominio` em kebab-case ou camelCase.
+Ex.: `/new-rtk-service pagamentos`, `/new-rtk-service payment-connect`.
 
 Se faltar, pergunte o nome do domínio antes de criar.
 
 ## Fatos-chave da arquitetura
 
-- A base `api` (`createApi`, `reducerPath: 'api'`) já tem `baseQueryWithReauth`
-  com prefixo Bearer, header `portfolio`, `companytoken` e retry 401/403 +
-  logout federado. **NÃO reescreva nada disso.**
-- Serviços novos chamam **`api.injectEndpoints`** → auto-registram no store.
-  **NÃO edite `redux/store.ts`** nem adicione reducer.
-- Endpoints que precisam de tag nova → adicione a string em `tagTypes` de
-  `src/redux/services/api.ts` (não crie novo `createApi`).
+- **Um arquivo por domínio**, não um diretório: `config/redux/api/<dominio>Api.ts`.
+  Não crie `<dominio>/index.ts` + `types.ts`.
+- A base `baseApi` (`createApi`, `reducerPath: 'api'`) já tem
+  `baseQueryWithReauth` com `Authorization: Bearer` a partir de
+  `state.auth.accessToken`, refresh automático em **401** via `/auth/refresh`, e
+  logout federado (`signOut` do `next-auth` + redirect para `/login`) quando o
+  refresh falha. **NÃO reescreva nada disso.**
+- Serviços novos chamam **`baseApi.injectEndpoints`** → auto-registram no store.
+  **NÃO edite `config/redux/store.ts`** nem adicione reducer.
+- Tag nova → adicione a string ao array `tagTypes` de
+  `config/redux/api/baseApi.ts`. Não crie um `createApi` novo.
+- `baseUrl` vem de `NEXT_PUBLIC_BASE_URL`. As URLs dos endpoints são relativas
+  a ela (`/pagamentos`, `/planos/meu`).
 
 ## Regras
 
-1. `query`/`mutation` tipados: `build.query<Resposta, Args>` / `build.mutation<Resposta, Args>`.
-2. Respostas da API vêm embrulhadas em `ResponseViewModel<T>` → use
-   `transformResponse: (r: ResponseViewModel<T>) => r.data`.
+1. `query`/`mutation` tipados: `builder.query<Resposta, Args>` /
+   `builder.mutation<Resposta, Args>`. Use `void` quando não houver argumento.
+2. **A API responde com o objeto direto, sem envelope.** NÃO use
+   `transformResponse` para desembrulhar `data` — não existe `ResponseViewModel`
+   neste projeto.
 3. `providesTags` em queries de leitura; `invalidatesTags` em mutations que
    alteram dados dessa tag.
-4. Tipos em `types.ts` do domínio; `ResponseViewModel<T>` genérico incluso.
-5. `import type` para tipos.
+4. Tipos do domínio: se forem usados só por este serviço, declare-os no próprio
+   arquivo (como `dashboardApi.ts` faz). Se forem compartilhados com módulos,
+   coloque em `types/<dominio>.types.ts` na raiz (como `types/area.types.ts`).
+5. Valores monetários chegam da API como **string** (`Decimal` serializado).
+   Tipe como `string`, nunca `number`.
+6. `import type` para tipos.
 
 ## Passos
 
-1. Crie `src/redux/services/<domain>/types.ts`:
+1. Se o domínio precisa de tag nova, adicione-a a `tagTypes` em
+   `config/redux/api/baseApi.ts`:
 
    ```ts
-   export interface ResponseViewModel<T> {
-     data: T;
-     statusCode: number;
-     message?: string;
-   }
-
-   // interfaces de request/response do domínio
-   export interface Exemplo { id: number; nome: string; }
+   tagTypes: ['Eventos', 'Participantes', 'Users', 'Projetos', 'Areas', 'Me', 'Dashboard', 'Pagamentos'],
    ```
 
-2. Crie `src/redux/services/<domain>/index.ts`:
+2. Crie `config/redux/api/<dominio>Api.ts`:
 
    ```ts
-   import api from '../api';
-   import type { Exemplo, ResponseViewModel } from './types';
+   import { baseApi } from './baseApi';
 
-   export const <domainCamel>Endpoints = api.injectEndpoints({
-     endpoints: (build) => ({
-       get<Domain>: build.query<Exemplo, { id: number }>({
-         query: ({ id }) => ({
-           url: `/vx-.../${id}`,
-           method: 'GET',
-         }),
-         providesTags: ['<TAG>'],
-         transformResponse: (r: ResponseViewModel<Exemplo>) => r.data,
+   export interface Pagamento {
+     id: string;
+     valor: string;           // Decimal serializado — string, nunca number
+     applicationFee: string;
+     status: 'PENDING' | 'APPROVED' | 'REJECTED';
+   }
+
+   export interface CriarPagamentoArgs {
+     eventoId: string;
+     participanteId: string;
+     produtoIds: string[];
+   }
+
+   export const pagamentosApi = baseApi.injectEndpoints({
+     endpoints: (builder) => ({
+       listarPagamentosEvento: builder.query<Pagamento[], string>({
+         query: (eventoId) => `/pagamentos/evento/${eventoId}`,
+         providesTags: ['Pagamentos'],
        }),
-       create<Domain>: build.mutation<Exemplo, Partial<Exemplo>>({
-         query: (body) => ({ url: '/vx-...', method: 'POST', body }),
-         invalidatesTags: ['<TAG>'],
-         transformResponse: (r: ResponseViewModel<Exemplo>) => r.data,
+       obterPagamento: builder.query<Pagamento, string>({
+         query: (id) => `/pagamentos/${id}`,
+         providesTags: (result, error, id) => [{ type: 'Pagamentos', id }],
+       }),
+       criarPagamento: builder.mutation<Pagamento, CriarPagamentoArgs>({
+         query: (body) => ({ url: '/pagamentos', method: 'POST', body }),
+         invalidatesTags: ['Pagamentos', 'Participantes'],
        }),
      }),
    });
 
-   export const { useGet<Domain>Query, useCreate<Domain>Mutation } =
-     <domainCamel>Endpoints;
+   export const {
+     useListarPagamentosEventoQuery,
+     useObterPagamentoQuery,
+     useCriarPagamentoMutation,
+   } = pagamentosApi;
    ```
 
-   - `<domainCamel>` = domain em camelCase (`painel-cambio` → `painelCambio`).
-   - `<Domain>` = PascalCase.
+   - Nome do arquivo e da const: **camelCase + sufixo `Api`**
+     (`payment-connect` → `paymentConnectApi.ts`, const `paymentConnectApi`).
+   - `builder`, não `build` — segue o que já existe no projeto.
 
-3. Se usar `providesTags`/`invalidatesTags` com tag nova, adicione a string ao
-   array `tagTypes` em `src/redux/services/api.ts`.
+3. Query com polling (ex.: aguardar confirmação de PIX) usa
+   `pollingInterval` no hook, não no endpoint:
 
-4. Consuma via os hooks gerados dentro de um `hooks/use-<feature>.tsx` de módulo
-   (nunca no `index.tsx` da página).
+   ```ts
+   const { data } = useObterPagamentoQuery(id, {
+     pollingInterval: 5000,
+     skip: statusFinal,
+   });
+   ```
 
-5. Rode `pnpm check-types`. Reporte arquivos criados + typecheck.
+4. Consuma os hooks gerados dentro de um `hooks/use-<feature>.tsx` de módulo —
+   **nunca** no `index.tsx` da página (regra do `.claude/CLAUDE.md`).
+
+5. Rode `pnpm check-types` e `pnpm lint`. Reporte os arquivos criados +
+   resultado.
+
+## Tratamento de erro tipado
+
+O backend devolve erros com um campo `error` estável. Trate pelo **código**,
+nunca pela mensagem:
+
+```ts
+403 { "error": "FEATURE_INDISPONIVEL", "feature": "pagamentosOnline" }
+403 { "error": "LIMITE_ATINGIDO", "limite": "eventosAtivos", "max": 5 }
+402 { "error": "ASSINATURA_INATIVA", "status": "PAUSED" }
+```
+
+O erro do RTK Query chega como `FetchBaseQueryError`; o corpo está em
+`error.data`.
 
 ## Checklist antes de encerrar
 
-- [ ] Usa `api.injectEndpoints` (NÃO novo `createApi`, NÃO editou store)
-- [ ] Base `api.ts` intacta (Bearer/portfolio/reauth preservados)
-- [ ] Endpoints tipados + `transformResponse` desembrulha `ResponseViewModel`
-- [ ] Tag nova (se houver) adicionada a `tagTypes`
-- [ ] `pnpm check-types` verde
+- [ ] Usa `baseApi.injectEndpoints` (NÃO novo `createApi`, NÃO editou `store.ts`)
+- [ ] Arquivo único `config/redux/api/<dominio>Api.ts` (não um diretório)
+- [ ] Base `baseApi.ts` intacta (Bearer / refresh 401 / logout federado preservados)
+- [ ] Endpoints tipados; **sem** `transformResponse` (a API não usa envelope)
+- [ ] Tag nova (se houver) adicionada a `tagTypes` de `baseApi.ts`
+- [ ] Valores monetários tipados como `string`
+- [ ] Hooks consumidos só dentro de `hooks/use-<feature>.tsx` de módulo
+- [ ] `pnpm check-types` e `pnpm lint` verdes

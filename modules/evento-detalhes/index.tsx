@@ -25,6 +25,7 @@ import { Tabs, Tab } from "@mui/material";
 import ParticipanteDrawer from "./components/ParticipanteDrawer";
 import ParticipantesPizzaChart from "./components/ParticipantesPizzaChart";
 import EventoDrawer from "./components/EventoDrawer";
+import { PagamentosTab } from "./components/PagamentosTab";
 import { QRCodeSVG } from "qrcode.react";
 
 const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
@@ -243,6 +244,8 @@ export default function EventoDetalhesModule() {
   };
 
   const { data: evento, isLoading: isLoadingEvento, isFetching: isFetchingEvento } = useObterEventoQuery(eventoId);
+
+  const temProdutoPagavel = Boolean(evento?.produtos?.some((produto) => produto.exigePagamento));
   const statusEvento = evento?.statusAtual ?? evento?.status ?? null;
   const statusJustificativa = statusEvento?.justificativa || 'Sem justificativa informada.';
 
@@ -599,6 +602,7 @@ export default function EventoDetalhesModule() {
             >
               <Tab label="Ativos" />
               <Tab label="Inativos" />
+              {temProdutoPagavel && <Tab label="Pagamentos" />}
             </Tabs>
           </Box>
 
@@ -729,6 +733,13 @@ export default function EventoDetalhesModule() {
               />
             </Card>
           </CustomTabPanel>
+
+          {/* Sem produto cobrável, a aba nem existe e `listarPagamentosEvento` não é chamado. */}
+          {temProdutoPagavel && (
+            <CustomTabPanel value={currentTab} index={2}>
+              <PagamentosTab eventoId={eventoId} />
+            </CustomTabPanel>
+          )}
         </Box>
       </Grid>
 

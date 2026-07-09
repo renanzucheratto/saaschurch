@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { Controller } from 'react-hook-form';
 import { useEventoForm } from '../hooks/useEventoForm';
+import { CheckoutEvento } from '@/modules/checkout-evento';
 import {
   TextField,
   Checkbox,
@@ -46,8 +47,15 @@ export const EventoForm = () => {
   const temCamposCustomizados = campos.length > 0;
   const camposVisiveis = campos.filter((c) => !c.oculto);
 
-  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } =
-    useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen, campos);
+  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert, checkout } =
+    useEventoForm(
+      eventoId,
+      hasProdutos,
+      selecaoUnicaProduto,
+      isRegistrationOpen,
+      campos,
+      evento?.produtos ?? [],
+    );
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return null;
@@ -100,6 +108,19 @@ export const EventoForm = () => {
     },
     '& .MuiInputLabel-root': { fontSize: '0.95rem' },
   };
+
+  // Inscrição concluída com produto cobrável: a etapa de pagamento substitui o form.
+  if (checkout) {
+    return (
+      <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh', p: 3 }}>
+        <CheckoutEvento
+          eventoId={eventoId}
+          participanteId={checkout.participanteId}
+          produtoIds={checkout.produtoIds}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh' }}>

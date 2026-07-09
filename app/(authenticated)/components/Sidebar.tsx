@@ -30,7 +30,9 @@ import { useAppSelector } from "@/config/redux/store";
 import { logout } from "@/config/redux/slices/authSlice";
 import { formatFirstLastName } from "@/config/helpers/name-formatter";
 import { useGetCurrentUserQuery } from "@/config/redux/api/authApi";
-import type { UserRole } from "@/lib/permissions";
+import { usePlano } from "@/lib/hooks/use-plano";
+import { ADMIN_DA_IGREJA, type UserRole } from "@/lib/permissions";
+import type { FeatureKey } from "@/types/plano.types";
 
 interface MenuItem {
   id: string;
@@ -40,6 +42,8 @@ interface MenuItem {
   badge?: number;
   isBeta?: boolean;
   allowedRoles?: UserRole[];
+  /** Item some quando a feature não está no plano. Pergunta pela feature, não pelo plano. */
+  feature?: FeatureKey;
 }
 
 interface MenuSection {
@@ -64,15 +68,28 @@ const menuSections: MenuSection[] = [
   {
     title: "PROJETOS",
     items: [
-      { id: "projetos", label: "Lista de Projetos", icon: <IconifyIcon icon="material-symbols:folder-managed-outline" width={20} />, href: "/projetos", allowedRoles: ["lider", "backoffice"] },
-      { id: "criar-projeto", label: "Criar projeto", icon: <IconifyIcon icon="material-symbols:create-new-folder-outline" width={20} />, href: "/projetos/criar", allowedRoles: ["lider", "backoffice"] },
+      { id: "projetos", label: "Lista de Projetos", icon: <IconifyIcon icon="material-symbols:folder-managed-outline" width={20} />, href: "/projetos", allowedRoles: ["lider", "backoffice"], feature: "projetos" },
+      { id: "criar-projeto", label: "Criar projeto", icon: <IconifyIcon icon="material-symbols:create-new-folder-outline" width={20} />, href: "/projetos/criar", allowedRoles: ["lider", "backoffice"], feature: "projetos" },
     ],
   },
   {
     title: "GERENCIAMENTO",
     items: [
       { id: "usuarios", label: "Usuários", icon: <IconifyIcon icon="material-symbols:group-outline" width={20} />, href: "/usuarios", allowedRoles: ["backoffice"] },
-      { id: "areas", label: "Áreas", icon: <IconifyIcon icon="material-symbols:group-work-outline" width={20} />, href: "/areas", allowedRoles: ["lider", "backoffice", "membro"] },
+      { id: "areas", label: "Áreas", icon: <IconifyIcon icon="material-symbols:group-work-outline" width={20} />, href: "/areas", allowedRoles: ["lider", "backoffice", "membro"], feature: "areas" },
+    ],
+  },
+  {
+    title: "INSTITUIÇÃO",
+    items: [
+      { id: "assinatura", label: "Plano e assinatura", icon: <IconifyIcon icon="material-symbols:workspace-premium-outline" width={20} />, href: "/instituicao/assinatura", allowedRoles: ["lider", ...ADMIN_DA_IGREJA] },
+      { id: "pagamentos", label: "Pagamentos", icon: <IconifyIcon icon="material-symbols:credit-card-outline" width={20} />, href: "/instituicao/pagamentos", allowedRoles: ADMIN_DA_IGREJA, feature: "pagamentosOnline" },
+    ],
+  },
+  {
+    title: "BACKOFFICE",
+    items: [
+      { id: "backoffice-planos", label: "Planos das igrejas", icon: <IconifyIcon icon="material-symbols:price-change-outline" width={20} />, href: "/backoffice/planos", allowedRoles: ["backoffice"] },
     ],
   },
 ];
@@ -90,6 +107,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { is } = usePermissions();
+  const { temFeature, carregando: carregandoPlano } = usePlano();
   const dispatch = useDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -183,9 +201,13 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       {/* Navegação */}
       <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
         {menuSections.map((section) => {
-          const visibleItems = section.items.filter((item) =>
-            item.allowedRoles ? is(...item.allowedRoles) : true
-          );
+          const visibleItems = section.items.filter((item) => {
+            if (item.allowedRoles && !is(...item.allowedRoles)) return false;
+            // Enquanto o plano carrega, o item fica visível: escondê-lo e revelá-lo
+            // depois faria a Sidebar saltar a cada navegação.
+            if (item.feature && !carregandoPlano && !temFeature(item.feature)) return false;
+            return true;
+          });
           if (visibleItems.length === 0) return null;
           return (
             <Box key={section.title || "root"} sx={{ mb: 2.5 }}>

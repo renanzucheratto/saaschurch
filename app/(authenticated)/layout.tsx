@@ -5,6 +5,7 @@ import { Box } from "@mui/material";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import { UserSync } from "./components/UserSync";
+import { BannerAssinatura } from "@/components/BannerAssinatura";
 
 export default function LayoutAuthenticated({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -47,6 +48,8 @@ export default function LayoutAuthenticated({ children }: { children: React.Reac
       >
         {/* Header */}
         <Navbar onMenuClick={handleDrawerToggle} />
+
+        <BannerAssinatura />
 
         {/* Conteúdo da página */}
         <Box
