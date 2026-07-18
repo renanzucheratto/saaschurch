@@ -1,10 +1,11 @@
-export type UserRole = 'membro' | 'lider' | 'backoffice';
+export type UserRole = 'membro' | 'lider' | 'backoffice' | 'pastor' | 'tesouraria';
 
 export const routeRoles: Record<string, UserRole[]> = {
   '/usuarios': ['backoffice'],
   '/eventos': ['lider', 'backoffice'],
   '/projetos': ['lider', 'backoffice'],
   '/areas': ['lider', 'backoffice', 'membro'],
+  '/financeiro': ['lider', 'backoffice', 'pastor', 'tesouraria'],
 };
 
 export const featureRoles = {
@@ -15,6 +16,7 @@ export const featureRoles = {
   alterarPapelMembro: ['backoffice'],
   solicitarReembolso: ['lider', 'backoffice'],
   liquidarProjeto: ['lider', 'backoffice'],
+  gerenciarFinanceiro: ['lider', 'backoffice', 'pastor', 'tesouraria'],
 } satisfies Record<string, UserRole[]>;
 
 export function canAccessRoute(role: UserRole, path: string): boolean {

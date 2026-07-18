@@ -69,6 +69,13 @@ const menuSections: MenuSection[] = [
     ],
   },
   {
+    title: "FINANCEIRO",
+    items: [
+      { id: "conciliacao", label: "Conciliação", icon: <IconifyIcon icon="material-symbols:sync-alt" width={20} />, href: "/financeiro", allowedRoles: ["lider", "backoffice", "pastor", "tesouraria"] },
+      { id: "financeiro-cadastros", label: "Cadastros", icon: <IconifyIcon icon="material-symbols:account-balance-outline" width={20} />, href: "/financeiro/cadastros", allowedRoles: ["lider", "backoffice", "pastor", "tesouraria"] },
+    ],
+  },
+  {
     title: "GERENCIAMENTO",
     items: [
       { id: "usuarios", label: "Usuários", icon: <IconifyIcon icon="material-symbols:group-outline" width={20} />, href: "/usuarios", allowedRoles: ["backoffice"] },
