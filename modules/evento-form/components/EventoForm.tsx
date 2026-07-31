@@ -46,8 +46,23 @@ export const EventoForm = () => {
   const temCamposCustomizados = campos.length > 0;
   const camposVisiveis = campos.filter((c) => !c.oculto);
 
-  const { control, handleSubmit, errors, isSubmitting, isValid, alert, handleCloseAlert } =
-    useEventoForm(eventoId, hasProdutos, selecaoUnicaProduto, isRegistrationOpen, campos);
+  const {
+    control,
+    handleSubmit,
+    errors,
+    isSubmitting,
+    isValid,
+    alert,
+    handleCloseAlert,
+    redirecionandoPagamento,
+  } = useEventoForm(
+    eventoId,
+    hasProdutos,
+    selecaoUnicaProduto,
+    isRegistrationOpen,
+    campos,
+    evento?.produtos ?? [],
+  );
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return null;
@@ -496,8 +511,24 @@ export const EventoForm = () => {
                   },
                 }}
               >
-                {isSubmitting ? 'Enviando...' : 'Confirmar Inscrição'}
+                {redirecionandoPagamento
+                  ? 'Redirecionando para o pagamento...'
+                  : isSubmitting
+                    ? 'Enviando...'
+                    : 'Confirmar Inscrição'}
               </Button>
+
+              {/* O redirect para o Mercado Pago pode demorar alguns segundos.
+                  Sem aviso, a pessoa clica de novo e cria inscrição duplicada. */}
+              {redirecionandoPagamento && (
+                <Typography
+                  variant="caption"
+                  sx={{ display: 'block', mt: 1.5, textAlign: 'center' }}
+                >
+                  Inscrição registrada. Levando você ao Mercado Pago para concluir o pagamento —
+                  não feche esta página.
+                </Typography>
+              )}
             </Box>
           </Box>
         </Box>
