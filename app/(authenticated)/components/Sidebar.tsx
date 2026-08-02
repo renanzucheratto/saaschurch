@@ -78,7 +78,7 @@ const menuSections: MenuSection[] = [
   {
     title: "CONFIGURAÇÕES",
     items: [
-      { id: "planos", label: "Planos", icon: <IconifyIcon icon="material-symbols:workspace-premium-outline" width={20} />, href: "/configuracoes/planos", allowedRoles: ["backoffice"] },
+      // { id: "planos", label: "Planos", icon: <IconifyIcon icon="material-symbols:workspace-premium-outline" width={20} />, href: "/configuracoes/planos", allowedRoles: ["backoffice"] },
       { id: "pagamentos", label: "Pagamentos", icon: <IconifyIcon icon="material-symbols:credit-card-outline" width={20} />, href: "/configuracoes/pagamentos", allowedRoles: ["backoffice"] },
     ],
   },
