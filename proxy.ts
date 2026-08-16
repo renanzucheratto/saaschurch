@@ -3,7 +3,9 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { type UserRole, canAccessRoute } from '@/lib/permissions';
 
-const publicPaths = ['/login', '/signup', '/externo', '/reset-password', '/forgot-password', '/set-password'];
+// /inscricao é para onde o Mercado Pago devolve o participante depois do
+// checkout. Ele nunca tem sessão — é inscrito em evento, não usuário do sistema.
+const publicPaths = ['/login', '/signup', '/externo', '/inscricao', '/reset-password', '/forgot-password', '/set-password'];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

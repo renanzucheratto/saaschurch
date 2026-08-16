@@ -63,6 +63,8 @@ export const baseApi = createApi({
     'RegrasConciliacao',
     'TransacoesBancarias',
     'SaldoConta',
+    'Plano',
+    'MercadoPago',
   ],
   endpoints: () => ({}),
 });
