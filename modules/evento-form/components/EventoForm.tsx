@@ -38,7 +38,10 @@ export const EventoForm = () => {
 
   const { data: evento, isLoading: isLoadingEvento } = useObterEventoQuery(eventoId);
 
-  const hasProdutos = !!(evento?.produtos && evento.produtos.length > 0);
+  // Produtos ocultos não são escolhidos pelo inscrito — a organização atribui depois,
+  // ao editar o participante, para poder lançar as parcelas.
+  const produtosVisiveis = (evento?.produtos ?? []).filter((p) => !p.oculto);
+  const hasProdutos = produtosVisiveis.length > 0;
   const selecaoUnicaProduto = evento?.selecao_unica_produto;
   const statusEvento = evento?.statusAtual ?? evento?.status ?? null;
   const isRegistrationOpen = statusEvento?.nome === 'aberto';
@@ -61,7 +64,7 @@ export const EventoForm = () => {
     selecaoUnicaProduto,
     isRegistrationOpen,
     campos,
-    evento?.produtos ?? [],
+    produtosVisiveis,
   );
 
   const formatDate = (dateString: string | null) => {
@@ -313,17 +316,15 @@ export const EventoForm = () => {
                     control={control}
                     render={({ field }) => (
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                        {evento.produtos
-                          .filter((p) => !p.oculto)
-                          .map((produto) => (
-                            <ProductAccordion
-                              key={produto.id}
-                              produto={produto}
-                              selected={field.value === produto.id}
-                              onSelect={field.onChange}
-                              disabled={!isRegistrationOpen}
-                            />
-                          ))}
+                        {produtosVisiveis.map((produto) => (
+                          <ProductAccordion
+                            key={produto.id}
+                            produto={produto}
+                            selected={field.value === produto.id}
+                            onSelect={field.onChange}
+                            disabled={!isRegistrationOpen}
+                          />
+                        ))}
                       </Box>
                     )}
                   />
