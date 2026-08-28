@@ -59,6 +59,7 @@ const menuSections: MenuSection[] = [
     items: [
       { id: "eventos", label: "Lista de Eventos", icon: <IconifyIcon icon="material-symbols:event-outline" width={20} />, href: "/eventos", allowedRoles: ["lider", "backoffice"] },
       { id: "criar-evento", label: "Criar evento", icon: <IconifyIcon icon="material-symbols:add-circle-outline" width={20} />, href: "/eventos/criar", allowedRoles: ["lider", "backoffice"] },
+      { id: "calendario", label: "Calendário", icon: <IconifyIcon icon="material-symbols:calendar-month-outline" width={20} />, href: "/calendario", allowedRoles: ["lider", "backoffice"] },
     ],
   },
   {

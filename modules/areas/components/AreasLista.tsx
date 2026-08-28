@@ -18,7 +18,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { useListarAreasQuery, useCriarAreaMutation } from '@/config/redux/api/areasApi';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { BORDER_RADIUS } from '@/config/utils/contants';
@@ -36,12 +36,14 @@ export function AreasLista({ onSelectArea }: Props) {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [novoNome, setNovoNome] = useState('');
+  const [novaCor, setNovaCor] = useState('#6366f1');
 
   const handleCriar = async () => {
     if (!novoNome.trim()) return;
     try {
-      const area = await criarArea({ nome: novoNome }).unwrap();
+      const area = await criarArea({ nome: novoNome, cor: novaCor }).unwrap();
       setNovoNome('');
+      setNovaCor('#6366f1');
       setOpenDialog(false);
       onSelectArea(area.id);
     } catch {}
@@ -117,9 +119,20 @@ export function AreasLista({ onSelectArea }: Props) {
             <CardActionArea onClick={() => onSelectArea(area.id)}>
               <CardContent>
                 <Stack direction="row" alignItems="flex-start" justifyContent="space-between" mb={1}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    {area.nome}
-                  </Typography>
+                  <Stack direction="row" alignItems="center" gap={1}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        bgcolor: area.cor ?? '#9e9e9e',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {area.nome}
+                    </Typography>
+                  </Stack>
                   <Icon icon="material-symbols:chevron-right" width={20} color="#999" />
                 </Stack>
                 <Stack direction="row" gap={2}>
@@ -155,17 +168,34 @@ export function AreasLista({ onSelectArea }: Props) {
               {(erroCriar as any)?.data?.error || 'Erro ao criar área'}
             </Alert>
           )}
-          <TextField
-            label="Nome da área"
-            value={novoNome}
-            onChange={(e) => setNovoNome(e.target.value)}
-            fullWidth
-            autoFocus
-            sx={{ mt: 1 }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCriar();
-            }}
-          />
+          <Stack direction="row" gap={2} alignItems="flex-start" sx={{ mt: 1 }}>
+            <TextField
+              label="Nome da área"
+              value={novoNome}
+              onChange={(e) => setNovoNome(e.target.value)}
+              fullWidth
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCriar();
+              }}
+            />
+            <Box
+              component="input"
+              type="color"
+              value={novaCor}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNovaCor(e.target.value)}
+              sx={{
+                width: 56,
+                height: 56,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                cursor: 'pointer',
+                p: 0.5,
+                flexShrink: 0,
+              }}
+            />
+          </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>

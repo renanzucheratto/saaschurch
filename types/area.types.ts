@@ -9,6 +9,7 @@ export interface AreaMembro {
 export interface Area {
   id: string;
   nome: string;
+  cor: string | null;
   createdAt: string;
   updatedAt: string;
   lideres: AreaMembro[];

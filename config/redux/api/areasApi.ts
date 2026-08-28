@@ -11,11 +11,11 @@ export const areasApi = baseApi.injectEndpoints({
       query: (id) => `/areas/${id}`,
       providesTags: (result, error, id) => [{ type: 'Areas', id }],
     }),
-    criarArea: builder.mutation<Area, { nome: string }>({
+    criarArea: builder.mutation<Area, { nome: string; cor?: string | null }>({
       query: (body) => ({ url: '/areas', method: 'POST', body }),
       invalidatesTags: ['Areas'],
     }),
-    atualizarArea: builder.mutation<Area, { id: string; nome: string }>({
+    atualizarArea: builder.mutation<Area, { id: string; nome: string; cor?: string | null }>({
       query: ({ id, ...body }) => ({ url: `/areas/${id}`, method: 'PUT', body }),
       invalidatesTags: (result, error, { id }) => ['Areas', { type: 'Areas', id }],
     }),

@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { useAppSelector } from '@/config/redux/store';
 import { selectCurrentUser } from '@/config/redux/slices/authSlice';
 import { useBuscarAreaQuery, useAtualizarAreaMutation, useRemoverAreaMutation } from '@/config/redux/api/areasApi';
@@ -36,6 +36,7 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
 
   const [editandoNome, setEditandoNome] = useState(false);
   const [novoNome, setNovoNome] = useState('');
+  const [novaCor, setNovaCor] = useState('#9e9e9e');
   const [openAdicionarDialog, setOpenAdicionarDialog] = useState(false);
 
   const isBackoffice = is('backoffice');
@@ -45,13 +46,14 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
 
   const handleEditarNome = () => {
     setNovoNome(area?.nome ?? '');
+    setNovaCor(area?.cor ?? '#9e9e9e');
     setEditandoNome(true);
   };
 
   const handleSalvarNome = async () => {
     if (!novoNome.trim()) return;
     try {
-      await atualizarArea({ id: areaId, nome: novoNome }).unwrap();
+      await atualizarArea({ id: areaId, nome: novoNome, cor: novaCor }).unwrap();
       setEditandoNome(false);
     } catch {}
   };
@@ -99,6 +101,22 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
               }}
               sx={{ flex: 1, maxWidth: 300 }}
             />
+            <Box
+              component="input"
+              type="color"
+              value={novaCor}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNovaCor(e.target.value)}
+              sx={{
+                width: 40,
+                height: 40,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                cursor: 'pointer',
+                p: 0.5,
+                flexShrink: 0,
+              }}
+            />
             <Button
               size="small"
               variant="contained"
@@ -114,6 +132,15 @@ export function AreaDetalhes({ areaId, onVoltar }: Props) {
           </Stack>
         ) : (
           <Stack direction="row" alignItems="center" gap={1} flex={1}>
+            <Box
+              sx={{
+                width: 14,
+                height: 14,
+                borderRadius: '50%',
+                bgcolor: area.cor ?? '#9e9e9e',
+                flexShrink: 0,
+              }}
+            />
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {area.nome}
             </Typography>
