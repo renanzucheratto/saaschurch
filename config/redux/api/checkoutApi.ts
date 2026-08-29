@@ -43,7 +43,7 @@ export const checkoutApi = baseApi.injectEndpoints({
      * Diferente do antigo fluxo Mercado Pago (redirect via init_point), o
      * PagBank não aceita split em checkout hospedado — esta chamada cria o
      * pedido e devolve os dados para a NOSSA tela de pagamento exibir
-     * (QR Pix, link de boleto ou o resultado imediato do cartão).
+     * (QR Pix ou o resultado imediato do cartão).
      */
     criarPedidoCheckout: builder.mutation<PedidoCheckoutResponse, CriarPedidoRequest>({
       query: (body) => ({ url: '/checkout/pedidos', method: 'POST', body }),

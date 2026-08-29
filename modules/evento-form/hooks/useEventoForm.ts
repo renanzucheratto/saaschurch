@@ -173,7 +173,7 @@ export const useEventoForm = (
       // ela permanece pendente e pode ser retomada depois. Diferente do
       // antigo fluxo Mercado Pago (redirect externo via init_point), o
       // PagBank não aceita split em checkout hospedado — quem cria o
-      // pedido/QR/boleto é a própria tela /inscricao/pagamento.
+      // pedido/QR é a própria tela /inscricao/pagamento.
       const produtoSelecionado = produtos.find((p) => p.id === data.produtoId);
 
       if (produtoSelecionado?.exigePagamento && participante?.id) {

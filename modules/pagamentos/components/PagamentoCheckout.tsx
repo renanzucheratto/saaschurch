@@ -312,12 +312,6 @@ export function PagamentoCheckout({ participanteId, produtoId }: Props) {
                 <span>Cartão</span>
               </Stack>
             </ToggleButton>
-            <ToggleButton value="BOLETO">
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <Icon icon="material-symbols:barcode" width={18} />
-                <span>Boleto</span>
-              </Stack>
-            </ToggleButton>
           </ToggleButtonGroup>
 
           <Divider />
@@ -331,18 +325,6 @@ export function PagamentoCheckout({ participanteId, produtoId }: Props) {
               </Typography>
               <Button variant="contained" size="large" disabled={carregando} onClick={() => gerarPedido()}>
                 {carregando ? <CircularProgress size={20} color="inherit" /> : 'Gerar QR Code Pix'}
-              </Button>
-            </Stack>
-          )}
-
-          {metodo === 'BOLETO' && (
-            <Stack spacing={1.5}>
-              <Typography variant="body2" color="text.secondary">
-                O boleto vence em 3 dias. A confirmação do pagamento pode levar até 2 dias úteis
-                após o pagamento.
-              </Typography>
-              <Button variant="contained" size="large" disabled={carregando} onClick={() => gerarPedido()}>
-                {carregando ? <CircularProgress size={20} color="inherit" /> : 'Gerar boleto'}
               </Button>
             </Stack>
           )}

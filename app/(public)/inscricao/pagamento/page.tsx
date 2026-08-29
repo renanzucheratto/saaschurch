@@ -8,7 +8,7 @@ import { PagamentoCheckout } from '@/modules/pagamentos/components/PagamentoChec
 /**
  * Tela de pagamento do participante — NOSSA, não um redirect para o
  * provedor. O PagBank não aceita split no checkout hospedado, então quem
- * cria o pedido (Pix/boleto/cartão) e mostra QR Code/link/resultado é esta
+ * cria o pedido (Pix/cartão) e mostra QR Code/resultado é esta
  * página, chamando POST /checkout/pedidos.
  */
 function ConteudoPagamento() {

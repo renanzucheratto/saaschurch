@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { type UserRole, canAccessRoute } from '@/lib/permissions';
 
-// /inscricao/pagamento é a NOSSA tela de pagamento (Pix/boleto/cartão via
+// /inscricao/pagamento é a NOSSA tela de pagamento (Pix/cartão via
 // PagBank) — o participante nunca sai do site. Segue pública porque ele
 // nunca tem sessão: é inscrito em evento, não usuário do sistema.
 const publicPaths = ['/login', '/signup', '/externo', '/inscricao', '/reset-password', '/forgot-password', '/set-password'];
