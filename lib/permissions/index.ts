@@ -5,6 +5,10 @@ export const routeRoles: Record<string, UserRole[]> = {
   '/eventos': ['lider', 'backoffice'],
   '/projetos': ['lider', 'backoffice'],
   '/areas': ['lider', 'backoffice', 'membro'],
+  // Configurações expõem conexão bancária e valores recebidos: só backoffice.
+  // Esconder do menu não basta — sem esta entrada, qualquer usuário logado
+  // alcança a tela digitando a URL.
+  '/configuracoes': ['backoffice'],
 };
 
 export const featureRoles = {

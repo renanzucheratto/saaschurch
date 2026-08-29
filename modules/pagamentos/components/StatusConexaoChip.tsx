@@ -2,15 +2,15 @@
 
 import { Chip } from '@mui/material';
 import { Icon } from '@iconify/react';
-import type { MercadoPagoAccountStatus } from '@/types/mercadopago.types';
+import type { PagBankAccountStatus } from '@/types/pagbank.types';
 
 interface Props {
-  status?: MercadoPagoAccountStatus;
+  status?: PagBankAccountStatus;
   conectado: boolean;
 }
 
 const CONFIG: Record<
-  MercadoPagoAccountStatus,
+  PagBankAccountStatus,
   { label: string; color: 'success' | 'warning' | 'default' | 'info'; icon: string }
 > = {
   ACTIVE: { label: 'Conectado', color: 'success', icon: 'material-symbols:check-circle-outline' },

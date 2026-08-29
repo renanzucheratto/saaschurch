@@ -2,42 +2,42 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Box, Card, CardContent, CircularProgress, Stack, Typography } from '@mui/material';
-import { Icon } from '@iconify/react';
+import { Box, CircularProgress, Stack, Typography } from '@mui/material';
+import { PagamentoCheckout } from '@/modules/pagamentos/components/PagamentoCheckout';
 
-type StatusPagamento = 'sucesso' | 'pendente' | 'falha';
-
-const CONTEUDO: Record<
-  StatusPagamento,
-  { icone: string; cor: string; titulo: string; descricao: string }
-> = {
-  sucesso: {
-    icone: 'material-symbols:check-circle-outline',
-    cor: 'success.main',
-    titulo: 'Pagamento aprovado',
-    descricao:
-      'Sua inscrição está confirmada. Você receberá os detalhes por e-mail. Pode fechar esta página.',
-  },
-  pendente: {
-    icone: 'material-symbols:hourglass-top-outline',
-    cor: 'warning.main',
-    titulo: 'Pagamento em processamento',
-    descricao:
-      'Recebemos seu pagamento e ele está sendo confirmado. Isso pode levar alguns minutos — no boleto ou Pix, um pouco mais. Sua inscrição é confirmada assim que o pagamento for aprovado.',
-  },
-  falha: {
-    icone: 'material-symbols:cancel-outline',
-    cor: 'error.main',
-    titulo: 'Pagamento não concluído',
-    descricao:
-      'O pagamento não foi aprovado. Sua inscrição continua registrada como pendente — procure a organização do evento para tentar novamente.',
-  },
-};
-
-function ResultadoPagamento() {
+/**
+ * Tela de pagamento do participante — NOSSA, não um redirect para o
+ * provedor. O PagBank não aceita split no checkout hospedado, então quem
+ * cria o pedido (Pix/boleto/cartão) e mostra QR Code/link/resultado é esta
+ * página, chamando POST /checkout/pedidos.
+ */
+function ConteudoPagamento() {
   const searchParams = useSearchParams();
-  const status = (searchParams.get('status') ?? 'pendente') as StatusPagamento;
-  const conteudo = CONTEUDO[status] ?? CONTEUDO.pendente;
+  const participanteId = searchParams.get('participanteId');
+  const produtoId = searchParams.get('produtoId');
+
+  if (!participanteId || !produtoId) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
+        }}
+      >
+        <Stack spacing={1} textAlign="center" alignItems="center">
+          <Typography variant="h6" fontWeight={600}>
+            Link de pagamento inválido
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Volte à página de inscrição do evento e tente novamente.
+          </Typography>
+        </Stack>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -49,19 +49,7 @@ function ResultadoPagamento() {
         p: 2,
       }}
     >
-      <Card variant="outlined" sx={{ maxWidth: 480, width: '100%' }}>
-        <CardContent sx={{ p: 4 }}>
-          <Stack spacing={2} alignItems="center" textAlign="center">
-            <Icon icon={conteudo.icone} width={64} />
-            <Typography variant="h5" fontWeight={600} sx={{ color: conteudo.cor }}>
-              {conteudo.titulo}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {conteudo.descricao}
-            </Typography>
-          </Stack>
-        </CardContent>
-      </Card>
+      <PagamentoCheckout participanteId={participanteId} produtoId={produtoId} />
     </Box>
   );
 }
@@ -75,7 +63,7 @@ export default function PagamentoRetornoPage() {
         </Box>
       }
     >
-      <ResultadoPagamento />
+      <ConteudoPagamento />
     </Suspense>
   );
 }

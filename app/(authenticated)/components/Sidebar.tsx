@@ -80,6 +80,9 @@ const menuSections: MenuSection[] = [
     items: [
       // { id: "planos", label: "Planos", icon: <IconifyIcon icon="material-symbols:workspace-premium-outline" width={20} />, href: "/configuracoes/planos", allowedRoles: ["backoffice"] },
       { id: "pagamentos", label: "Pagamentos", icon: <IconifyIcon icon="material-symbols:credit-card-outline" width={20} />, href: "/configuracoes/pagamentos", allowedRoles: ["backoffice"] },
+      // Mensalidade desativada por ora — o produto ainda não cobra as instituições.
+      // Para reativar: descomentar aqui e o corpo de /configuracoes/assinatura/page.tsx.
+      // { id: "assinatura", label: "Mensalidade", icon: <IconifyIcon icon="material-symbols:receipt-long-outline" width={20} />, href: "/configuracoes/assinatura", allowedRoles: ["backoffice"] },
     ],
   },
 ];

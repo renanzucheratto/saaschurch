@@ -20,10 +20,10 @@ interface Props {
 export function DesvincularDialog({ aberto, processando, onFechar, onConfirmar }: Props) {
   return (
     <Dialog open={aberto} onClose={onFechar} maxWidth="xs" fullWidth>
-      <DialogTitle>Desvincular Mercado Pago</DialogTitle>
+      <DialogTitle>Desvincular PagBank</DialogTitle>
       <DialogContent>
         <DialogContentText sx={{ mb: 2 }}>
-          A conta Mercado Pago da sua instituição será desconectada e os acessos guardados serão
+          A conta PagBank da sua instituição será desconectada e os acessos guardados serão
           apagados.
         </DialogContentText>
         <Alert severity="warning">

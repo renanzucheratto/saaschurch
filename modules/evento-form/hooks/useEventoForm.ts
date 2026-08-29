@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { buildEventoFormSchema, EventoFormValues } from '../schemas/evento-form.schema';
 import { useCadastrarParticipanteMutation } from '@/config/redux';
-import { useCriarPreferenceCheckoutMutation } from '@/config/redux/api/checkoutApi';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { CampoCustomizado } from '@/types/evento.types';
 
@@ -29,9 +29,9 @@ export const useEventoForm = (
   campos: CampoCustomizado[] = [],
   produtos: ProdutoCobranca[] = [],
 ) => {
+  const router = useRouter();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [cadastrarParticipante, { isLoading: isSubmittingApi }] = useCadastrarParticipanteMutation();
-  const [criarPreference, { isLoading: isCriandoPreference }] = useCriarPreferenceCheckoutMutation();
   const [alert, setAlert] = useState<Alert>({
     open: false,
     message: '',
@@ -168,42 +168,24 @@ export const useEventoForm = (
         data: payload as Parameters<typeof cadastrarParticipante>[0]['data'],
       }).unwrap();
 
-      // Produto pago: leva o participante ao checkout do Mercado Pago.
+      // Produto pago: leva o participante para a NOSSA tela de pagamento.
       // A inscrição já está gravada — se o pagamento falhar ou for abandonado,
-      // ela permanece pendente e pode ser retomada depois.
+      // ela permanece pendente e pode ser retomada depois. Diferente do
+      // antigo fluxo Mercado Pago (redirect externo via init_point), o
+      // PagBank não aceita split em checkout hospedado — quem cria o
+      // pedido/QR/boleto é a própria tela /inscricao/pagamento.
       const produtoSelecionado = produtos.find((p) => p.id === data.produtoId);
 
       if (produtoSelecionado?.exigePagamento && participante?.id) {
         setRedirecionandoPagamento(true);
 
-        try {
-          const tokenPagamento = await executeRecaptcha('checkout_preference');
+        const params = new URLSearchParams({
+          participanteId: participante.id,
+          produtoId: produtoSelecionado.id,
+        });
 
-          const { init_point } = await criarPreference({
-            participanteId: participante.id,
-            produtoId: produtoSelecionado.id,
-            recaptchaToken: tokenPagamento,
-          }).unwrap();
-
-          window.location.href = init_point;
-          return;
-        } catch (erroPagamento) {
-          console.error('Erro ao iniciar pagamento:', erroPagamento);
-          setRedirecionandoPagamento(false);
-
-          const detalhe =
-            (erroPagamento as { data?: { error?: string } })?.data?.error ??
-            'Não foi possível iniciar o pagamento.';
-
-          // A inscrição foi criada — dizer só "erro" faria a pessoa se
-          // cadastrar de novo e bater no unique de (eventoId, cpf).
-          setAlert({
-            open: true,
-            message: `Inscrição registrada, mas o pagamento não pôde ser iniciado: ${detalhe} Procure a organização do evento.`,
-            severity: 'error',
-          });
-          return;
-        }
+        router.push(`/inscricao/pagamento?${params.toString()}`);
+        return;
       }
 
       setAlert({
@@ -240,7 +222,7 @@ export const useEventoForm = (
     control,
     handleSubmit: handleSubmit(onSubmit),
     errors,
-    isSubmitting: isSubmitting || isSubmittingApi || isCriandoPreference || redirecionandoPagamento,
+    isSubmitting: isSubmitting || isSubmittingApi || redirecionandoPagamento,
     isValid,
     alert,
     handleCloseAlert,

@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { Box, CircularProgress } from '@mui/material';
-import { ConexaoMercadoPago } from '@/modules/pagamentos/components/ConexaoMercadoPago';
+import { ConexaoPagBank } from '@/modules/pagamentos/components/ConexaoPagBank';
 
 export default function PagamentosPage() {
   return (
@@ -15,7 +15,7 @@ export default function PagamentosPage() {
         </Box>
       }
     >
-      <ConexaoMercadoPago />
+      <ConexaoPagBank />
     </Suspense>
   );
 }
