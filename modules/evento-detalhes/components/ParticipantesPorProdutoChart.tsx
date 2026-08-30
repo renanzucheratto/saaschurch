@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
-import { Box, Typography, Paper, CircularProgress, Card } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
+import { CardWithTitle } from "@/components/card-with-title";
 import { useObterEstatisticasParticipantesPorProdutoQuery } from "@/config/redux/api/eventosApi";
 
 interface ParticipantesPorProdutoChartProps {
@@ -91,9 +92,9 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
 
   if (isLoading) {
     return (
-      <Card variant="outlined">
+      <CardWithTitle>
         <CircularProgress />
-      </Card>
+      </CardWithTitle>
     );
   }
 
@@ -102,10 +103,7 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%' }}>
-      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-        Participantes por produto
-      </Typography>
+    <CardWithTitle title="Participantes por produto">
       <Box sx={{ width: "100%", minHeight: 400, height: '100%' }}>
         <ReactECharts
           option={chartOptions}
@@ -114,6 +112,6 @@ export default function ParticipantesPorProdutoChart({ eventoId }: Participantes
         />
 
       </Box>
-    </Card>
+    </CardWithTitle>
   );
 }

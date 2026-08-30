@@ -2,17 +2,15 @@
 
 import { useRef, useState } from "react";
 import {
-  Card,
   Typography,
   Stack,
-  Box,
   Button,
   IconButton,
   Link,
   CircularProgress,
-  Divider,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
+import { CardWithTitle } from "@/components/card-with-title";
 import {
   useUploadAnexoProjetoMutation,
   useRemoverAnexoProjetoMutation,
@@ -84,17 +82,19 @@ export function AnexosCard({
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 3 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#1A1A1A" }}>
+    <CardWithTitle
+      title={
+        <>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {titulo}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {descricao}
           </Typography>
-        </Box>
-        {podeGerenciar && (
+        </>
+      }
+      actions={
+        podeGerenciar ? (
           <>
             <input
               ref={inputRef}
@@ -120,11 +120,9 @@ export function AnexosCard({
               Anexar
             </Button>
           </>
-        )}
-      </Stack>
-
-      <Divider sx={{ my: 1.5 }} />
-
+        ) : undefined
+      }
+    >
       {anexosFiltrados.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
           Nenhum anexo adicionado.
@@ -175,6 +173,6 @@ export function AnexosCard({
           ))}
         </Stack>
       )}
-    </Card>
+    </CardWithTitle>
   );
 }

@@ -7,7 +7,6 @@ import {
   CircularProgress,
   IconButton,
   Chip,
-  Card,
   Grid,
   Stack,
   Button,
@@ -19,6 +18,7 @@ import { Icon as IconifyIcon } from "@iconify/react";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useObterEventoQuery, useListarParticipantesQuery } from "@/config/redux/api/eventosApi";
 import { EventoDetalhes, Participante, ProdutoParticipante } from "@/types/evento.types";
+import { CardWithTitle } from "@/components/card-with-title";
 import ParticipantesPorProdutoChart from "./components/ParticipantesPorProdutoChart";
 import { useState, useCallback, useMemo } from "react";
 import { Tabs, Tab } from "@mui/material";
@@ -424,10 +424,7 @@ export default function EventoDetalhesModule() {
 
       {/* Informações do Evento */}
       <Grid size={12}>
-        <Card variant="outlined">
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-            Informações do Evento
-          </Typography>
+        <CardWithTitle title="Informações do Evento">
 
           <Box sx={{ display: "grid", gap: 2 }}>
             <Box>
@@ -489,15 +486,12 @@ export default function EventoDetalhesModule() {
               </Box>
             )}
           </Box>
-        </Card>
+        </CardWithTitle>
       </Grid>
 
       {/* QR Code e Link do Evento */}
       <Grid size={{ xs: 12 }}>
-        <Card variant="outlined">
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-            Link do Evento
-          </Typography>
+        <CardWithTitle title="Link do Evento">
           <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center">
             <Box
               sx={{
@@ -578,7 +572,7 @@ export default function EventoDetalhesModule() {
               </Stack>
             </Box>
           </Stack>
-        </Card>
+        </CardWithTitle>
       </Grid>
 
       {/* Gráficos de Participantes */}
@@ -617,17 +611,9 @@ export default function EventoDetalhesModule() {
           </Box>
 
           <CustomTabPanel value={currentTab} index={0}>
-            <Card variant="outlined">
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                alignItems={{ xs: "start", sm: "center" }}
-                justifyContent="space-between"
-                spacing={2}
-                sx={{ mb: 2 }}
-              >
-                <Typography variant="subtitle1" fontWeight={600}>
-                  Participantes Ativos ({filteredAtivos.length})
-                </Typography>
+            <CardWithTitle
+              title={`Participantes Ativos (${filteredAtivos.length})`}
+              actions={
                 <TextField
                   placeholder="Buscar em todos os dados..."
                   size="small"
@@ -648,7 +634,8 @@ export default function EventoDetalhesModule() {
                     },
                   }}
                 />
-              </Stack>
+              }
+            >
               <DataGrid
                 rows={filteredAtivos}
                 columns={participantesColumnsFiltradas}
@@ -677,21 +664,13 @@ export default function EventoDetalhesModule() {
                   },
                 }}
               />
-            </Card>
+            </CardWithTitle>
           </CustomTabPanel>
 
           <CustomTabPanel value={currentTab} index={1}>
-            <Card variant="outlined">
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                alignItems={{ xs: "start", sm: "center" }}
-                justifyContent="space-between"
-                spacing={2}
-                sx={{ mb: 2 }}
-              >
-                <Typography variant="subtitle1" fontWeight={600}>
-                  Participantes Inativos ({filteredInativos.length})
-                </Typography>
+            <CardWithTitle
+              title={`Participantes Inativos (${filteredInativos.length})`}
+              actions={
                 <TextField
                   placeholder="Buscar em todos os dados..."
                   size="small"
@@ -712,7 +691,8 @@ export default function EventoDetalhesModule() {
                     },
                   }}
                 />
-              </Stack>
+              }
+            >
               <DataGrid
                 rows={filteredInativos}
                 columns={participantesColumnsFiltradas}
@@ -741,7 +721,7 @@ export default function EventoDetalhesModule() {
                   },
                 }}
               />
-            </Card>
+            </CardWithTitle>
           </CustomTabPanel>
         </Box>
       </Grid>

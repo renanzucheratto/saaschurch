@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import {
   Box,
   Typography,
-  Card,
   Grid,
   Stack,
   Chip,
@@ -30,6 +29,7 @@ import { usePermissions } from "@/lib/hooks/usePermissions";
 import { getStatusInfo } from "@/config/helpers/projeto-status";
 import { formatNumberToCurrency } from "@/config/helpers/currency-mask";
 import type { StatusProjetoNome } from "@/types/projeto.types";
+import { CardWithTitle } from "@/components/card-with-title";
 import { AlterarStatusModal } from "./components/AlterarStatusModal";
 import { AnexosCard } from "./components/AnexosCard";
 import ProjetoDrawer from "./components/ProjetoDrawer";
@@ -178,10 +178,7 @@ export default function ProjetoDetalhesModule() {
       <Grid container spacing={3}>
         {/* Informações */}
         <Grid size={12}>
-          <Card variant="outlined" sx={{ p: 3 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              Informações do projeto
-            </Typography>
+          <CardWithTitle title="Informações do projeto">
             <Grid container spacing={2}>
               <Grid size={{ xs: 6, md: 3 }}>
                 <Typography variant="caption" color="text.secondary">
@@ -236,16 +233,13 @@ export default function ProjetoDetalhesModule() {
                 <Typography variant="body2">{projeto.status.justificativa}</Typography>
               </>
             )}
-          </Card>
+          </CardWithTitle>
         </Grid>
 
         {/* Ações de status */}
         {acoes.length > 0 && (
           <Grid size={12}>
-            <Card variant="outlined" sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                Ações
-              </Typography>
+            <CardWithTitle title="Ações">
               <Stack direction="row" gap={2} flexWrap="wrap">
                 {acoes.map((acao) => (
                   <Button
@@ -259,16 +253,13 @@ export default function ProjetoDetalhesModule() {
                   </Button>
                 ))}
               </Stack>
-            </Card>
+            </CardWithTitle>
           </Grid>
         )}
 
         {/* Itens */}
         <Grid size={12}>
-          <Card variant="outlined" sx={{ p: 3 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              Itens do projeto
-            </Typography>
+          <CardWithTitle title="Itens do projeto">
             <TableContainer>
               <Table size="small">
                 <TableHead>
@@ -309,21 +300,18 @@ export default function ProjetoDetalhesModule() {
                 </TableBody>
               </Table>
             </TableContainer>
-          </Card>
+          </CardWithTitle>
         </Grid>
 
         {/* Ideias */}
         {projeto.ideias && (
           <Grid size={12}>
-            <Card variant="outlined" sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                Ideias e detalhamento
-              </Typography>
+            <CardWithTitle title="Ideias e detalhamento">
               <Box
                 sx={{ "& p": { m: 0 }, fontSize: 14, color: "#333" }}
                 dangerouslySetInnerHTML={{ __html: projeto.ideias }}
               />
-            </Card>
+            </CardWithTitle>
           </Grid>
         )}
 

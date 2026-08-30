@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
-import { Box, Typography, Card, CircularProgress } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
+import { CardWithTitle } from "@/components/card-with-title";
 import { useObterEstatisticasPizzaQuery } from "@/config/redux/api/eventosApi";
 
 interface ParticipantesPizzaChartProps {
@@ -67,27 +68,26 @@ export default function ParticipantesPizzaChart({ eventoId }: ParticipantesPizza
 
   if (isLoading) {
     return (
-      <Card variant="outlined" sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", minHeight: 500 }}>
-        <CircularProgress />
-      </Card>
+      <CardWithTitle sx={{ minHeight: 500 }}>
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <CircularProgress />
+        </Box>
+      </CardWithTitle>
     );
   }
 
   if (!estatisticas || estatisticas.length === 0) {
     return (
-      <Card variant="outlined" sx={{ p: 2, height: "100%" }}>
+      <CardWithTitle>
         <Typography variant="body1" color="text.secondary">
           Nenhum dado disponível para exibir
         </Typography>
-      </Card>
+      </CardWithTitle>
     );
   }
 
   return (
-    <Card variant="outlined" sx={{ height: "100%" }}>
-      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-        Day Use vs Retiro (Inclui Pacotes)
-      </Typography>
+    <CardWithTitle title="Day Use vs Retiro (Inclui Pacotes)">
       <Box sx={{ width: "100%", minHeight: 250, height: '100%', display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ReactECharts
           option={chartOptions}
@@ -95,6 +95,6 @@ export default function ParticipantesPizzaChart({ eventoId }: ParticipantesPizza
           opts={{ renderer: "svg" }}
         />
       </Box>
-    </Card>
+    </CardWithTitle>
   );
 }
