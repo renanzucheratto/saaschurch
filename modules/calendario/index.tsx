@@ -1,14 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { ptBR } from "date-fns/locale";
+import { useObterEventoQuery } from "@/config/redux/api/eventosApi";
+import { EventoDetalhes } from "@/types/evento.types";
 import { useCalendario } from "./hooks/use-calendario";
 import { useCalendarioStyles } from "./styles";
 import { CalendarioHeader } from "./components/CalendarioHeader";
 import { CalendarioGrid } from "./components/CalendarioGrid";
-import { OcorrenciaDialog } from "./components/OcorrenciaDialog";
+import { OcorrenciaDrawer } from "./components/OcorrenciaDrawer";
+import { OcorrenciaVisualizacaoDrawer } from "./components/OcorrenciaVisualizacaoDrawer";
+import { EventoVisualizacaoDrawer } from "./components/EventoVisualizacaoDrawer";
 
 export default function CalendarioModule() {
   const {
@@ -16,9 +21,12 @@ export default function CalendarioModule() {
     date,
     itens,
     areas,
+    ocorrencias,
     podeGerenciar,
     isLoading,
     dialogState,
+    eventoDrawer,
+    ocorrenciaVisualizacao,
     control,
     isSubmitting,
     erro,
@@ -28,10 +36,30 @@ export default function CalendarioModule() {
     onSelectEvent,
     onNovaOcorrencia,
     onCloseDialog,
+    onCloseEventoDrawer,
+    onCloseOcorrenciaVisualizacao,
+    onEditarOcorrencia,
+    podeEditarOcorrencia,
     onSubmitForm,
     onDeleteOcorrencia,
   } = useCalendario();
   const styles = useCalendarioStyles();
+
+  const {
+    data: eventoSelecionado,
+    isLoading: carregandoEvento,
+    isFetching: atualizandoEvento,
+    refetch: refetchEvento,
+  } = useObterEventoQuery(eventoDrawer.eventoId ?? "", {
+    skip: !eventoDrawer.eventoId,
+  });
+
+  useEffect(() => {
+    if (eventoDrawer.eventoId) refetchEvento();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventoDrawer.clickId]);
+
+  const ocorrenciaSelecionada = ocorrencias.find((o) => o.id === ocorrenciaVisualizacao.ocorrenciaId) ?? null;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
@@ -61,7 +89,7 @@ export default function CalendarioModule() {
           />
         )}
 
-        <OcorrenciaDialog
+        <OcorrenciaDrawer
           open={dialogState.open}
           mode={dialogState.mode}
           control={control}
@@ -71,6 +99,22 @@ export default function CalendarioModule() {
           onClose={onCloseDialog}
           onSubmit={onSubmitForm}
           onDelete={dialogState.mode === "edit" ? onDeleteOcorrencia : undefined}
+        />
+
+        <OcorrenciaVisualizacaoDrawer
+          open={ocorrenciaVisualizacao.open}
+          ocorrencia={ocorrenciaSelecionada}
+          podeEditar={ocorrenciaSelecionada ? podeEditarOcorrencia(ocorrenciaSelecionada) : false}
+          onClose={onCloseOcorrenciaVisualizacao}
+          onEditar={onEditarOcorrencia}
+        />
+
+        <EventoVisualizacaoDrawer
+          open={eventoDrawer.open}
+          isLoading={carregandoEvento}
+          isFetching={atualizandoEvento}
+          onClose={onCloseEventoDrawer}
+          evento={(eventoSelecionado as EventoDetalhes) ?? null}
         />
       </Box>
     </LocalizationProvider>

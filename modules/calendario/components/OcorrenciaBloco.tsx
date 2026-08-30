@@ -1,6 +1,8 @@
 "use client";
 
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import { format } from "date-fns";
 import { useCalendarioStyles } from "../styles";
 import { ItemCalendario } from "../helpers/calendario-item.types";
 
@@ -10,24 +12,26 @@ interface Props {
 
 export function OcorrenciaBloco({ item }: Props) {
   const styles = useCalendarioStyles();
+  const cor = item.resource.corPrincipal;
 
   return (
-    <Tooltip title={item.resource.nota ? `${item.title} — ${item.resource.nota}` : item.title}>
-      <Box
-        sx={{
-          ...styles.ocorrenciaBloco,
-          bgcolor: item.resource.corPrincipal,
-          color: "#fff",
-          borderRadius: 0.5,
-        }}
-      >
-        <Typography variant="caption" sx={{ color: "inherit", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>
-          {item.title}
-        </Typography>
-        {item.resource.corsExtras.map((cor, index) => (
-          <Box key={index} sx={{ ...styles.dotExtra, bgcolor: cor }} />
-        ))}
-      </Box>
-    </Tooltip>
+    <Box
+      sx={{
+        ...styles.itemBloco,
+        bgcolor: alpha(cor, 0.16),
+        borderLeftColor: cor,
+        color: cor,
+      }}
+    >
+      <Typography variant="caption" sx={{ ...styles.horaTexto, color: "inherit" }}>
+        {format(item.start, "HH:mm")}
+      </Typography>
+      <Typography variant="caption" sx={{ ...styles.tituloTexto, color: "inherit" }}>
+        {item.title}
+      </Typography>
+      {item.resource.corsExtras.map((corExtra, index) => (
+        <Box key={index} sx={{ ...styles.dotExtra, bgcolor: corExtra }} />
+      ))}
+    </Box>
   );
 }

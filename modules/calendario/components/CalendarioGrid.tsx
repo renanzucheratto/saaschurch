@@ -9,6 +9,7 @@ import { useCalendarioStyles } from "../styles";
 import { ItemCalendario } from "../helpers/calendario-item.types";
 import { EventoBloco } from "./EventoBloco";
 import { OcorrenciaBloco } from "./OcorrenciaBloco";
+import { FeriadoBloco } from "./FeriadoBloco";
 
 const localizer = dateFnsLocalizer({
   format,
@@ -50,8 +51,11 @@ export function CalendarioGrid({ itens, view, date, onViewChange, onNavigate, on
           style: { backgroundColor: "transparent", border: "none", padding: 0 },
         })}
         components={{
-          event: ({ event }: { event: ItemCalendario }) =>
-            event.tipo === "evento" ? <EventoBloco item={event} /> : <OcorrenciaBloco item={event} />,
+          event: ({ event }: { event: ItemCalendario }) => {
+            if (event.tipo === "feriado") return <FeriadoBloco item={event} />;
+            if (event.tipo === "evento") return <EventoBloco item={event} />;
+            return <OcorrenciaBloco item={event} />;
+          },
         }}
         messages={{
           month: "Mês",

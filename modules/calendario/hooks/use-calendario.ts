@@ -14,9 +14,15 @@ import {
   useRemoverOcorrenciaMutation,
   CriarOcorrenciaRequest,
 } from "@/config/redux/api/ocorrenciasCalendarioApi";
+import { useListarFeriadosQuery } from "@/config/redux/api/feriadosApi";
 import { usePermissions } from "@/lib/hooks/usePermissions";
+import { useAppSelector } from "@/config/redux/store";
+import { selectCurrentUser } from "@/config/redux/slices/authSlice";
+import { OcorrenciaCalendario } from "@/types/ocorrencia-calendario.types";
 import { mapearEventosParaCalendario } from "../helpers/mapear-eventos-para-calendario";
 import { mapearOcorrenciasParaCalendario } from "../helpers/mapear-ocorrencias-para-calendario";
+import { mapearFeriadosParaCalendario } from "../helpers/mapear-feriados-para-calendario";
+import { filtrarFeriadosNaJanela, obterJanelaFeriados } from "../helpers/obter-janela-feriados";
 import { ocorrenciaSchema, OcorrenciaFormData } from "../helpers/validation";
 import { CalendarioView } from "../helpers/constants";
 import { ItemCalendario } from "../helpers/calendario-item.types";
@@ -25,6 +31,17 @@ interface DialogState {
   open: boolean;
   mode: "create" | "edit";
   ocorrenciaId?: string;
+}
+
+interface EventoDrawerState {
+  open: boolean;
+  eventoId: string | null;
+  clickId: number;
+}
+
+interface OcorrenciaVisualizacaoState {
+  open: boolean;
+  ocorrenciaId: string | null;
 }
 
 function getErrorMessage(value: unknown): string {
@@ -41,24 +58,41 @@ function getErrorMessage(value: unknown): string {
 export function useCalendario() {
   const { is } = usePermissions();
   const podeGerenciar = is("lider", "backoffice");
+  const isBackoffice = is("backoffice");
+  const currentUser = useAppSelector(selectCurrentUser);
 
   const [view, setView] = useState<CalendarioView>("month");
   const [date, setDate] = useState(new Date());
   const [dialogState, setDialogState] = useState<DialogState>({ open: false, mode: "create" });
+  const [eventoDrawer, setEventoDrawer] = useState<EventoDrawerState>({ open: false, eventoId: null, clickId: 0 });
+  const [ocorrenciaVisualizacao, setOcorrenciaVisualizacao] = useState<OcorrenciaVisualizacaoState>({
+    open: false,
+    ocorrenciaId: null,
+  });
   const [erro, setErro] = useState<string | null>(null);
 
   const { data: eventos = [], isLoading: carregandoEventos } = useListarEventosQuery();
   const { data: ocorrencias = [], isLoading: carregandoOcorrencias } = useListarOcorrenciasQuery();
   const { data: areas = [] } = useListarAreasQuery();
 
+  const janelaFeriados = useMemo(() => obterJanelaFeriados(), []);
+  const { data: feriadosAnoInicio = [] } = useListarFeriadosQuery(janelaFeriados.anoInicio);
+  const { data: feriadosAnoFim = [] } = useListarFeriadosQuery(janelaFeriados.anoFim, {
+    skip: janelaFeriados.anoFim === janelaFeriados.anoInicio,
+  });
+
   const [criarOcorrencia, { isLoading: criando }] = useCriarOcorrenciaMutation();
   const [atualizarOcorrencia, { isLoading: atualizando }] = useAtualizarOcorrenciaMutation();
   const [removerOcorrencia] = useRemoverOcorrenciaMutation();
 
-  const itens = useMemo<ItemCalendario[]>(
-    () => [...mapearEventosParaCalendario(eventos), ...mapearOcorrenciasParaCalendario(ocorrencias)],
-    [eventos, ocorrencias]
-  );
+  const itens = useMemo<ItemCalendario[]>(() => {
+    const feriados = filtrarFeriadosNaJanela([...feriadosAnoInicio, ...feriadosAnoFim], janelaFeriados);
+    return [
+      ...mapearEventosParaCalendario(eventos),
+      ...mapearOcorrenciasParaCalendario(ocorrencias),
+      ...mapearFeriadosParaCalendario(feriados),
+    ];
+  }, [eventos, ocorrencias, feriadosAnoInicio, feriadosAnoFim, janelaFeriados]);
 
   const { control, handleSubmit, reset } = useForm<OcorrenciaFormData>({
     resolver: zodResolver(ocorrenciaSchema),
@@ -72,7 +106,7 @@ export function useCalendario() {
     setDialogState({ open: true, mode: "create" });
   }
 
-  function abrirEdicao(ocorrenciaId: string) {
+  function abrirEdicaoOcorrencia(ocorrenciaId: string) {
     const ocorrencia = ocorrencias.find((o) => o.id === ocorrenciaId);
     if (!ocorrencia) return;
 
@@ -89,7 +123,17 @@ export function useCalendario() {
       })),
     });
     setErro(null);
+    setOcorrenciaVisualizacao({ open: false, ocorrenciaId: null });
     setDialogState({ open: true, mode: "edit", ocorrenciaId });
+  }
+
+  function podeEditarOcorrencia(ocorrencia: OcorrenciaCalendario): boolean {
+    if (isBackoffice) return true;
+    if (!currentUser) return false;
+    return ocorrencia.areas.some((area) => {
+      const areaCompleta = areas.find((a) => a.id === area.id);
+      return areaCompleta?.lideres.some((lider) => lider.id === currentUser.id) ?? false;
+    });
   }
 
   function onSelectSlot(slotInfo: SlotInfo) {
@@ -98,9 +142,23 @@ export function useCalendario() {
   }
 
   function onSelectEvent(item: ItemCalendario) {
-    if (item.tipo === "evento") return;
-    if (!podeGerenciar || !item.resource.ocorrenciaId) return;
-    abrirEdicao(item.resource.ocorrenciaId);
+    if (item.tipo === "feriado") return;
+    if (item.tipo === "evento") {
+      if (item.resource.eventoId) {
+        setEventoDrawer((prev) => ({ open: true, eventoId: item.resource.eventoId!, clickId: prev.clickId + 1 }));
+      }
+      return;
+    }
+    if (!item.resource.ocorrenciaId) return;
+    setOcorrenciaVisualizacao({ open: true, ocorrenciaId: item.resource.ocorrenciaId });
+  }
+
+  function onCloseEventoDrawer() {
+    setEventoDrawer({ open: false, eventoId: null, clickId: 0 });
+  }
+
+  function onCloseOcorrenciaVisualizacao() {
+    setOcorrenciaVisualizacao({ open: false, ocorrenciaId: null });
   }
 
   function onNovaOcorrencia() {
@@ -156,9 +214,12 @@ export function useCalendario() {
     date,
     itens,
     areas,
+    ocorrencias,
     podeGerenciar,
     isLoading: carregandoEventos || carregandoOcorrencias,
     dialogState,
+    eventoDrawer,
+    ocorrenciaVisualizacao,
     control,
     isSubmitting: criando || atualizando,
     erro,
@@ -168,6 +229,10 @@ export function useCalendario() {
     onSelectEvent,
     onNovaOcorrencia,
     onCloseDialog,
+    onCloseEventoDrawer,
+    onCloseOcorrenciaVisualizacao,
+    onEditarOcorrencia: abrirEdicaoOcorrencia,
+    podeEditarOcorrencia,
     onSubmitForm,
     onDeleteOcorrencia,
   };

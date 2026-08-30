@@ -81,6 +81,7 @@ export interface EventoDetalhes {
   statusAtual?: StatusEvento;
   produtos: Produto[];
   campos_customizados?: CampoCustomizado[];
+  quantidadeParticipantes?: number;
 }
 
 export interface Parcela {

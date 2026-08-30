@@ -49,7 +49,7 @@ export function AreaMultiSelect({ areas, value, onChange }: Props) {
             label={area.nome}
             size="small"
             icon={<Swatch cor={area.cor} />}
-            sx={{ "& .MuiChip-icon": { ml: 1 } }}
+            sx={{ "& .MuiChip-icon": { ml: 1.25, mr: 0.5 } }}
           />
         ))
       }

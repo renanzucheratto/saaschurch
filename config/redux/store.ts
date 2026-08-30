@@ -3,6 +3,7 @@ import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, 
 import storage from 'redux-persist/lib/storage';
 import { combineReducers } from '@reduxjs/toolkit';
 import { baseApi } from './api/baseApi';
+import { feriadosApi } from './api/feriadosApi';
 import authReducer from './slices/authSlice';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
@@ -14,6 +15,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
+  [feriadosApi.reducerPath]: feriadosApi.reducer,
   auth: authReducer,
 });
 
@@ -26,7 +28,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(baseApi.middleware),
+    }).concat(baseApi.middleware, feriadosApi.middleware),
 });
 
 export const persistor = persistStore(store);

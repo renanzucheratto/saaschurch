@@ -5,13 +5,11 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Drawer,
   IconButton,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { Controller, Control, useWatch } from "react-hook-form";
@@ -34,28 +32,37 @@ interface Props {
   onDelete?: () => void;
 }
 
-export function OcorrenciaDialog({ open, mode, control, areas, isSubmitting, erro, onClose, onSubmit, onDelete }: Props) {
+export function OcorrenciaDrawer({ open, mode, control, areas, isSubmitting, erro, onClose, onSubmit, onDelete }: Props) {
   const de = useWatch({ control, name: "de" });
   const ate = useWatch({ control, name: "ate" });
   const mostrarExcecoes = de && ate && differenceInCalendarDays(ate, de) >= 1;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        {mode === "create" ? "Nova ocorrência" : "Editar ocorrência"}
-        <IconButton onClick={onClose}>
-          <Icon icon="material-symbols:close" />
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      disableEnforceFocus
+      disableRestoreFocus
+      PaperProps={{ sx: { width: { xs: "100%", sm: 480 }, p: 0 } }}
+    >
+      <Box sx={{ px: 3, height: 61, display: "flex", flexShrink: "inherit", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid", borderColor: "divider" }}>
+        <Typography variant="h6" fontWeight={700}>
+          {mode === "create" ? "Nova ocorrência" : "Editar ocorrência"}
+        </Typography>
+        <IconButton onClick={onClose} size="small">
+          <Icon icon="mdi:close" width={24} />
         </IconButton>
-      </DialogTitle>
+      </Box>
 
-      <DialogContent>
+      <Box sx={{ p: 3, overflowY: "auto", flexGrow: 1 }}>
         {erro && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {erro}
           </Alert>
         )}
 
-        <Stack gap={2.5} sx={{ mt: 1 }}>
+        <Stack gap={2.5}>
           <Controller
             control={control}
             name="titulo"
@@ -121,9 +128,9 @@ export function OcorrenciaDialog({ open, mode, control, areas, isSubmitting, err
 
           {mostrarExcecoes && <ExcecoesHorarioForm control={control} de={de} ate={ate} />}
         </Stack>
-      </DialogContent>
+      </Box>
 
-      <DialogActions sx={{ px: 3, pb: 2, justifyContent: "space-between" }}>
+      <Box sx={{ px: 3, py: 2, borderTop: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           {mode === "edit" && onDelete && (
             <Button onClick={onDelete} sx={{ color: "#d32f2f" }}>
@@ -142,7 +149,7 @@ export function OcorrenciaDialog({ open, mode, control, areas, isSubmitting, err
             {isSubmitting ? <CircularProgress size={20} color="inherit" /> : "Salvar"}
           </Button>
         </Stack>
-      </DialogActions>
-    </Dialog>
+      </Box>
+    </Drawer>
   );
 }

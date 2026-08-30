@@ -16,7 +16,7 @@ export function useCalendarioStyles() {
       border: "1px solid",
       borderColor: "divider",
       p: 2,
-      height: { xs: 640, md: 760 },
+      height: { xs: 760, md: 920 },
       "& .rbc-calendar": {
         fontFamily: theme.typography.fontFamily,
         color: theme.palette.text.primary,
@@ -43,7 +43,8 @@ export function useCalendarioStyles() {
       },
       "& .rbc-event": {
         border: "none",
-        padding: "2px 6px",
+        padding: 0,
+        minHeight: 34,
       },
       "& .rbc-event.rbc-selected": {
         boxShadow: `0 0 0 2px ${theme.palette.primary.main}`,
@@ -53,31 +54,45 @@ export function useCalendarioStyles() {
         fontWeight: 600,
       },
     },
-    eventoBloco: {
+    itemBloco: {
       display: "flex",
       alignItems: "center",
-      gap: 0.5,
+      gap: 1,
       overflow: "hidden",
       whiteSpace: "nowrap",
       textOverflow: "ellipsis",
-      cursor: "default",
+      height: "calc(100% - 4px)",
+      width: "calc(100% - 6px)",
+      mx: "3px",
+      my: "2px",
+      px: 1,
+      py: 0.5,
+      borderRadius: BORDER_RADIUS.default,
+      borderLeft: "3px solid",
+      cursor: "pointer",
+      transition: "filter 0.15s ease",
+      "&:hover": {
+        filter: "brightness(0.96)",
+      },
+    },
+    horaTexto: {
+      flexShrink: 0,
+      fontWeight: 700,
+      fontVariantNumeric: "tabular-nums",
       opacity: 0.85,
     },
-    ocorrenciaBloco: {
-      display: "flex",
-      alignItems: "center",
-      gap: 0.5,
+    tituloTexto: {
+      fontWeight: 600,
       overflow: "hidden",
-      whiteSpace: "nowrap",
       textOverflow: "ellipsis",
-      cursor: "pointer",
     },
     dotExtra: {
-      width: 6,
-      height: 6,
+      width: 7,
+      height: 7,
       borderRadius: "50%",
       flexShrink: 0,
-      border: "1px solid rgba(255,255,255,0.7)",
+      ml: 0.5,
+      border: "1px solid rgba(255,255,255,0.85)",
     },
   } as const;
 }

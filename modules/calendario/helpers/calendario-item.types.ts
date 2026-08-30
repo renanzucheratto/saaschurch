@@ -1,4 +1,10 @@
-export type TipoItemCalendario = "evento" | "ocorrencia";
+export type TipoItemCalendario = "evento" | "ocorrencia" | "feriado";
+
+export interface ExcecaoItemCalendario {
+  data: string;
+  horaInicio: string;
+  horaFim: string;
+}
 
 export interface RecursoItemCalendario {
   corPrincipal: string;
@@ -6,6 +12,7 @@ export interface RecursoItemCalendario {
   nota?: string | null;
   ocorrenciaId?: string;
   eventoId?: string;
+  excecoes?: ExcecaoItemCalendario[];
 }
 
 export interface ItemCalendario {
@@ -14,5 +21,6 @@ export interface ItemCalendario {
   title: string;
   start: Date;
   end: Date;
+  allDay?: boolean;
   resource: RecursoItemCalendario;
 }
