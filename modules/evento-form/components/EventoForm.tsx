@@ -519,14 +519,14 @@ export const EventoForm = () => {
                     : 'Confirmar Inscrição'}
               </Button>
 
-              {/* O redirect para o Mercado Pago pode demorar alguns segundos.
-                  Sem aviso, a pessoa clica de novo e cria inscrição duplicada. */}
+              {/* A navegação para a tela de pagamento é praticamente instantânea
+                  (rota interna), mas o aviso evita clique duplo mesmo assim. */}
               {redirecionandoPagamento && (
                 <Typography
                   variant="caption"
                   sx={{ display: 'block', mt: 1.5, textAlign: 'center' }}
                 >
-                  Inscrição registrada. Levando você ao Mercado Pago para concluir o pagamento —
+                  Inscrição registrada. Levando você para a tela de pagamento —
                   não feche esta página.
                 </Typography>
               )}

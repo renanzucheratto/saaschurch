@@ -24,6 +24,7 @@ import { criarEventoSchema, type CriarEventoSchema } from "./schemas/criar-event
 import { useCadastrarEventoMutation } from "@/config/redux/api/eventosApi";
 import type { ProdutoEventoRequest, CampoCustomizadoRequest } from "@/config/redux/api/eventosApi";
 import RichTextEditor from "./components/RichTextEditor";
+import { CalculadoraTaxas } from "./components/CalculadoraTaxas";
 import { CamposCustomizadosManager } from "./components/CamposCustomizadosManager";
 import { FaqManager } from "./components/FaqManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
@@ -60,6 +61,8 @@ export default function CriarEventoModule() {
   const {
     control,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isValid },
   } = useForm<CriarEventoSchema>({
     resolver: zodResolver(criarEventoSchema),
@@ -573,6 +576,28 @@ export default function CriarEventoModule() {
                               )}
                             />
                           </Grid>
+
+                          {/*
+                            Só faz sentido para produto cobrado: mostra o
+                            líquido do preço digitado e resolve o inverso.
+                          */}
+                          {watch(`produtos.${index}.exigePagamento`) && (
+                            <Grid size={{ xs: 12 }}>
+                              <CalculadoraTaxas
+                                valorMascarado={watch(`produtos.${index}.valor`)}
+                                onSugerirValor={(valorSugerido) =>
+                                  setValue(
+                                    `produtos.${index}.valor`,
+                                    valorSugerido.toLocaleString("pt-BR", {
+                                      style: "currency",
+                                      currency: "BRL",
+                                    }),
+                                    { shouldValidate: true, shouldDirty: true },
+                                  )
+                                }
+                              />
+                            </Grid>
+                          )}
                         </Grid>
                       </Card>
                     ))}

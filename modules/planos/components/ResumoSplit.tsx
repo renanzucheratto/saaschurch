@@ -58,7 +58,7 @@ export function ResumoSplit({ split, sx }: Props) {
 
       <Box sx={{ mt: 1.5 }}>
         <Typography variant="caption" color="text.secondary">
-          A taxa incide apenas sobre pagamentos feitos online pelo Mercado Pago. Lançamentos
+          A taxa incide apenas sobre pagamentos feitos online pelo PagBank. Lançamentos
           registrados manualmente não são afetados.
         </Typography>
       </Box>

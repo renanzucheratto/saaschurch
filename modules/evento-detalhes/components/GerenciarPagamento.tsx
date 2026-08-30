@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useListarPagamentosPagBankQuery } from '@/config/redux/api/pagbankApi';
 import {
   Box,
   Typography,
@@ -43,7 +44,23 @@ const parcelaSchema = z.object({
 
 type ParcelaForm = z.infer<typeof parcelaSchema>;
 
+/** Casa a parcela com o pagamento online pelo externalReference na descrição. */
+const REF_NA_DESCRICAO = /Pagamento online PagBank \(([0-9a-f-]{36})\)/i;
+
+function moedaBR(valor: number): string {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+}
+
 export default function GerenciarPagamento({ eventoId, participanteId, produto }: GerenciarPagamentoProps) {
+  // Traz taxa e líquido dos pagamentos online deste participante. A parcela
+  // registra o valor cheio da inscrição (é o que quita), mas na conta da
+  // instituição cai o valor menos a taxa — sem mostrar isso aqui, a diferença
+  // no extrato bancário fica sem explicação.
+  const { data: pagamentosOnline } = useListarPagamentosPagBankQuery({ participanteId });
+
+  const splitPorRef = new Map(
+    (pagamentosOnline?.pagamentos ?? []).map((p) => [p.externalReference, p]),
+  );
   const [atualizarQuantidade] = useAtualizarQuantidadeParcelasMutation();
   const [cadastrarParcela, { isLoading: isLoadingCadastrar }] = useCadastrarParcelaMutation();
   const [editarParcela, { isLoading: isLoadingEditar }] = useEditarParcelaMutation();
@@ -237,7 +254,12 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
 
       <Typography variant="caption" fontWeight={600} display="block" mb={1}>Lançamentos</Typography>
       <Stack spacing={1} mb={2}>
-        {produto.parcelas?.map((parcela, index) => (
+        {produto.parcelas?.map((parcela, index) => {
+          const ref = parcela.descricao?.match(REF_NA_DESCRICAO)?.[1];
+          const online = ref ? splitPorRef.get(ref) : undefined;
+          const taxa = online ? Number(online.splitValor) : 0;
+
+          return (
           <Box key={parcela.id} sx={{ bgcolor: 'white', p: 1.5, borderRadius: 1, border: '1px solid #E0E0E0' }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Box>
@@ -248,23 +270,39 @@ export default function GerenciarPagamento({ eventoId, participanteId, produto }
                   {parcela.metodo_pagamento} {parcela.numero_vezes ? `(${parcela.numero_vezes}x)` : ''}
                   {parcela.data_pagamento ? ` • ${new Date(parcela.data_pagamento).toLocaleDateString()}` : ''}
                 </Typography>
-                {parcela.descricao && (
+                {online ? (
                   <Typography variant="caption" color="text.secondary" display="block">
-                    Obs: {parcela.descricao}
+                    Pago online · taxas {moedaBR(taxa)} · repassado{' '}
+                    <strong>{moedaBR(parseValor(parcela.valor_pago) - taxa)}</strong>
                   </Typography>
+                ) : (
+                  parcela.descricao && (
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      Obs: {parcela.descricao}
+                    </Typography>
+                  )
                 )}
               </Box>
-              <Stack direction="row">
-                <IconButton size="small" onClick={() => openForm(parcela)}>
-                  <IconifyIcon icon="material-symbols:edit" width={18} />
-                </IconButton>
-                <IconButton size="small" color="error" onClick={() => handleDeleteParcela(parcela.id)}>
-                  <IconifyIcon icon="material-symbols:delete" width={18} />
-                </IconButton>
-              </Stack>
+              {/*
+                Lançamento vindo do PagBank não se edita à mão: o valor é o que
+                foi efetivamente cobrado, e apagar aqui não estorna nada lá.
+              */}
+              {online ? (
+                <Chip size="small" label="Automático" variant="outlined" />
+              ) : (
+                <Stack direction="row">
+                  <IconButton size="small" onClick={() => openForm(parcela)}>
+                    <IconifyIcon icon="material-symbols:edit" width={18} />
+                  </IconButton>
+                  <IconButton size="small" color="error" onClick={() => handleDeleteParcela(parcela.id)}>
+                    <IconifyIcon icon="material-symbols:delete" width={18} />
+                  </IconButton>
+                </Stack>
+              )}
             </Stack>
           </Box>
-        ))}
+          );
+        })}
         {(!produto.parcelas || produto.parcelas.length === 0) && (
           <Typography variant="caption" color="text.secondary">Nenhuma parcela lançada.</Typography>
         )}

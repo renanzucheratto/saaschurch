@@ -16,19 +16,20 @@ import {
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import {
-  useConectarMercadoPagoMutation,
-  useDesvincularMercadoPagoMutation,
-  useStatusMercadoPagoQuery,
-} from '@/config/redux/api/mercadopagoApi';
+  useConectarPagBankMutation,
+  useDesvincularPagBankMutation,
+  useStatusPagBankQuery,
+} from '@/config/redux/api/pagbankApi';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { BORDER_RADIUS } from '@/config/utils/contants';
 import { StatusConexaoChip } from './StatusConexaoChip';
 import { DesvincularDialog } from './DesvincularDialog';
+import { PagamentosRecebidos } from './PagamentosRecebidos';
 
 const MENSAGENS_ERRO: Record<string, string> = {
-  autorizacao_recusada: 'Você cancelou a autorização no Mercado Pago.',
+  autorizacao_recusada: 'Você cancelou a autorização no PagBank.',
   state_invalido: 'A solicitação expirou. Clique em Conectar novamente.',
-  parametros_ausentes: 'Retorno inválido do Mercado Pago. Tente novamente.',
+  parametros_ausentes: 'Retorno inválido do PagBank. Tente novamente.',
   falha_troca_token:
     'Não foi possível concluir a conexão. Tente novamente ou contate o suporte.',
 };
@@ -38,53 +39,64 @@ function formatarData(valor?: string | null): string {
   return new Date(valor).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-export function ConexaoMercadoPago() {
+export function ConexaoPagBank() {
   const { is } = usePermissions();
   const podeGerenciar = is('backoffice');
 
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const { data: conta, isLoading, refetch } = useStatusMercadoPagoQuery();
-  const [conectar, { isLoading: conectando }] = useConectarMercadoPagoMutation();
-  const [desvincular, { isLoading: desvinculando }] = useDesvincularMercadoPagoMutation();
+  const { data: conta, isLoading, refetch } = useStatusPagBankQuery();
+  const [conectar, { isLoading: conectando }] = useConectarPagBankMutation();
+  const [desvincular, { isLoading: desvinculando }] = useDesvincularPagBankMutation();
 
   const [dialogAberto, setDialogAberto] = useState(false);
-  const [aviso, setAviso] = useState<{ tipo: 'success' | 'error'; texto: string } | null>(null);
+  const [avisoAcao, setAvisoAcao] = useState<{ tipo: 'success' | 'error'; texto: string } | null>(null);
+  const [avisoRetornoFechado, setAvisoRetornoFechado] = useState(false);
 
-  // Retorno do callback OAuth. O ?status=ok diz apenas que o callback não
-  // estourou — a verdade está no banco, então refetch antes de declarar sucesso.
+  // O aviso do callback OAuth é DERIVADO da URL, não copiado para estado num
+  // efeito — copiar causaria uma renderização em cascata a cada retorno.
+  const statusRetorno = searchParams.get('status');
+
+  const avisoRetorno = statusRetorno
+    ? statusRetorno === 'ok'
+      ? { tipo: 'success' as const, texto: 'Conta PagBank conectada.' }
+      : {
+          tipo: 'error' as const,
+          texto:
+            MENSAGENS_ERRO[searchParams.get('motivo') ?? ''] ??
+            'Não foi possível conectar a conta.',
+        }
+    : null;
+
+  // O ?status=ok diz apenas que o callback não estourou — a verdade está no
+  // banco, então refetch antes de o usuário confiar no que vê. Aqui o efeito
+  // sincroniza com um sistema externo (a API), que é o seu uso legítimo.
   useEffect(() => {
-    const status = searchParams.get('status');
-    if (!status) return;
+    if (statusRetorno) refetch();
+  }, [statusRetorno, refetch]);
 
-    refetch();
+  const aviso = avisoAcao ?? (avisoRetornoFechado ? null : avisoRetorno);
 
-    setAviso(
-      status === 'ok'
-        ? { tipo: 'success', texto: 'Conta Mercado Pago conectada.' }
-        : {
-            tipo: 'error',
-            texto:
-              MENSAGENS_ERRO[searchParams.get('motivo') ?? ''] ??
-              'Não foi possível conectar a conta.',
-          },
-    );
-
-    // Sem isso, um F5 reexibe o aviso indefinidamente.
-    router.replace('/configuracoes/pagamentos');
-  }, [searchParams, refetch, router]);
+  const fecharAviso = () => {
+    setAvisoAcao(null);
+    setAvisoRetornoFechado(true);
+    // Limpa a query para um F5 não reexibir o aviso indefinidamente.
+    if (statusRetorno) router.replace('/configuracoes/pagamentos');
+  };
 
   const handleConectar = async () => {
     try {
       const { authorizationUrl } = await conectar().unwrap();
-      // Navegação completa, não popup: o fluxo termina num redirect do MP de
-      // volta para esta mesma rota.
+      // Navegação completa, não popup: o fluxo termina num redirect do
+      // PagBank de volta para esta mesma rota.
       window.location.href = authorizationUrl;
-    } catch (err: any) {
-      setAviso({
+    } catch (err) {
+      setAvisoAcao({
         tipo: 'error',
-        texto: err?.data?.error ?? 'Não foi possível iniciar a conexão.',
+        texto:
+          (err as { data?: { error?: string } })?.data?.error ??
+          'Não foi possível iniciar a conexão.',
       });
     }
   };
@@ -92,11 +104,13 @@ export function ConexaoMercadoPago() {
   const handleDesvincular = async () => {
     try {
       const resultado = await desvincular().unwrap();
-      setAviso({ tipo: 'success', texto: resultado.message });
-    } catch (err: any) {
-      setAviso({
+      setAvisoAcao({ tipo: 'success', texto: resultado.message });
+    } catch (err) {
+      setAvisoAcao({
         tipo: 'error',
-        texto: err?.data?.error ?? 'Não foi possível desvincular a conta.',
+        texto:
+          (err as { data?: { error?: string } })?.data?.error ??
+          'Não foi possível desvincular a conta.',
       });
     } finally {
       setDialogAberto(false);
@@ -122,7 +136,7 @@ export function ConexaoMercadoPago() {
         ? 'Conectar novamente'
         : status === 'PENDING'
           ? 'Concluir conexão'
-          : 'Conectar Mercado Pago';
+          : 'Conectar PagBank';
 
   return (
     <Box>
@@ -131,7 +145,7 @@ export function ConexaoMercadoPago() {
           Pagamentos
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Conecte a conta Mercado Pago da sua instituição para receber inscrições pagas online. O
+          Conecte a conta PagBank da sua instituição para receber inscrições pagas online. O
           dinheiro cai direto na conta da instituição.
         </Typography>
       </Stack>
@@ -146,7 +160,7 @@ export function ConexaoMercadoPago() {
           para esta instituição. Merece alerta, não só um chip discreto. */}
       {expirado && (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          O acesso à conta Mercado Pago expirou e <strong>novas cobranças não estão sendo
+          O acesso à conta PagBank expirou e <strong>novas cobranças não estão sendo
           processadas</strong>. Reconecte para voltar a receber pagamentos online.
           {conta?.ultimoErro && (
             <Typography variant="caption" component="div" sx={{ mt: 1 }}>
@@ -166,10 +180,10 @@ export function ConexaoMercadoPago() {
             sx={{ mb: 2 }}
           >
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <Icon icon="simple-icons:mercadopago" width={28} />
+              <Icon icon="simple-icons:pagseguro" width={28} />
               <Box>
                 <Typography variant="subtitle1" fontWeight={600}>
-                  Mercado Pago
+                  PagBank
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Conta da instituição
@@ -185,9 +199,9 @@ export function ConexaoMercadoPago() {
             <Stack spacing={1} sx={{ mb: 2 }}>
               <Stack direction="row" spacing={1}>
                 <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                  ID no Mercado Pago
+                  ID no PagBank
                 </Typography>
-                <Typography variant="body2">{conta?.mpUserId ?? '—'}</Typography>
+                <Typography variant="body2">{conta?.pagbankAccountId ?? '—'}</Typography>
               </Stack>
               <Stack direction="row" spacing={1}>
                 <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
@@ -205,13 +219,13 @@ export function ConexaoMercadoPago() {
           ) : (
             <Stack spacing={1.5} sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary">
-                Ao conectar, você será levado ao Mercado Pago para autorizar o acesso. É preciso
-                fazer login na conta <strong>da instituição</strong>, não em uma conta pessoal.
+                Ao conectar, você será levado ao PagBank para autorizar o acesso. É preciso fazer
+                login na conta <strong>da instituição</strong>, não em uma conta pessoal.
               </Typography>
               <Stack spacing={0.5}>
                 {[
                   'O valor da inscrição cai direto na conta da instituição',
-                  'A taxa da plataforma é descontada automaticamente',
+                  'As taxas são descontadas automaticamente',
                   'Nunca temos acesso à senha da conta',
                   'Você pode desvincular quando quiser',
                 ].map((texto) => (
@@ -254,6 +268,8 @@ export function ConexaoMercadoPago() {
         </CardContent>
       </Card>
 
+      {conectado && <PagamentosRecebidos />}
+
       <DesvincularDialog
         aberto={dialogAberto}
         processando={desvinculando}
@@ -264,10 +280,10 @@ export function ConexaoMercadoPago() {
       <Snackbar
         open={!!aviso}
         autoHideDuration={6000}
-        onClose={() => setAviso(null)}
+        onClose={fecharAviso}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={aviso?.tipo ?? 'info'} onClose={() => setAviso(null)}>
+        <Alert severity={aviso?.tipo ?? 'info'} onClose={fecharAviso}>
           {aviso?.texto}
         </Alert>
       </Snackbar>
