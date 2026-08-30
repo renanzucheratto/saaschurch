@@ -13,6 +13,7 @@ import { Icon as IconifyIcon } from '@iconify/react';
 import type { Control, FieldErrors } from 'react-hook-form';
 import type { CriarEventoSchema } from '../schemas/criar-evento.schema';
 import RichTextEditor from './RichTextEditor';
+import { CardWithTitle } from '@/components/card-with-title';
 
 interface FaqManagerProps {
   control: Control<CriarEventoSchema>;
@@ -26,16 +27,18 @@ export function FaqManager({ control, errors }: FaqManagerProps) {
   });
 
   return (
-    <Card variant="outlined" sx={{ p: 3 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1A1A1A' }}>
+    <CardWithTitle
+      title={
+        <>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Perguntas Frequentes (FAQ)
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Adicione perguntas e respostas frequentes sobre o evento (opcional)
           </Typography>
-        </Box>
+        </>
+      }
+      actions={
         <Button
           variant="outlined"
           size="small"
@@ -45,8 +48,8 @@ export function FaqManager({ control, errors }: FaqManagerProps) {
         >
           Adicionar pergunta
         </Button>
-      </Stack>
-
+      }
+    >
       {fields.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 4, color: '#999' }}>
           <IconifyIcon icon="material-symbols:help-outline" width={40} />
@@ -102,6 +105,6 @@ export function FaqManager({ control, errors }: FaqManagerProps) {
           </Card>
         ))}
       </Stack>
-    </Card>
+    </CardWithTitle>
   );
 }

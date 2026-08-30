@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Box, Typography, Paper, CircularProgress, Chip, Button, Card } from "@mui/material";
+import { Box, Typography, CircularProgress, Chip } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { ptBR } from '@mui/x-data-grid/locales';
 import { useListarEventosQuery } from "@/config/redux/api/eventosApi";
-import { Icon } from "@iconify/react";
+import { CardWithTitle } from "@/components/card-with-title";
 
 const formatDateRange = (dataInicio: string | null, dataFim: string | null): string => {
   if (!dataInicio && !dataFim) return "-";
@@ -98,7 +98,7 @@ export default function EventosPage() {
         Lista de Eventos
       </Typography>
 
-      <Card variant="outlined">
+      <CardWithTitle>
         <DataGrid
           rows={eventos}
           columns={columns}
@@ -130,7 +130,7 @@ export default function EventosPage() {
           }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
         />
-      </Card>
+      </CardWithTitle>
     </Box>
   );
 }

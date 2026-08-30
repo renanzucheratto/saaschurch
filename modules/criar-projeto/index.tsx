@@ -29,6 +29,7 @@ import {
 } from "@/config/helpers/currency-mask";
 import { useAppSelector } from "@/config/redux/store";
 import { selectCurrentUser } from "@/config/redux/slices/authSlice";
+import { CardWithTitle } from "@/components/card-with-title";
 
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: 1.5 } };
 
@@ -143,11 +144,7 @@ export default function CriarProjetoModule() {
         <Grid container spacing={3}>
           {/* Informações Básicas */}
           <Grid size={12}>
-            <Card variant="outlined" sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 3, color: "#1A1A1A" }}>
-                Informações do Projeto
-              </Typography>
-
+            <CardWithTitle title="Informações do Projeto">
               <Grid container spacing={2.5}>
                 <Grid size={12}>
                   <Controller
@@ -217,15 +214,12 @@ export default function CriarProjetoModule() {
                   />
                 </Grid>
               </Grid>
-            </Card>
+            </CardWithTitle>
           </Grid>
 
           {/* Ideias / Detalhamento */}
           <Grid size={12}>
-            <Card variant="outlined" sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: "#1A1A1A" }}>
-                Ideias e detalhamento
-              </Typography>
+            <CardWithTitle title="Ideias e detalhamento">
               <Controller
                 name="ideias"
                 control={control}
@@ -237,26 +231,23 @@ export default function CriarProjetoModule() {
                   />
                 )}
               />
-            </Card>
+            </CardWithTitle>
           </Grid>
 
           {/* Itens */}
           <Grid size={12}>
-            <Card variant="outlined" sx={{ p: 3 }}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ mb: 2 }}
-              >
-                <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#1A1A1A" }}>
+            <CardWithTitle
+              title={
+                <>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                     Itens do projeto
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Liste os insumos e seus valores para compor o orçamento
                   </Typography>
-                </Box>
+                </>
+              }
+              actions={
                 <Button
                   variant="outlined"
                   size="small"
@@ -268,8 +259,8 @@ export default function CriarProjetoModule() {
                 >
                   Adicionar item
                 </Button>
-              </Stack>
-
+              }
+            >
               {errors.itens?.message && (
                 <Typography color="error" variant="caption" sx={{ display: "block", mb: 1 }}>
                   {errors.itens.message}
@@ -385,7 +376,7 @@ export default function CriarProjetoModule() {
 
               <Divider sx={{ my: 2 }} />
               <TotalProjeto control={control} />
-            </Card>
+            </CardWithTitle>
           </Grid>
 
           {/* Submit */}

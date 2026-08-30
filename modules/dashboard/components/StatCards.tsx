@@ -1,8 +1,9 @@
 "use client";
 
-import { Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { DashboardStats } from "@/config/redux/api/dashboardApi";
+import { CardWithTitle } from "@/components/card-with-title";
 
 interface Props {
   cards: DashboardStats["cards"] | undefined;
@@ -42,20 +43,12 @@ export function StatCards({ cards, isLoading }: Props) {
       {STATS.map(({ key, label, color, bg, icon, descriptionKey }) => {
         const description = descriptionKey ? (cards?.[descriptionKey] as string | undefined) : undefined;
         return (
-          <Card key={key} variant="outlined" sx={{ borderRadius: 2 }}>
-            <CardContent
-              sx={{
-                padding: 0,
-                pb: "0!important",
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
+          <CardWithTitle key={key} title={label}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: '100%' }}>
               <Box
                 sx={{
-                  width: 52,
-                  height: 52,
+                  width: 36,
+                  height: 36,
                   borderRadius: "50%",
                   bgcolor: bg,
                   color,
@@ -65,16 +58,13 @@ export function StatCards({ cards, isLoading }: Props) {
                   flexShrink: 0,
                 }}
               >
-                <Icon icon={icon} width={26} height={26} />
+                <Icon icon={icon} width={18} height={18} />
               </Box>
               <Box>
-                <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                  {label}
-                </Typography>
                 {isLoading ? (
                   <Skeleton width={60} height={36} />
                 ) : (
-                  <Typography variant="h4" fontWeight={700} color={color}>
+                  <Typography variant="h4" fontWeight={700} color="text.primary">
                     {cards?.[key] ?? 0}
                   </Typography>
                 )}
@@ -84,8 +74,8 @@ export function StatCards({ cards, isLoading }: Props) {
                   </Typography>
                 )}
               </Box>
-            </CardContent>
-          </Card>
+            </Box>
+          </CardWithTitle>
         );
       })}
     </Box>

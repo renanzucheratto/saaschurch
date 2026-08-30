@@ -11,3 +11,8 @@
 3. **Nomenclatura**: Todas as pastas e arquivos devem adotar o formato **kebab-case**.
 4. **Helpers Globais**: Devem ser criados em `@/config/helpers`.
 5. **Estilização Global MUI**: Toda alteração de layout de componentes do Material-UI (MUI) deve ser feita nos overrides em `@/config/theme/overrides`.
+6. **Cards**: NUNCA use `<Card>` do MUI diretamente. Todo card deve usar `CardWithTitle` (`@/components/card-with-title`), que aplica a variant `withTitle` do tema (moldura cinza + bloco branco interno).
+   - `title` (opcional): `string` vira o título padrão; passe um `ReactNode` para título com subtítulo, ícone ou bolinha de cor. Omita o `title` quando o card for só um contêiner (ex: uma `DataGrid`) — o header não é renderizado.
+   - `actions` (opcional): elemento à direita do header (botão, chip de status, ícone, menu).
+   - Demais props do `Card` são repassadas (`onClick`, `sx`, etc.).
+   - Exceção: cards internos de item repetido dentro de uma lista/formulário (ex: cada produto ou campo customizado) continuam usando `<Card variant="outlined">` — eles são itens, não seções.

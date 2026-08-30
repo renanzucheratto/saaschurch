@@ -3,8 +3,9 @@
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
-import { Card, CardContent, Skeleton, Typography } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { DashboardStats } from "@/config/redux/api/dashboardApi";
+import { CardWithTitle } from "@/components/card-with-title";
 
 interface Props {
   data: DashboardStats["crescimentoMembros"] | undefined;
@@ -54,17 +55,12 @@ export function MembrosGrowthChart({ data = [], isLoading }: Props) {
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2, height: "100%" }}>
-      <CardContent sx={{p: 0}}>
-        <Typography variant="subtitle1" fontWeight={600} mb={1}>
-          Crescimento de membros
-        </Typography>
-        {isLoading ? (
-          <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
-        ) : (
-          <ReactECharts option={option} style={{ height: 220 }} opts={{ renderer: "svg" }} />
-        )}
-      </CardContent>
-    </Card>
+    <CardWithTitle title="Crescimento de membros">
+      {isLoading ? (
+        <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
+      ) : (
+        <ReactECharts option={option} style={{ height: 220 }} opts={{ renderer: "svg" }} />
+      )}
+    </CardWithTitle>
   );
 }

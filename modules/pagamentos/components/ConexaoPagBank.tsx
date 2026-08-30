@@ -6,10 +6,7 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
   CircularProgress,
-  Divider,
   Snackbar,
   Stack,
   Typography,
@@ -21,7 +18,7 @@ import {
   useStatusPagBankQuery,
 } from '@/config/redux/api/pagbankApi';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { BORDER_RADIUS } from '@/config/utils/contants';
+import { CardWithTitle } from '@/components/card-with-title';
 import { StatusConexaoChip } from './StatusConexaoChip';
 import { DesvincularDialog } from './DesvincularDialog';
 import { PagamentosRecebidos } from './PagamentosRecebidos';
@@ -170,103 +167,93 @@ export function ConexaoPagBank() {
         </Alert>
       )}
 
-      <Card variant="outlined" sx={{ borderRadius: BORDER_RADIUS }}>
-        <CardContent>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            alignItems={{ xs: 'flex-start', sm: 'center' }}
-            justifyContent="space-between"
-            spacing={2}
-            sx={{ mb: 2 }}
-          >
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <Icon icon="simple-icons:pagseguro" width={28} />
-              <Box>
-                <Typography variant="subtitle1" fontWeight={600}>
-                  PagBank
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Conta da instituição
-                </Typography>
-              </Box>
-            </Stack>
-            <StatusConexaoChip status={status} conectado={conectado} />
-          </Stack>
-
-          <Divider sx={{ mb: 2 }} />
-
-          {conectado ? (
-            <Stack spacing={1} sx={{ mb: 2 }}>
-              <Stack direction="row" spacing={1}>
-                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                  ID no PagBank
-                </Typography>
-                <Typography variant="body2">{conta?.pagbankAccountId ?? '—'}</Typography>
-              </Stack>
-              <Stack direction="row" spacing={1}>
-                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                  Conectada em
-                </Typography>
-                <Typography variant="body2">{formatarData(conta?.conectadoEm)}</Typography>
-              </Stack>
-              <Stack direction="row" spacing={1}>
-                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
-                  Última renovação
-                </Typography>
-                <Typography variant="body2">{formatarData(conta?.ultimoRefreshEm)}</Typography>
-              </Stack>
-            </Stack>
-          ) : (
-            <Stack spacing={1.5} sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Ao conectar, você será levado ao PagBank para autorizar o acesso. É preciso fazer
-                login na conta <strong>da instituição</strong>, não em uma conta pessoal.
+      <CardWithTitle
+        title={
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Icon icon="simple-icons:pagseguro" width={28} />
+            <Stack>
+              <Typography variant="subtitle1" fontWeight={600}>
+                PagBank
               </Typography>
-              <Stack spacing={0.5}>
-                {[
-                  'O valor da inscrição cai direto na conta da instituição',
-                  'As taxas são descontadas automaticamente',
-                  'Nunca temos acesso à senha da conta',
-                  'Você pode desvincular quando quiser',
-                ].map((texto) => (
-                  <Stack key={texto} direction="row" spacing={1} alignItems="center">
-                    <Icon icon="material-symbols:check-small" width={18} />
-                    <Typography variant="body2">{texto}</Typography>
-                  </Stack>
-                ))}
-              </Stack>
+              <Typography variant="caption" color="text.secondary">
+                Conta da instituição
+              </Typography>
             </Stack>
-          )}
-
-          <Stack direction="row" spacing={1}>
-            {conectado ? (
-              <Button
-                variant="outlined"
-                color="error"
-                disabled={!podeGerenciar || desvinculando}
-                onClick={() => setDialogAberto(true)}
-              >
-                Desvincular
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                disabled={!podeGerenciar || conectando}
-                onClick={handleConectar}
-                startIcon={
-                  conectando ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : (
-                    <Icon icon="material-symbols:link" width={18} />
-                  )
-                }
-              >
-                {conectando ? 'Redirecionando...' : textoBotaoPrincipal}
-              </Button>
-            )}
           </Stack>
-        </CardContent>
-      </Card>
+        }
+        actions={<StatusConexaoChip status={status} conectado={conectado} />}
+      >
+        {conectado ? (
+          <Stack spacing={1} sx={{ mb: 2 }}>
+            <Stack direction="row" spacing={1}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
+                ID no PagBank
+              </Typography>
+              <Typography variant="body2">{conta?.pagbankAccountId ?? '—'}</Typography>
+            </Stack>
+            <Stack direction="row" spacing={1}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
+                Conectada em
+              </Typography>
+              <Typography variant="body2">{formatarData(conta?.conectadoEm)}</Typography>
+            </Stack>
+            <Stack direction="row" spacing={1}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 150 }}>
+                Última renovação
+              </Typography>
+              <Typography variant="body2">{formatarData(conta?.ultimoRefreshEm)}</Typography>
+            </Stack>
+          </Stack>
+        ) : (
+          <Stack spacing={1.5} sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Ao conectar, você será levado ao PagBank para autorizar o acesso. É preciso fazer
+              login na conta <strong>da instituição</strong>, não em uma conta pessoal.
+            </Typography>
+            <Stack spacing={0.5}>
+              {[
+                'O valor da inscrição cai direto na conta da instituição',
+                'As taxas são descontadas automaticamente',
+                'Nunca temos acesso à senha da conta',
+                'Você pode desvincular quando quiser',
+              ].map((texto) => (
+                <Stack key={texto} direction="row" spacing={1} alignItems="center">
+                  <Icon icon="material-symbols:check-small" width={18} />
+                  <Typography variant="body2">{texto}</Typography>
+                </Stack>
+              ))}
+            </Stack>
+          </Stack>
+        )}
+
+        <Stack direction="row" spacing={1}>
+          {conectado ? (
+            <Button
+              variant="outlined"
+              color="error"
+              disabled={!podeGerenciar || desvinculando}
+              onClick={() => setDialogAberto(true)}
+            >
+              Desvincular
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              disabled={!podeGerenciar || conectando}
+              onClick={handleConectar}
+              startIcon={
+                conectando ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Icon icon="material-symbols:link" width={18} />
+                )
+              }
+            >
+              {conectando ? 'Redirecionando...' : textoBotaoPrincipal}
+            </Button>
+          )}
+        </Stack>
+      </CardWithTitle>
 
       {conectado && <PagamentosRecebidos />}
 

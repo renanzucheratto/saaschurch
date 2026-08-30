@@ -7,9 +7,6 @@ import {
   CircularProgress,
   Alert,
   Stack,
-  Card,
-  CardActionArea,
-  CardContent,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -21,7 +18,7 @@ import { Icon } from '@iconify/react';
 import { useState, ChangeEvent } from 'react';
 import { useListarAreasQuery, useCriarAreaMutation } from '@/config/redux/api/areasApi';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { BORDER_RADIUS } from '@/config/utils/contants';
+import { CardWithTitle } from '@/components/card-with-title';
 
 interface Props {
   onSelectArea: (id: string) => void;
@@ -115,43 +112,43 @@ export function AreasLista({ onSelectArea }: Props) {
         }}
       >
         {areas.map((area) => (
-          <Card key={area.id} variant="outlined" sx={{ borderRadius: BORDER_RADIUS.medium }}>
-            <CardActionArea onClick={() => onSelectArea(area.id)}>
-              <CardContent>
-                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" mb={1}>
-                  <Stack direction="row" alignItems="center" gap={1}>
-                    <Box
-                      sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: '50%',
-                        bgcolor: area.cor ?? '#9e9e9e',
-                        flexShrink: 0,
-                      }}
-                    />
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {area.nome}
-                    </Typography>
-                  </Stack>
-                  <Icon icon="material-symbols:chevron-right" width={20} color="#999" />
-                </Stack>
-                <Stack direction="row" gap={2}>
-                  <Stack direction="row" alignItems="center" gap={0.5}>
-                    <Icon icon="material-symbols:star-outline" width={14} color="#6366f1" />
-                    <Typography variant="caption" color="text.secondary">
-                      {area.lideres.length} líder{area.lideres.length !== 1 ? 'es' : ''}
-                    </Typography>
-                  </Stack>
-                  <Stack direction="row" alignItems="center" gap={0.5}>
-                    <Icon icon="material-symbols:person-outline" width={14} color="#666" />
-                    <Typography variant="caption" color="text.secondary">
-                      {area.membros.length} membro{area.membros.length !== 1 ? 's' : ''}
-                    </Typography>
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </CardActionArea>
-          </Card>
+          <CardWithTitle
+            key={area.id}
+            onClick={() => onSelectArea(area.id)}
+            sx={{ cursor: 'pointer' }}
+            title={
+              <Stack direction="row" alignItems="center" gap={1}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: area.cor ?? '#9e9e9e',
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  {area.nome}
+                </Typography>
+              </Stack>
+            }
+            actions={<Icon icon="material-symbols:chevron-right" width={20} color="#999" />}
+          >
+            <Stack direction="row" gap={2}>
+              <Stack direction="row" alignItems="center" gap={0.5}>
+                <Icon icon="material-symbols:star-outline" width={14} color="#6366f1" />
+                <Typography variant="caption" color="text.secondary">
+                  {area.lideres.length} líder{area.lideres.length !== 1 ? 'es' : ''}
+                </Typography>
+              </Stack>
+              <Stack direction="row" alignItems="center" gap={0.5}>
+                <Icon icon="material-symbols:person-outline" width={14} color="#666" />
+                <Typography variant="caption" color="text.secondary">
+                  {area.membros.length} membro{area.membros.length !== 1 ? 's' : ''}
+                </Typography>
+              </Stack>
+            </Stack>
+          </CardWithTitle>
         ))}
       </Box>
 

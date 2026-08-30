@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
-import { Card, CardContent, Skeleton, Typography } from "@mui/material";
+import { Skeleton, Typography } from "@mui/material";
 import { DashboardStats } from "@/config/redux/api/dashboardApi";
+import { CardWithTitle } from "@/components/card-with-title";
 
 interface Props {
   data: DashboardStats["projetosPorStatus"] | undefined;
@@ -68,21 +69,16 @@ export function ProjetosPorStatusChart({ data = [], isLoading }: Props) {
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2, height: "100%" }}>
-      <CardContent sx={{p: 0}}>
-        <Typography variant="subtitle1" fontWeight={600} mb={1}>
-          Projetos por status
+    <CardWithTitle title="Projetos por status">
+      {isLoading ? (
+        <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
+      ) : data.length === 0 ? (
+        <Typography color="text.secondary" variant="body2" mt={2}>
+          Nenhum projeto cadastrado.
         </Typography>
-        {isLoading ? (
-          <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
-        ) : data.length === 0 ? (
-          <Typography color="text.secondary" variant="body2" mt={2}>
-            Nenhum projeto cadastrado.
-          </Typography>
-        ) : (
-          <ReactECharts option={option} style={{ height: 200 }} opts={{ renderer: "svg" }} />
-        )}
-      </CardContent>
-    </Card>
+      ) : (
+        <ReactECharts option={option} style={{ height: 200 }} opts={{ renderer: "svg" }} />
+      )}
+    </CardWithTitle>
   );
 }

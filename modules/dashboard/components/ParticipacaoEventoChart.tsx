@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
-import { Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import { DashboardStats } from "@/config/redux/api/dashboardApi";
+import { CardWithTitle } from "@/components/card-with-title";
 
 interface Props {
   data: DashboardStats["participacaoPorEvento"] | undefined;
@@ -86,63 +87,57 @@ export function ParticipacaoEventoChart({ data = [], isLoading }: Props) {
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2, height: "100%" }}>
-      <CardContent sx={{ p: 0, pb: '0!important' }}>
-        <Typography variant="subtitle1" fontWeight={600} mb={1}>
-          Participação por evento
+    <CardWithTitle title="Participação por evento">
+      {isLoading ? (
+        <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
+      ) : data.length === 0 ? (
+        <Typography color="text.secondary" variant="body2" mt={2}>
+          Nenhum evento cadastrado.
         </Typography>
-
-        {isLoading ? (
-          <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
-        ) : data.length === 0 ? (
-          <Typography color="text.secondary" variant="body2" mt={2}>
-            Nenhum evento cadastrado.
-          </Typography>
-        ) : (
-          <>
-            <ReactECharts
-              option={option}
-              style={{ height: 240 }}
-              opts={{ renderer: "svg" }}
-            />
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexWrap: "wrap",
-                gap: 1.5,
-                mt: 2,
-                px: 0.5,
-              }}
-            >
-              {legendStatuses.map((s) => {
-                const cfg = statusConfig(s);
-                return (
+      ) : (
+        <>
+          <ReactECharts
+            option={option}
+            style={{ height: 240 }}
+            opts={{ renderer: "svg" }}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexWrap: "wrap",
+              gap: 1.5,
+              mt: 2,
+              px: 0.5,
+            }}
+          >
+            {legendStatuses.map((s) => {
+              const cfg = statusConfig(s);
+              return (
+                <Box
+                  key={s}
+                  sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                >
                   <Box
-                    key={s}
-                    sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                  >
-                    <Box
-                      sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: 0.5,
-                        bgcolor: cfg.bg,
-                        border: `1.5px solid ${cfg.border}`,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {cfg.label}
-                    </Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-          </>
-        )}
-      </CardContent>
-    </Card>
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: 0.5,
+                      bgcolor: cfg.bg,
+                      border: `1.5px solid ${cfg.border}`,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    {cfg.label}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+        </>
+      )}
+    </CardWithTitle>
   );
 }

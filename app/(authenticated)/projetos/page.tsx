@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Box, Typography, CircularProgress, Chip, Button, Card, Stack } from "@mui/material";
+import { Box, Typography, CircularProgress, Chip, Button, Stack } from "@mui/material";
+import { CardWithTitle } from "@/components/card-with-title";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { ptBR } from "@mui/x-data-grid/locales";
 import { Icon as IconifyIcon } from "@iconify/react";
@@ -105,7 +106,7 @@ export default function ProjetosPage() {
         )}
       </Stack>
 
-      <Card variant="outlined">
+      <CardWithTitle>
         <DataGrid
           rows={projetos}
           columns={columns}
@@ -129,7 +130,7 @@ export default function ProjetosPage() {
           }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
         />
-      </Card>
+      </CardWithTitle>
     </Box>
   );
 }

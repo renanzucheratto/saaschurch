@@ -1,11 +1,9 @@
 import {
   Box,
   Typography,
-  Paper,
   CircularProgress,
   Chip,
   Button,
-  Card,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -25,6 +23,7 @@ import { Icon } from '@iconify/react';
 import { useState, type MouseEvent } from 'react';
 import { useListarUsuariosQuery, useExcluirUsuarioMutation, type User } from '@/config/redux/api/usersApi';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { CardWithTitle } from '@/components/card-with-title';
 import { CreateUserForm } from './CreateUserForm';
 
 export function UsersList() {
@@ -160,7 +159,7 @@ export function UsersList() {
         </Alert>
       )}
 
-      <Card variant="outlined">
+      <CardWithTitle>
         <DataGrid
           rows={users}
           columns={columns}
@@ -185,7 +184,7 @@ export function UsersList() {
           }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
         />
-      </Card>
+      </CardWithTitle>
 
       <Dialog open={openCreate} onClose={() => setOpenCreate(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

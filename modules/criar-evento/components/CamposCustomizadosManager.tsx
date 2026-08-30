@@ -32,6 +32,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { CardWithTitle } from "@/components/card-with-title";
 
 const TEXTO_TERMO_PADRAO =
   "Concordo com as condições contidas nesse formulário de inscrição da Igreja Formosa de Cristo.";
@@ -276,49 +277,48 @@ export const CamposCustomizadosManager = ({
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 3 }}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 2 }}
-      >
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#1A1A1A" }}>
+    <CardWithTitle
+      title={
+        <>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Campos do formulário
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Defina os campos que serão coletados no formulário de inscrição
           </Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<IconifyIcon icon="material-symbols:add" width={18} />}
-          onClick={(e) => setAnchorEl(e.currentTarget)}
-          sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600 }}
-        >
-          Adicionar campo
-        </Button>
-        <Menu anchorEl={anchorEl} open={menuAberto} onClose={() => setAnchorEl(null)}>
-          <MenuItem onClick={adicionarTexto}>Campo de texto</MenuItem>
-          <MenuItem onClick={adicionarEmail}>E-mail</MenuItem>
-          <MenuItem onClick={adicionarCPF}>CPF</MenuItem>
-          <MenuItem onClick={adicionarRG}>RG</MenuItem>
-          <MenuItem onClick={adicionarTelefone}>Telefone</MenuItem>
-          <Tooltip
-            title={jaTemAceiteTermo ? "Só é permitido um aceite de termo por formulário" : ""}
-            placement="left"
+        </>
+      }
+      actions={
+        <>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<IconifyIcon icon="material-symbols:add" width={18} />}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600 }}
           >
-            <span>
-              <MenuItem onClick={adicionarAceiteTermo} disabled={jaTemAceiteTermo}>
-                Aceite de termo
-              </MenuItem>
-            </span>
-          </Tooltip>
-        </Menu>
-      </Stack>
-
+            Adicionar campo
+          </Button>
+          <Menu anchorEl={anchorEl} open={menuAberto} onClose={() => setAnchorEl(null)}>
+            <MenuItem onClick={adicionarTexto}>Campo de texto</MenuItem>
+            <MenuItem onClick={adicionarEmail}>E-mail</MenuItem>
+            <MenuItem onClick={adicionarCPF}>CPF</MenuItem>
+            <MenuItem onClick={adicionarRG}>RG</MenuItem>
+            <MenuItem onClick={adicionarTelefone}>Telefone</MenuItem>
+            <Tooltip
+              title={jaTemAceiteTermo ? "Só é permitido um aceite de termo por formulário" : ""}
+              placement="left"
+            >
+              <span>
+                <MenuItem onClick={adicionarAceiteTermo} disabled={jaTemAceiteTermo}>
+                  Aceite de termo
+                </MenuItem>
+              </span>
+            </Tooltip>
+          </Menu>
+        </>
+      }
+    >
       {fields.length > 0 ? (
         <DndContext
           sensors={sensors}
@@ -362,6 +362,6 @@ export const CamposCustomizadosManager = ({
           </Typography>
         </Box>
       )}
-    </Card>
+    </CardWithTitle>
   );
 };

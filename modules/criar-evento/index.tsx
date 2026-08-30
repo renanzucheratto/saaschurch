@@ -28,6 +28,7 @@ import { CalculadoraTaxas } from "./components/CalculadoraTaxas";
 import { CamposCustomizadosManager } from "./components/CamposCustomizadosManager";
 import { FaqManager } from "./components/FaqManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
+import { CardWithTitle } from "@/components/card-with-title";
 import { useAppSelector } from "@/config/redux/store";
 import { selectCurrentUser } from "@/config/redux/slices/authSlice";
 
@@ -167,14 +168,7 @@ export default function CriarEventoModule() {
         <Grid container spacing={3}>
           {/* Informações Básicas */}
           <Grid size={12}>
-            <Card variant="outlined" sx={{ p: 3 }}>
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: 600, mb: 3, color: "#1A1A1A" }}
-              >
-                Informações do Evento
-              </Typography>
-
+            <CardWithTitle title="Informações do Evento">
               <Grid container spacing={2.5}>
                 <Grid size={12}>
                   <Controller
@@ -344,7 +338,7 @@ export default function CriarEventoModule() {
                   />
                 </Grid> */}
               </Grid>
-            </Card>
+            </CardWithTitle>
           </Grid>
 
           {/* Campos customizados */}
@@ -359,25 +353,18 @@ export default function CriarEventoModule() {
 
           {/* Produtos */}
           <Grid size={12}>
-            <Card variant="outlined" sx={{ p: 3 }}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ mb: 2 }}
-              >
-                <Box>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: 600, color: "#1A1A1A" }}
-                  >
+            <CardWithTitle
+              title={
+                <>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                     Produtos
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Adicione produtos ou opções vinculadas ao evento
-                    (opcional)
+                    Adicione produtos ou opções vinculadas ao evento (opcional)
                   </Typography>
-                </Box>
+                </>
+              }
+              actions={
                 <Button
                   variant="outlined"
                   size="small"
@@ -396,8 +383,8 @@ export default function CriarEventoModule() {
                 >
                   Adicionar produto
                 </Button>
-              </Stack>
-
+              }
+            >
               {fields.length > 0 && (
                 <Box>
                   <Controller
@@ -622,7 +609,7 @@ export default function CriarEventoModule() {
                   </Typography>
                 </Box>
               )}
-            </Card>
+            </CardWithTitle>
           </Grid>
 
           {/* Submit */}

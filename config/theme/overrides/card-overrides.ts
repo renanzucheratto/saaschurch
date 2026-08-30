@@ -24,6 +24,25 @@ export const cardOverrides: Components<Theme> = {
           border: `2px solid ${theme.palette.grey[200]}`,
         }),
       },
+      {
+        props: { variant: 'withTitle' },
+        style: ({ theme }) => ({
+          padding: theme.spacing(1),
+          backgroundColor: theme.palette.grey[100],
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          '.MuiCardContent-root': {
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            borderRadius: theme.spacing(1.5),
+            backgroundColor: theme.palette.background.paper,
+            padding: theme.spacing(1.5, 1),
+            paddingBottom: `${theme.spacing(1.5)}!important`,
+          }
+        }),
+      },
     ],
   },
 };

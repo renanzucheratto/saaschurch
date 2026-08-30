@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
-import { Card, CardContent, Skeleton, Typography } from "@mui/material";
+import { Skeleton, Typography } from "@mui/material";
 import { DashboardStats } from "@/config/redux/api/dashboardApi";
+import { CardWithTitle } from "@/components/card-with-title";
 
 interface Props {
   data: DashboardStats["membrosPorArea"] | undefined;
@@ -46,21 +47,16 @@ export function MembrosPorAreaChart({ data = [], isLoading }: Props) {
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2, height: "100%" }}>
-      <CardContent sx={{p: 0}}>
-        <Typography variant="subtitle1" fontWeight={600} mb={1}>
-          Membros por área
+    <CardWithTitle title="Membros por área">
+      {isLoading ? (
+        <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
+      ) : data.length === 0 ? (
+        <Typography color="text.secondary" variant="body2" mt={2}>
+          Nenhuma área com membros.
         </Typography>
-        {isLoading ? (
-          <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
-        ) : data.length === 0 ? (
-          <Typography color="text.secondary" variant="body2" mt={2}>
-            Nenhuma área com membros.
-          </Typography>
-        ) : (
-          <ReactECharts option={option} style={{ height: 220 }} opts={{ renderer: "svg" }} />
-        )}
-      </CardContent>
-    </Card>
+      ) : (
+        <ReactECharts option={option} style={{ height: 220 }} opts={{ renderer: "svg" }} />
+      )}
+    </CardWithTitle>
   );
 }

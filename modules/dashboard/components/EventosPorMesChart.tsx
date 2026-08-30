@@ -3,8 +3,9 @@
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
-import { Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import { DashboardStats } from "@/config/redux/api/dashboardApi";
+import { CardWithTitle } from "@/components/card-with-title";
 
 interface Props {
   data: DashboardStats["eventosPorMes"] | undefined;
@@ -54,19 +55,14 @@ export function EventosPorMesChart({ data = [], isLoading }: Props) {
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2, height: "100%" }}>
-      <CardContent sx={{p: 0}}>
-        <Typography variant="subtitle1" fontWeight={600} mb={1}>
-          Eventos por mês
-        </Typography>
-        {isLoading ? (
-          <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
-        ) : (
-          <Box sx={{mt: 3}}>
-            <ReactECharts option={option} style={{ height: 220 }} opts={{ renderer: "svg" }} />
-          </Box>
-        )}
-      </CardContent>
-    </Card>
+    <CardWithTitle title="Eventos por mês">
+      {isLoading ? (
+        <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
+      ) : (
+        <Box sx={{mt: 3}}>
+          <ReactECharts option={option} style={{ height: 220 }} opts={{ renderer: "svg" }} />
+        </Box>
+      )}
+    </CardWithTitle>
   );
 }
