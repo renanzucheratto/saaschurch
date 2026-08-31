@@ -40,6 +40,23 @@ export const CPFMaskCustom = React.forwardRef<HTMLInputElement, MaskProps>(
   },
 );
 
+export const DataMaskCustom = React.forwardRef<HTMLInputElement, MaskProps>(
+  function DataMaskCustom(props, ref) {
+    const { onChange, ...other } = props;
+    return (
+      <IMaskInput
+        {...other}
+        mask="00/00/0000"
+        inputRef={ref}
+        onAccept={(value: unknown) =>
+          onChange({ target: { name: props.name, value: value as string } })
+        }
+        overwrite
+      />
+    );
+  },
+);
+
 export const RGMaskCustom = React.forwardRef<HTMLInputElement, MaskProps>(
   function RGMaskCustom(props, ref) {
     const { onChange, ...other } = props;

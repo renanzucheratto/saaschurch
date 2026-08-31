@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { CampoCustomizado } from '@/types/evento.types';
 import { EventoFormValues } from '../schemas/evento-form.schema';
-import { CPFMaskCustom, RGMaskCustom, TelefoneMaskCustom } from './MaskInputs';
+import { CPFMaskCustom, DataMaskCustom, RGMaskCustom, TelefoneMaskCustom } from './MaskInputs';
 
 interface CampoRendererProps {
   campo: CampoCustomizado;
@@ -182,6 +182,25 @@ export const CampoRenderer = ({ campo, control, disabled }: CampoRendererProps) 
               sx={fieldSx}
               placeholder="000.000.000-00"
               InputProps={{ inputComponent: CPFMaskCustom as never }}
+            />
+          );
+        }
+
+        if (campo.tipo === 'data') {
+          return (
+            <TextField
+              label={label}
+              fullWidth
+              disabled={disabled}
+              value={(field.value as string) ?? ''}
+              onChange={(e) => field.onChange(e.target.value)}
+              onBlur={field.onBlur}
+              error={!!fieldState.error}
+              helperText={errorMessage ?? 'dd/mm/aaaa'}
+              variant="outlined"
+              sx={fieldSx}
+              placeholder="dd/mm/aaaa"
+              InputProps={{ inputComponent: DataMaskCustom as never }}
             />
           );
         }

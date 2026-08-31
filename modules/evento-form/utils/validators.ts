@@ -28,6 +28,22 @@ export const validateCPF = (cpf: string): boolean => {
   return true;
 };
 
+/** Valida uma data no formato dd/mm/aaaa, conferindo se o dia existe no mes. */
+export const validateDataBR = (data: string): boolean => {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(data.trim());
+  if (!match) return false;
+
+  const dia = Number(match[1]);
+  const mes = Number(match[2]);
+  const ano = Number(match[3]);
+
+  if (mes < 1 || mes > 12) return false;
+  if (ano < 1900 || ano > 2200) return false;
+
+  const diasNoMes = new Date(ano, mes, 0).getDate();
+  return dia >= 1 && dia <= diasNoMes;
+};
+
 export const validateRG = (rg: string): boolean => {
   const cleanRG = rg.replace(/\D/g, '');
   

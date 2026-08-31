@@ -20,7 +20,7 @@ import {
 import { useEditarParticipanteMutation } from '@/config/redux/api/eventosApi';
 import type { RespostaCustomizadaRequest } from '@/config/redux/api/eventosApi';
 import { Participante, Produto, CampoCustomizado } from '@/types/evento.types';
-import { CPFMaskCustom, RGMaskCustom, TelefoneMaskCustom } from '@/modules/evento-form/components/MaskInputs';
+import { CPFMaskCustom, DataMaskCustom, RGMaskCustom, TelefoneMaskCustom } from '@/modules/evento-form/components/MaskInputs';
 
 interface EditParticipanteModalProps {
   open: boolean;
@@ -212,6 +212,20 @@ export default function EditParticipanteModal({
                           fullWidth
                           placeholder="000.000.000-00"
                           InputProps={{ inputComponent: CPFMaskCustom as never }}
+                        />
+                      );
+                    }
+                    if (campo.tipo === 'data') {
+                      return (
+                        <TextField
+                          key={campo.id}
+                          label={campo.obrigatorio ? `${campo.label} *` : campo.label}
+                          value={respostas[campo.id] ?? ''}
+                          onChange={(e) => handleRespostaChange(campo.id, e.target.value)}
+                          fullWidth
+                          placeholder="dd/mm/aaaa"
+                          helperText="dd/mm/aaaa"
+                          InputProps={{ inputComponent: DataMaskCustom as never }}
                         />
                       );
                     }

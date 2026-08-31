@@ -12,7 +12,7 @@ export interface Produto {
   oculto?: boolean;
 }
 
-export type TipoCampoCustomizado = 'texto' | 'radio' | 'checkbox' | 'select' | 'aceite_termo' | 'email' | 'cpf' | 'rg' | 'telefone';
+export type TipoCampoCustomizado = 'texto' | 'radio' | 'checkbox' | 'select' | 'aceite_termo' | 'email' | 'cpf' | 'rg' | 'telefone' | 'data';
 
 // Tipos que exigem uma lista de opcoes preenchida.
 export const TIPOS_COM_OPCOES: TipoCampoCustomizado[] = ['radio', 'checkbox', 'select'];

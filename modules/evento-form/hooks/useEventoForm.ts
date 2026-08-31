@@ -38,6 +38,9 @@ export const useEventoForm = (
     severity: 'success',
   });
   const [redirecionandoPagamento, setRedirecionandoPagamento] = useState(false);
+  // Marca cada cadastro concluído. O reset do form roda no efeito seguinte, não
+  // dentro do onSubmit — ver comentário do useEffect abaixo.
+  const [cadastrosConcluidos, setCadastrosConcluidos] = useState(0);
 
   const temCamposCustomizados = campos.length > 0;
   const camposVisiveis = campos.filter((c) => !c.oculto);
@@ -92,6 +95,17 @@ export const useEventoForm = (
     reset(buildDefaultValues());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camposSignature]);
+
+  // O react-hook-form aplica o estado do submit (isSubmitted: true) DEPOIS que a
+  // função do onSubmit termina. Resetar lá dentro fazia o form voltar com os
+  // campos vazios já marcados como enviados e, com reValidateMode 'onChange',
+  // revalidar tudo — daí o "campo obrigatório" aparecendo logo após o sucesso.
+  // Rodando o reset no efeito seguinte, ele é a última coisa a tocar o form.
+  useEffect(() => {
+    if (cadastrosConcluidos === 0) return;
+    reset(buildDefaultValues());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cadastrosConcluidos]);
 
   const onSubmit = async (data: EventoFormValues) => {
     try {
@@ -193,14 +207,7 @@ export const useEventoForm = (
         message: 'Cadastro realizado com sucesso!',
         severity: 'success',
       });
-      reset(buildDefaultValues(), {
-        keepErrors: false,
-        keepDirty: false,
-        keepIsSubmitted: false,
-        keepTouched: false,
-        keepIsValid: false,
-        keepSubmitCount: false,
-      });
+      setCadastrosConcluidos((n) => n + 1);
     } catch (error) {
       console.error('Erro ao enviar formulário:', error);
 

@@ -52,6 +52,7 @@ const LABEL_TIPO: Record<TipoCampoCustomizado, string> = {
   cpf: "CPF",
   rg: "RG",
   telefone: "Telefone",
+  data: "Data",
   checkbox: "Múltipla escolha",
   radio: "Seleção única",
   select: "Lista",
@@ -400,6 +401,7 @@ export const CamposCustomizadosManager = ({
             <MenuItem onClick={() => adicionarCampo("cpf")}>CPF</MenuItem>
             <MenuItem onClick={() => adicionarCampo("rg")}>RG</MenuItem>
             <MenuItem onClick={() => adicionarCampo("telefone")}>Telefone</MenuItem>
+            <MenuItem onClick={() => adicionarCampo("data")}>Data</MenuItem>
 
             <ListSubheader sx={SUBHEADER_SX}>Perguntas com opções</ListSubheader>
             <MenuItem onClick={() => adicionarCampo("checkbox")}>Múltipla escolha</MenuItem>

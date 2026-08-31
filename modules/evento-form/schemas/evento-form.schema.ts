@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { validateCPF, validateRG } from '../utils/validators';
+import { validateCPF, validateDataBR, validateRG } from '../utils/validators';
 import { CampoCustomizado } from '@/types/evento.types';
 
 // Schema dos campos padrão (usado quando o evento NÃO tem campos customizados)
@@ -80,6 +80,11 @@ export function buildEventoFormSchema(campos: CampoCustomizado[] = []) {
         camposShape[campo.id] = campo.obrigatorio
           ? z.string().min(1, `${campo.label} é obrigatório`).refine(validateRG, { message: 'RG inválido' })
           : z.string().refine((val) => val === '' || validateRG(val), { message: 'RG inválido' }).optional();
+        break;
+      case 'data':
+        camposShape[campo.id] = campo.obrigatorio
+          ? z.string().min(1, `${campo.label} é obrigatório`).refine(validateDataBR, { message: 'Data inválida. Use dd/mm/aaaa' })
+          : z.string().refine((val) => val === '' || validateDataBR(val), { message: 'Data inválida. Use dd/mm/aaaa' }).optional();
         break;
       case 'telefone':
         camposShape[campo.id] = campo.obrigatorio

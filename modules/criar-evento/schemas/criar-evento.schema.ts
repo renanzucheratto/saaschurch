@@ -18,7 +18,7 @@ const TIPOS_COM_OPCOES = ["radio", "checkbox", "select"] as const;
 export const campoCustomizadoSchema = z.object({
   id: z.string().optional(),
   label: z.string().optional(),
-  tipo: z.enum(["texto", "radio", "checkbox", "select", "aceite_termo", "email", "cpf", "rg", "telefone"]),
+  tipo: z.enum(["texto", "radio", "checkbox", "select", "aceite_termo", "email", "cpf", "rg", "telefone", "data"]),
   obrigatorio: z.boolean().optional(),
   oculto: z.boolean().optional(),
   opcoes: z.array(z.string()).optional(),
