@@ -75,7 +75,8 @@ interface CamposCustomizadosManagerProps {
   control: Control<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors?: FieldErrors<any>;
-  // Quando true, campos já salvos (com id) não podem ser removidos, apenas ocultados.
+  // Quando true, campos já salvos (com id) não exibem o botão de remover — só podem ser ocultados.
+  // Campos recém-adicionados (sem id) continuam removíveis.
   bloquearRemocaoSalvos?: boolean;
   // Quando false, nenhum campo pode ser removido (ex: na edição do evento). Default true.
   permitirRemocao?: boolean;
@@ -136,8 +137,30 @@ const SortableField = ({
     opacity: isDragging ? 0.6 : 1,
   };
 
+  // Campo oculto ganha aparência de bloqueado: borda tracejada e tudo em cinza.
+  const isOculto = !isObrigatorio && !!ocultoField.value;
+
   return (
-    <Card ref={setNodeRef} style={style} variant="outlined" sx={{ p: 2, bgcolor: "#FAFAFA" }}>
+    <Card
+      ref={setNodeRef}
+      style={style}
+      variant="outlined"
+      sx={{
+        p: 2,
+        bgcolor: isOculto ? "#F2F2F2" : "#FAFAFA",
+        ...(isOculto && {
+          borderStyle: "dashed",
+          borderColor: "#BDBDBD",
+          color: "#9E9E9E",
+          "& .MuiTypography-root": { color: "#9E9E9E" },
+          "& .MuiFormLabel-root": { color: "#9E9E9E" },
+          "& .MuiInputBase-input": { color: "#8A8A8A", WebkitTextFillColor: "#8A8A8A" },
+          "& .MuiOutlinedInput-notchedOutline": { borderColor: "#D6D6D6", borderStyle: "dashed" },
+          "& .MuiChip-root": { color: "#757575", bgcolor: "#E4E4E4" },
+          "& .MuiSvgIcon-root, & .iconify": { color: "#9E9E9E" },
+        }),
+      }}
+    >
       <Stack direction="row" alignItems="flex-start" spacing={1}>
         <IconButton
           size="small"
@@ -246,12 +269,11 @@ const SortableField = ({
           )}
         </Box>
 
-        {permitirRemocao && (
-          <Tooltip title={removerDesabilitado ? "" : "Remover campo"} placement="left">
+        {permitirRemocao && !removerDesabilitado && (
+          <Tooltip title="Remover campo" placement="left">
             <span>
               <IconButton
                 size="small"
-                disabled={removerDesabilitado}
                 onClick={onRemove}
                 sx={{ p: 0.5, mt: 0.5, color: "#999", "&:hover": { color: "#d32f2f" } }}
               >

@@ -336,7 +336,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
               <Divider />
             </Grid>
             <Grid size={12}>
-              <CamposCustomizadosManager control={control as never} errors={errors} permitirRemocao={false} />
+              <CamposCustomizadosManager control={control as never} errors={errors} bloquearRemocaoSalvos />
             </Grid>
             <Grid size={12}>
               <TemplateFormularioSelector control={control as never} layout="largura-total" />
