@@ -28,8 +28,8 @@ import type { TipoCampoCustomizado } from '@/types/evento.types';
 const BRAND = '#513B89';
 const HERO_FALLBACK = 'linear-gradient(135deg, #2a1f47 0%, #513B89 100%)';
 
-// Tipos de campo customizado que devem ocupar a linha inteira do grid.
-const FULL_WIDTH_TIPOS: TipoCampoCustomizado[] = ['radio', 'checkbox', 'aceite_termo'];
+// Tipos de campo customizado que ocupam a linha inteira no template 'padrao'.
+const FULL_WIDTH_TIPOS: TipoCampoCustomizado[] = ['radio', 'checkbox', 'select', 'aceite_termo'];
 
 export const EventoForm = () => {
   const params = usePathname();
@@ -48,6 +48,9 @@ export const EventoForm = () => {
   const campos = evento?.campos_customizados ?? [];
   const temCamposCustomizados = campos.length > 0;
   const camposVisiveis = campos.filter((c) => !c.oculto);
+  // 'empilhado' joga tudo numa coluna; 'padrao' mantém o grid de 2 colunas.
+  const templateFormulario = evento?.template_formulario ?? 'padrao';
+  const empilhado = templateFormulario === 'empilhado';
 
   const {
     control,
@@ -341,14 +344,17 @@ export const EventoForm = () => {
                 <Box
                   sx={{
                     display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                    gridTemplateColumns: empilhado ? '1fr' : { xs: '1fr', sm: '1fr 1fr' },
                     gap: 2.5,
                   }}
                 >
                   {camposVisiveis.map((campo) => (
                     <Box
                       key={campo.id}
-                      sx={{ gridColumn: FULL_WIDTH_TIPOS.includes(campo.tipo) ? '1 / -1' : 'auto' }}
+                      sx={{
+                        gridColumn:
+                          empilhado || FULL_WIDTH_TIPOS.includes(campo.tipo) ? '1 / -1' : 'auto',
+                      }}
                     >
                       <CampoRenderer campo={campo} control={control} disabled={!isRegistrationOpen} />
                     </Box>

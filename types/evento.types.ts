@@ -14,6 +14,14 @@ export interface Produto {
 
 export type TipoCampoCustomizado = 'texto' | 'radio' | 'checkbox' | 'select' | 'aceite_termo' | 'email' | 'cpf' | 'rg' | 'telefone';
 
+// Tipos que exigem uma lista de opcoes preenchida.
+export const TIPOS_COM_OPCOES: TipoCampoCustomizado[] = ['radio', 'checkbox', 'select'];
+
+// Layout do formulario publico de inscricao.
+// 'padrao': grid de 2 colunas (comportamento atual).
+// 'empilhado': um campo embaixo do outro.
+export type TemplateFormulario = 'padrao' | 'empilhado';
+
 export interface CampoCustomizado {
   id: string;
   label: string;
@@ -81,6 +89,7 @@ export interface EventoDetalhes {
   statusAtual?: StatusEvento;
   produtos: Produto[];
   campos_customizados?: CampoCustomizado[];
+  template_formulario?: TemplateFormulario | null;
   quantidadeParticipantes?: number;
 }
 

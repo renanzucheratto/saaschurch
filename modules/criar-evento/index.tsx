@@ -26,6 +26,7 @@ import type { ProdutoEventoRequest, CampoCustomizadoRequest } from "@/config/red
 import RichTextEditor from "./components/RichTextEditor";
 import { CalculadoraTaxas } from "./components/CalculadoraTaxas";
 import { CamposCustomizadosManager } from "./components/CamposCustomizadosManager";
+import { TemplateFormularioSelector } from "./components/TemplateFormularioSelector";
 import { FaqManager } from "./components/FaqManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 import { CardWithTitle } from "@/components/card-with-title";
@@ -77,6 +78,7 @@ export default function CriarEventoModule() {
       descricao: "",
       selecao_unica_produto: true,
       enviar_email_qr_code: false,
+      template_formulario: "padrao",
       faq: [],
       produtos: [],
       campos_customizados: [
@@ -107,8 +109,9 @@ export default function CriarEventoModule() {
         label: c.tipo === "aceite_termo" ? (c.textoTermo || "Aceite de termo") : (c.label || ""),
         tipo: c.tipo || "texto",
         obrigatorio: c.tipo === "aceite_termo" ? true : (c.obrigatorio || false),
-        oculto: c.oculto || false,
-        opcoes: c.opcoes && c.opcoes.length > 0 ? c.opcoes : null,
+        // Campo obrigatório nunca vai oculto.
+        oculto: c.obrigatorio ? false : (c.oculto || false),
+        opcoes: c.opcoes && c.opcoes.length > 0 ? c.opcoes.map((o) => o.trim()).filter(Boolean) : null,
         textoTermo: c.tipo === "aceite_termo" ? (c.textoTermo || null) : null,
         ordem: index,
       }));
@@ -125,6 +128,7 @@ export default function CriarEventoModule() {
         enviar_email_qr_code: data.enviar_email_qr_code,
         produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
         campos_customizados: camposPayload.length > 0 ? camposPayload : undefined,
+        template_formulario: data.template_formulario,
         instituicaoId: currentUser?.instituicaoId,
       }).unwrap();
 
@@ -341,9 +345,19 @@ export default function CriarEventoModule() {
             </CardWithTitle>
           </Grid>
 
-          {/* Campos customizados */}
+          {/* Campos do formulário + template (sticky ao lado) */}
           <Grid size={12}>
-            <CamposCustomizadosManager control={control as never} errors={errors} />
+            <Grid container spacing={2} alignItems="flex-start">
+              <Grid size={{ xs: 12, md: 8, lg: 9 }}>
+                <CamposCustomizadosManager control={control as never} errors={errors} />
+              </Grid>
+              <Grid
+                size={{ xs: 12, md: 4, lg: 3 }}
+                sx={{ position: { md: "sticky" }, top: { md: 12 }, alignSelf: "flex-start" }}
+              >
+                <TemplateFormularioSelector control={control as never} />
+              </Grid>
+            </Grid>
           </Grid>
 
           {/* FAQ */}

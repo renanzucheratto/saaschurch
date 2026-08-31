@@ -12,6 +12,9 @@ export const produtoSchema = z.object({
   oculto: z.boolean().optional(),
 });
 
+// Tipos que exigem lista de opcoes (multipla escolha, selecao unica e lista).
+const TIPOS_COM_OPCOES = ["radio", "checkbox", "select"] as const;
+
 export const campoCustomizadoSchema = z.object({
   id: z.string().optional(),
   label: z.string().optional(),
@@ -29,11 +32,46 @@ export const campoCustomizadoSchema = z.object({
         path: ["textoTermo"],
       });
     }
-  } else if (!campo.label || campo.label.trim().length === 0) {
+    return;
+  }
+
+  if (!campo.label || campo.label.trim().length === 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "O rótulo do campo é obrigatório",
       path: ["label"],
+    });
+  }
+
+  if (!(TIPOS_COM_OPCOES as readonly string[]).includes(campo.tipo)) return;
+
+  const opcoes = campo.opcoes ?? [];
+  const preenchidas = opcoes.map((o) => o.trim()).filter((o) => o.length > 0);
+
+  if (opcoes.some((o) => o.trim().length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Preencha todas as opções",
+      path: ["opcoes"],
+    });
+    return;
+  }
+
+  if (preenchidas.length < 2) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Informe pelo menos 2 opções",
+      path: ["opcoes"],
+    });
+    return;
+  }
+
+  const duplicadas = new Set(preenchidas.map((o) => o.toLowerCase())).size !== preenchidas.length;
+  if (duplicadas) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "As opções não podem se repetir",
+      path: ["opcoes"],
     });
   }
 });
@@ -56,6 +94,7 @@ export const criarEventoSchema = z.object({
   enviar_email_qr_code: z.boolean(),
   produtos: z.array(produtoSchema).optional(),
   campos_customizados: z.array(campoCustomizadoSchema).optional(),
+  template_formulario: z.enum(["padrao", "empilhado"]),
 }).refine((data) => {
   if (data.data_inicio && data.data_fim) {
     return new Date(data.data_inicio) <= new Date(data.data_fim);

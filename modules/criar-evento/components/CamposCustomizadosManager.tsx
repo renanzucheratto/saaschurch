@@ -14,9 +14,18 @@ import {
   Tooltip,
   Menu,
   MenuItem,
+  ListSubheader,
+  Chip,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
-import { Control, Controller, useFieldArray, useWatch, FieldErrors } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  useController,
+  useFieldArray,
+  useWatch,
+  FieldErrors,
+} from "react-hook-form";
 import {
   DndContext,
   closestCenter,
@@ -33,6 +42,30 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CardWithTitle } from "@/components/card-with-title";
+import { TipoCampoCustomizado, TIPOS_COM_OPCOES } from "@/types/evento.types";
+import { OpcoesEditor } from "./OpcoesEditor";
+
+// Rótulo curto de cada tipo, exibido como chip no topo do campo.
+const LABEL_TIPO: Record<TipoCampoCustomizado, string> = {
+  texto: "Texto",
+  email: "E-mail",
+  cpf: "CPF",
+  rg: "RG",
+  telefone: "Telefone",
+  checkbox: "Múltipla escolha",
+  radio: "Seleção única",
+  select: "Lista",
+  aceite_termo: "Aceite de termo",
+};
+
+const SUBHEADER_SX = {
+  lineHeight: 2,
+  fontSize: "0.68rem",
+  fontWeight: 600,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+  color: "text.secondary",
+};
 
 const TEXTO_TERMO_PADRAO =
   "Concordo com as condições contidas nesse formulário de inscrição da Igreja Formosa de Cristo.";
@@ -74,8 +107,28 @@ const SortableField = ({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id, disabled: isDragDisabled });
 
-  const tipo = useWatch({ control, name: `campos_customizados.${index}.tipo` });
+  const tipo: TipoCampoCustomizado = useWatch({
+    control,
+    name: `campos_customizados.${index}.tipo`,
+  });
   const isAceiteTermo = tipo === "aceite_termo";
+  const temOpcoes = TIPOS_COM_OPCOES.includes(tipo);
+
+  // Campo obrigatório não pode ser ocultado: o inscrito precisa conseguir responder.
+  const { field: obrigatorioField } = useController({
+    control,
+    name: `campos_customizados.${index}.obrigatorio`,
+  });
+  const { field: ocultoField } = useController({
+    control,
+    name: `campos_customizados.${index}.oculto`,
+  });
+  const isObrigatorio = !!obrigatorioField.value;
+
+  const alterarObrigatorio = (checked: boolean) => {
+    obrigatorioField.onChange(checked);
+    if (checked && ocultoField.value) ocultoField.onChange(false);
+  };
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -119,6 +172,21 @@ const SortableField = ({
             />
           ) : (
             <>
+              <Chip
+                label={LABEL_TIPO[tipo] ?? tipo}
+                size="small"
+                sx={{
+                  mb: 1,
+                  height: 22,
+                  fontSize: "0.7rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  color: "primary.dark",
+                  bgcolor: "#f2eefc",
+                }}
+              />
+
               <Controller
                 name={`campos_customizados.${index}.label`}
                 control={control}
@@ -137,39 +205,42 @@ const SortableField = ({
                 )}
               />
 
+              {temOpcoes && (
+                <OpcoesEditor
+                  control={control}
+                  index={index}
+                  tipo={tipo}
+                  erro={camposErrors?.[index]?.opcoes?.message}
+                />
+              )}
+
               <Stack direction="row" spacing={2} sx={{ mt: 1 }} flexWrap="wrap">
-                <Controller
-                  name={`campos_customizados.${index}.obrigatorio`}
-                  control={control}
-                  render={({ field: f }) => (
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          size="small"
-                          checked={!!f.value}
-                          onChange={(e) => f.onChange(e.target.checked)}
-                        />
-                      }
-                      label={<Typography variant="body2">Obrigatório</Typography>}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={isObrigatorio}
+                      onChange={(e) => alterarObrigatorio(e.target.checked)}
                     />
-                  )}
+                  }
+                  label={<Typography variant="body2">Obrigatório</Typography>}
                 />
-                <Controller
-                  name={`campos_customizados.${index}.oculto`}
-                  control={control}
-                  render={({ field: f }) => (
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          size="small"
-                          checked={!!f.value}
-                          onChange={(e) => f.onChange(e.target.checked)}
-                        />
-                      }
-                      label={<Typography variant="body2">Ocultar</Typography>}
-                    />
-                  )}
-                />
+                <Tooltip
+                  title={isObrigatorio ? "Campo obrigatório não pode ser ocultado" : ""}
+                  placement="top"
+                >
+                  <FormControlLabel
+                    disabled={isObrigatorio}
+                    control={
+                      <Switch
+                        size="small"
+                        checked={!isObrigatorio && !!ocultoField.value}
+                        onChange={(e) => ocultoField.onChange(e.target.checked)}
+                      />
+                    }
+                    label={<Typography variant="body2">Ocultar</Typography>}
+                  />
+                </Tooltip>
               </Stack>
             </>
           )}
@@ -200,7 +271,7 @@ export const CamposCustomizadosManager = ({
   bloquearRemocaoSalvos = false,
   permitirRemocao = true,
 }: CamposCustomizadosManagerProps) => {
-  const { fields, append, remove, move } = useFieldArray({
+  const { fields, append, insert, remove, move } = useFieldArray({
     control,
     name: "campos_customizados",
     keyName: "_key",
@@ -240,40 +311,35 @@ export const CamposCustomizadosManager = ({
     move(oldIndex, newIndex);
   };
 
-  const adicionarTexto = () => {
-    append({ label: "", tipo: "texto", obrigatorio: false, oculto: false });
+  // O aceite de termo fica sempre no fim; os outros campos entram antes dele.
+  const adicionarCampo = (tipo: TipoCampoCustomizado) => {
     setAnchorEl(null);
-  };
 
-  const adicionarEmail = () => {
-    append({ label: "", tipo: "email", obrigatorio: false, oculto: false });
-    setAnchorEl(null);
-  };
+    if (tipo === "aceite_termo") {
+      append({
+        label: "",
+        tipo,
+        obrigatorio: true,
+        oculto: false,
+        textoTermo: TEXTO_TERMO_PADRAO,
+      });
+      return;
+    }
 
-  const adicionarCPF = () => {
-    append({ label: "", tipo: "cpf", obrigatorio: false, oculto: false });
-    setAnchorEl(null);
-  };
-
-  const adicionarRG = () => {
-    append({ label: "", tipo: "rg", obrigatorio: false, oculto: false });
-    setAnchorEl(null);
-  };
-
-  const adicionarTelefone = () => {
-    append({ label: "", tipo: "telefone", obrigatorio: false, oculto: false });
-    setAnchorEl(null);
-  };
-
-  const adicionarAceiteTermo = () => {
-    append({
+    // Campo novo nasce obrigatório (e, pela regra, nunca oculto).
+    const novoCampo = {
       label: "",
-      tipo: "aceite_termo",
+      tipo,
       obrigatorio: true,
       oculto: false,
-      textoTermo: TEXTO_TERMO_PADRAO,
-    });
-    setAnchorEl(null);
+      ...(TIPOS_COM_OPCOES.includes(tipo) ? { opcoes: ["", ""] } : {}),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const indexAceite = fields.findIndex((f) => (f as any).tipo === "aceite_termo");
+
+    if (indexAceite > -1) insert(indexAceite, novoCampo);
+    else append(novoCampo);
   };
 
   return (
@@ -300,17 +366,25 @@ export const CamposCustomizadosManager = ({
             Adicionar campo
           </Button>
           <Menu anchorEl={anchorEl} open={menuAberto} onClose={() => setAnchorEl(null)}>
-            <MenuItem onClick={adicionarTexto}>Campo de texto</MenuItem>
-            <MenuItem onClick={adicionarEmail}>E-mail</MenuItem>
-            <MenuItem onClick={adicionarCPF}>CPF</MenuItem>
-            <MenuItem onClick={adicionarRG}>RG</MenuItem>
-            <MenuItem onClick={adicionarTelefone}>Telefone</MenuItem>
+            <ListSubheader sx={SUBHEADER_SX}>Dados do participante</ListSubheader>
+            <MenuItem onClick={() => adicionarCampo("texto")}>Campo de texto</MenuItem>
+            <MenuItem onClick={() => adicionarCampo("email")}>E-mail</MenuItem>
+            <MenuItem onClick={() => adicionarCampo("cpf")}>CPF</MenuItem>
+            <MenuItem onClick={() => adicionarCampo("rg")}>RG</MenuItem>
+            <MenuItem onClick={() => adicionarCampo("telefone")}>Telefone</MenuItem>
+
+            <ListSubheader sx={SUBHEADER_SX}>Perguntas com opções</ListSubheader>
+            <MenuItem onClick={() => adicionarCampo("checkbox")}>Múltipla escolha</MenuItem>
+            <MenuItem onClick={() => adicionarCampo("radio")}>Seleção única</MenuItem>
+            <MenuItem onClick={() => adicionarCampo("select")}>Lista de opções</MenuItem>
+
+            <ListSubheader sx={SUBHEADER_SX}>Especiais</ListSubheader>
             <Tooltip
               title={jaTemAceiteTermo ? "Só é permitido um aceite de termo por formulário" : ""}
               placement="left"
             >
               <span>
-                <MenuItem onClick={adicionarAceiteTermo} disabled={jaTemAceiteTermo}>
+                <MenuItem onClick={() => adicionarCampo("aceite_termo")} disabled={jaTemAceiteTermo}>
                   Aceite de termo
                 </MenuItem>
               </span>
@@ -360,6 +434,31 @@ export const CamposCustomizadosManager = ({
           <Typography variant="body2" sx={{ mt: 1 }}>
             Nenhum campo adicionado. Adicione campos para o formulário de inscrição.
           </Typography>
+        </Box>
+      )}
+
+      {fields.length > 0 && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Tooltip title="Adicionar campo" placement="top">
+            <IconButton
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+              sx={{
+                width: 36,
+                height: 36,
+                color: "primary.main",
+                border: "2px dashed",
+                borderColor: "primary.light",
+                "&:hover": {
+                  color: "primary.dark",
+                  borderColor: "primary.main",
+                  borderStyle: "solid",
+                  bgcolor: "#f2eefc",
+                },
+              }}
+            >
+              <IconifyIcon icon="material-symbols:add" width={20} />
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
     </CardWithTitle>

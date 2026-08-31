@@ -26,6 +26,7 @@ import type { ProdutoEventoRequest, CampoCustomizadoRequest } from "@/config/red
 import { EventoDetalhes } from '@/types/evento.types';
 import RichTextEditor from "@/modules/criar-evento/components/RichTextEditor";
 import { CamposCustomizadosManager } from "@/modules/criar-evento/components/CamposCustomizadosManager";
+import { TemplateFormularioSelector } from "@/modules/criar-evento/components/TemplateFormularioSelector";
 import { FaqManager } from "@/modules/criar-evento/components/FaqManager";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 
@@ -88,6 +89,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
       faq: [],
       produtos: [],
       campos_customizados: [],
+      template_formulario: "padrao",
       statusNome: 'aberto',
       statusJustificativa: '',
     },
@@ -126,6 +128,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           opcoes: c.opcoes ?? undefined,
           textoTermo: c.textoTermo ?? (c.tipo === 'aceite_termo' ? c.label : undefined),
         })) || [],
+        template_formulario: evento.template_formulario ?? "padrao",
         faq: evento.faq || [],
         statusNome: (evento.status?.nome as 'aberto' | 'pausado' | 'cancelado') || 'aberto',
         statusJustificativa: evento.status?.justificativa || "",
@@ -155,8 +158,9 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         label: c.tipo === "aceite_termo" ? (c.textoTermo || "Aceite de termo") : (c.label || ""),
         tipo: c.tipo || "texto",
         obrigatorio: c.tipo === "aceite_termo" ? true : (c.obrigatorio || false),
-        oculto: c.oculto || false,
-        opcoes: c.opcoes && c.opcoes.length > 0 ? c.opcoes : null,
+        // Campo obrigatório nunca vai oculto.
+        oculto: c.obrigatorio ? false : (c.oculto || false),
+        opcoes: c.opcoes && c.opcoes.length > 0 ? c.opcoes.map((o) => o.trim()).filter(Boolean) : null,
         textoTermo: c.tipo === "aceite_termo" ? (c.textoTermo || null) : null,
         ordem: index,
       }));
@@ -174,6 +178,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
           selecao_unica_produto: data.selecao_unica_produto,
           produtos: produtosPayload.length > 0 ? produtosPayload : undefined,
           campos_customizados: camposPayload,
+          template_formulario: data.template_formulario,
           statusNome: data.statusNome,
           statusJustificativa: data.statusJustificativa || null,
         }
@@ -200,7 +205,7 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
         anchor="right"
         open={open}
         onClose={onClose}
-        PaperProps={{ sx: { width: { xs: '100%', sm: 650 }, p: 0 } }}
+        PaperProps={{ sx: { width: { xs: '100%', sm: 845 }, maxWidth: '100%', p: 0 } }}
       >
         <Box sx={{ px: 3, height: 61, display: 'flex', flexShrink: 'inherit', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h6" fontWeight={700}>Editar Evento</Typography>
@@ -328,8 +333,13 @@ export default function EventoDrawer({ open, onClose, evento }: EventoDrawerProp
               </Stack>
             </Grid>
             <Grid size={12}>
-              <Divider sx={{ my: 2 }} />
+              <Divider />
+            </Grid>
+            <Grid size={12}>
               <CamposCustomizadosManager control={control as never} errors={errors} permitirRemocao={false} />
+            </Grid>
+            <Grid size={12}>
+              <TemplateFormularioSelector control={control as never} layout="largura-total" />
             </Grid>
             <Grid size={12}>
               <FaqManager control={control as never} errors={errors as never} />

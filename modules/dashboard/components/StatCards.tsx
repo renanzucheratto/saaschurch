@@ -39,12 +39,24 @@ const STATS = [
 
 export function StatCards({ cards, isLoading }: Props) {
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
-      {STATS.map(({ key, label, color, bg, icon, descriptionKey }) => {
+    <Box
+      sx={{
+        display: "grid",
+        // 1 card por linha no mobile, 2 no tablet (o terceiro ocupa a linha) e 3 no desktop.
+        gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+        gap: { xs: 1.5, sm: 2 },
+      }}
+    >
+      {STATS.map(({ key, label, color, bg, icon, descriptionKey }, index) => {
         const description = descriptionKey ? (cards?.[descriptionKey] as string | undefined) : undefined;
+        const isUltimo = index === STATS.length - 1;
         return (
-          <CardWithTitle key={key} title={label}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: '100%' }}>
+          <CardWithTitle
+            key={key}
+            title={label}
+            sx={{ gridColumn: { sm: isUltimo ? "1 / -1" : "auto", md: "auto" } }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%", minWidth: 0 }}>
               <Box
                 sx={{
                   width: 36,
@@ -60,11 +72,16 @@ export function StatCards({ cards, isLoading }: Props) {
               >
                 <Icon icon={icon} width={18} height={18} />
               </Box>
-              <Box>
+              <Box sx={{ minWidth: 0 }}>
                 {isLoading ? (
                   <Skeleton width={60} height={36} />
                 ) : (
-                  <Typography variant="h4" fontWeight={700} color="text.primary">
+                  <Typography
+                    variant="h4"
+                    fontWeight={700}
+                    color="text.primary"
+                    sx={{ fontSize: { xs: "1.75rem", md: "2.125rem" }, lineHeight: 1.2 }}
+                  >
                     {cards?.[key] ?? 0}
                   </Typography>
                 )}
