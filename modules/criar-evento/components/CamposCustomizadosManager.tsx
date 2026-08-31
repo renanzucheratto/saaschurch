@@ -80,6 +80,9 @@ interface CamposCustomizadosManagerProps {
   bloquearRemocaoSalvos?: boolean;
   // Quando false, nenhum campo pode ser removido (ex: na edição do evento). Default true.
   permitirRemocao?: boolean;
+  // Quando true, campo oculto ganha aparência de bloqueado (borda tracejada, tudo em cinza).
+  // Usado só na edição do evento, onde ocultar é a alternativa a excluir.
+  destacarOcultos?: boolean;
 }
 
 interface SortableFieldProps {
@@ -91,6 +94,7 @@ interface SortableFieldProps {
   camposErrors: any;
   permitirRemocao: boolean;
   removerDesabilitado: boolean;
+  destacarOcultos: boolean;
   isDragDisabled?: boolean;
   onRemove: () => void;
 }
@@ -102,6 +106,7 @@ const SortableField = ({
   camposErrors,
   permitirRemocao,
   removerDesabilitado,
+  destacarOcultos,
   isDragDisabled = false,
   onRemove,
 }: SortableFieldProps) => {
@@ -138,7 +143,7 @@ const SortableField = ({
   };
 
   // Campo oculto ganha aparência de bloqueado: borda tracejada e tudo em cinza.
-  const isOculto = !isObrigatorio && !!ocultoField.value;
+  const isOculto = destacarOcultos && !isObrigatorio && !!ocultoField.value;
 
   return (
     <Card
@@ -292,6 +297,7 @@ export const CamposCustomizadosManager = ({
   errors,
   bloquearRemocaoSalvos = false,
   permitirRemocao = true,
+  destacarOcultos = false,
 }: CamposCustomizadosManagerProps) => {
   const { fields, append, insert, remove, move } = useFieldArray({
     control,
@@ -442,6 +448,7 @@ export const CamposCustomizadosManager = ({
                     camposErrors={camposErrors}
                     permitirRemocao={permitirRemocao}
                     removerDesabilitado={removerDesabilitado}
+                    destacarOcultos={destacarOcultos}
                     isDragDisabled={isAceiteTermo}
                     onRemove={() => remove(index)}
                   />
