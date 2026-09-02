@@ -87,15 +87,19 @@ export default function CriarProjetoModule() {
             </CardWithTitle>
 
             <Stack direction="row" justifyContent="space-between" gap={2} sx={{ mt: 3 }}>
-              <Button
-                type="button"
-                variant="text"
-                onClick={etapaAtual === 0 ? voltarParaListagem : voltar}
-                startIcon={<IconifyIcon icon="material-symbols:chevron-left" width={20} />}
-                sx={styles.acaoButton}
-              >
-                {etapaAtual === 0 ? "Cancelar" : "Voltar"}
-              </Button>
+              {etapaAtual > 0 ? (
+                <Button
+                  type="button"
+                  variant="text"
+                  onClick={voltar}
+                  startIcon={<IconifyIcon icon="material-symbols:chevron-left" width={20} />}
+                  sx={styles.acaoButton}
+                >
+                  Voltar
+                </Button>
+              ) : (
+                <Box />
+              )}
 
               {ehUltimaEtapa ? (
                 <Button

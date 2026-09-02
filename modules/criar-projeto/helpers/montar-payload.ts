@@ -16,6 +16,7 @@ export const montarPayload = (data: CriarProjetoSchema): CadastrarProjetoRequest
     ideias: data.ideias || null,
     data_inicio: data.data_inicio ? `${data.data_inicio}T00:00:00.000Z` : null,
     data_fim: data.data_fim ? `${data.data_fim}T00:00:00.000Z` : null,
+    areaIds: data.areaIds,
     itens,
   };
 };

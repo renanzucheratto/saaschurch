@@ -4,8 +4,8 @@ export const ETAPAS_CRIAR_PROJETO: EtapaCriarProjeto[] = [
   {
     id: "informacoes",
     titulo: "Informações",
-    descricao: "Nome, período e um resumo do que será feito.",
-    campos: ["nome", "data_inicio", "data_fim", "descricao"],
+    descricao: "Nome, áreas envolvidas, período e um resumo do que será feito.",
+    campos: ["nome", "areaIds", "data_inicio", "data_fim", "descricao"],
   },
   {
     id: "detalhamento",

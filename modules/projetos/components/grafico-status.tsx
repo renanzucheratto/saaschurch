@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import ReactECharts from "echarts-for-react";
+import { useTheme } from "@mui/material";
 import { formatNumberToCurrency } from "@/config/helpers/currency-mask";
 import type { ResumoStatus } from "../types";
 
@@ -14,6 +15,15 @@ interface TooltipParam {
 }
 
 export const GraficoStatus = ({ porStatus }: Props) => {
+  const theme = useTheme();
+
+  // O ECharts precisa de hex, então as cores dos Chips saem do tema do MUI.
+  const corDoStatus = useCallback(
+    (chipColor: ResumoStatus["chipColor"]) =>
+      chipColor === "default" ? theme.palette.grey[500] : theme.palette[chipColor].main,
+    [theme],
+  );
+
   const option = useMemo(
     () => ({
       tooltip: {
@@ -39,7 +49,7 @@ export const GraficoStatus = ({ porStatus }: Props) => {
           barMaxWidth: 22,
           data: porStatus.map((item) => ({
             value: item.quantidade,
-            itemStyle: { color: item.cor, borderRadius: [4, 4, 0, 0] },
+            itemStyle: { color: corDoStatus(item.chipColor), borderRadius: [4, 4, 0, 0] },
           })),
           label: {
             show: true,
@@ -51,7 +61,7 @@ export const GraficoStatus = ({ porStatus }: Props) => {
         },
       ],
     }),
-    [porStatus],
+    [porStatus, corDoStatus],
   );
 
   return (

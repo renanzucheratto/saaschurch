@@ -1,9 +1,11 @@
+import type { ChipColor } from "@/config/helpers/projeto-status";
 import type { StatusProjetoNome } from "@/types/projeto.types";
 
 export interface ResumoStatus {
   status: StatusProjetoNome;
   label: string;
-  cor: string;
+  /** Mesma cor do Chip de status usado na tabela. */
+  chipColor: ChipColor;
   quantidade: number;
   valor: number;
 }

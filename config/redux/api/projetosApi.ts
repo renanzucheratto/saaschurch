@@ -21,6 +21,8 @@ export interface CadastrarProjetoRequest {
   data_inicio?: string | null;
   data_fim?: string | null;
   eventoId?: string | null;
+  /** Áreas envolvidas. O backend sempre reinclui as áreas que o autor lidera. */
+  areaIds: string[];
   itens: ItemProjetoRequest[];
 }
 

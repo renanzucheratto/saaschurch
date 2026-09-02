@@ -4,6 +4,7 @@ import { cardOverrides } from "./card-overrides";
 import { textFieldOverrides } from "./textfield";
 import { appBarOverrides } from "./appbar-overrides";
 import { drawerOverrides } from "./drawer-overrides";
+import { datePickerOverrides } from "./date-picker-overrides";
 
 export const components = {
   ...buttonOverrides,
@@ -12,4 +13,5 @@ export const components = {
   ...textFieldOverrides,
   ...appBarOverrides,
   ...drawerOverrides,
+  ...datePickerOverrides,
 };

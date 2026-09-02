@@ -1,9 +1,10 @@
 "use client";
 
-import { Divider, Grid, Typography } from "@mui/material";
+import { Divider, Grid, Stack, Typography } from "@mui/material";
 import { CardWithTitle } from "@/components/card-with-title";
 import { formatDate } from "@/config/helpers/format-date";
 import { formatNumberToCurrency } from "@/config/helpers/currency-mask";
+import { AreaLabel } from "@/components/area-label";
 import type { ProjetoDetalhes } from "@/types/projeto.types";
 import { useProjetoDetalhesStyles } from "../styles";
 
@@ -42,6 +43,20 @@ export const InformacoesCard = ({ projeto }: Props) => {
         <Info label="Início" valor={formatDate(projeto.data_inicio)} />
         <Info label="Término" valor={formatDate(projeto.data_fim)} />
       </Grid>
+
+      {projeto.areas.length > 0 && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="caption" color="text.secondary" sx={styles.infoLabel}>
+            Áreas envolvidas
+          </Typography>
+          <Stack direction="row" gap={2} flexWrap="wrap" sx={{ mt: 0.5 }}>
+            {projeto.areas.map((area) => (
+              <AreaLabel key={area.id} area={area} />
+            ))}
+          </Stack>
+        </>
+      )}
 
       {projeto.descricao && (
         <>

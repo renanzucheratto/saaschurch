@@ -1,4 +1,4 @@
-import { getStatusInfo, STATUS_PROJETO_COR } from "@/config/helpers/projeto-status";
+import { getStatusInfo } from "@/config/helpers/projeto-status";
 import type { ProjetoListagem, StatusProjetoNome } from "@/types/projeto.types";
 import {
   ORDEM_STATUS,
@@ -32,7 +32,7 @@ export const calcularResumoProjetos = (projetos: ProjetoListagem[]): ResumoProje
     return {
       status,
       label: getStatusInfo(status).label,
-      cor: STATUS_PROJETO_COR[status],
+      chipColor: getStatusInfo(status).color,
       quantidade: doStatus.length,
       valor: somar(doStatus),
     };

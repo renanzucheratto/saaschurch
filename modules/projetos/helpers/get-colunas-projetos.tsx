@@ -1,17 +1,41 @@
-import { Chip } from "@mui/material";
+import { Chip, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { formatDate } from "@/config/helpers/format-date";
 import { formatNumberToCurrency } from "@/config/helpers/currency-mask";
 import { getStatusInfo } from "@/config/helpers/projeto-status";
+import { AreaChip } from "@/components/area-chip";
+import type { AreaResumo } from "@/types/projeto.types";
+import { MAX_AREAS_NA_TABELA } from "./constants";
 
 export const getColunasProjetos = (): GridColDef[] => [
   { field: "nome", headerName: "Projeto", flex: 1, minWidth: 220 },
   {
-    field: "lider",
-    headerName: "Líder",
+    field: "areas",
+    headerName: "Áreas",
     flex: 1,
-    minWidth: 180,
-    valueGetter: (value, row) => row.lider?.nome || "-",
+    minWidth: 200,
+    sortable: false,
+    valueGetter: (value: AreaResumo[]) => (value || []).map((area) => area.nome).join(", "),
+    renderCell: (params) => {
+      const areas: AreaResumo[] = params.row.areas || [];
+      if (areas.length === 0) return "-";
+
+      const visiveis = areas.slice(0, MAX_AREAS_NA_TABELA);
+      const restante = areas.length - visiveis.length;
+
+      return (
+        <Stack direction="row" alignItems="center" gap={0.5} sx={{ height: "100%" }}>
+          {visiveis.map((area) => (
+            <AreaChip key={area.id} area={area} />
+          ))}
+          {restante > 0 && (
+            <Typography variant="caption" sx={{ fontWeight: 600 }} color="text.secondary">
+              +{restante}
+            </Typography>
+          )}
+        </Stack>
+      );
+    },
   },
   {
     field: "data_inicio",

@@ -1,6 +1,9 @@
 "use client";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { ptBR } from "date-fns/locale";
 import { SessionProvider } from "next-auth/react";
 import { theme } from "@/config/theme/theme";
 import { ReduxProvider } from "@/config/redux";
@@ -25,7 +28,9 @@ export default function RootLayout({
           <ReduxProvider>
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              {children}
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+                {children}
+              </LocalizationProvider>
             </ThemeProvider>
           </ReduxProvider>
         </SessionProvider>

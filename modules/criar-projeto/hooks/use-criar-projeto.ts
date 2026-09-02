@@ -33,6 +33,7 @@ export const useCriarProjeto = () => {
       ideias: "",
       data_inicio: "",
       data_fim: "",
+      areaIds: [],
       itens: [{ ...ITEM_PROJETO_VAZIO }],
     },
   });

@@ -10,6 +10,9 @@ export const ORDEM_STATUS: StatusProjetoNome[] = [
   "recusado",
 ];
 
+/** Chips de área exibidos na tabela antes de agrupar o restante em "+N". */
+export const MAX_AREAS_NA_TABELA = 2;
+
 /** Quantidade de meses exibidos nos gráficos de linha dos cards. */
 export const MESES_SERIE = 6;
 

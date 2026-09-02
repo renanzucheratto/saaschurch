@@ -16,7 +16,7 @@ import {
   Card,
 } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { criarProjetoSchema, type CriarProjetoSchema } from "@/modules/criar-projeto/schemas/criar-projeto.schema";
 import { useEditarProjetoMutation } from "@/config/redux/api/projetosApi";
@@ -26,6 +26,9 @@ import RichTextEditor from "@/modules/criar-evento/components/RichTextEditor";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
 import { formatDateInput } from "@/config/helpers/format-date";
 import { getApiErrorMessage } from "@/config/helpers/get-api-error-message";
+import { SelectAreas } from "@/components/select-areas";
+import { DatePickerField } from "@/components/date-picker-field";
+import { parseDateInput, resolveEndDate } from "@/config/helpers/format-date";
 
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: 1.5 } };
 
@@ -47,6 +50,7 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<CriarProjetoSchema>({
     resolver: zodResolver(criarProjetoSchema),
@@ -57,11 +61,22 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
       ideias: "",
       data_inicio: "",
       data_fim: "",
+      areaIds: [],
       itens: [],
     },
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "itens" });
+
+  // O término nunca pode cair antes do início escolhido.
+  const dataInicio = useWatch({ control, name: "data_inicio" });
+  const dataFim = useWatch({ control, name: "data_fim" });
+
+  const handleInicioChange = (valor: string, onChange: (valor: string) => void) => {
+    onChange(valor);
+    // Um início posterior invalida o término já preenchido, então ele é limpo.
+    setValue("data_fim", resolveEndDate(valor, dataFim), { shouldValidate: true });
+  };
 
   useEffect(() => {
     if (projeto && open) {
@@ -71,6 +86,7 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
         ideias: projeto.ideias || "",
         data_inicio: formatDateInput(projeto.data_inicio),
         data_fim: formatDateInput(projeto.data_fim),
+        areaIds: projeto.areas.map((area) => area.id),
         itens: projeto.itens.map((item) => ({
           nome: item.nome,
           descricao: item.descricao || "",
@@ -99,6 +115,7 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
           ideias: data.ideias || null,
           data_inicio: data.data_inicio ? `${data.data_inicio}T00:00:00.000Z` : null,
           data_fim: data.data_fim ? `${data.data_fim}T00:00:00.000Z` : null,
+          areaIds: data.areaIds,
           itens: itensPayload,
         },
       }).unwrap();
@@ -145,18 +162,30 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
               )}
             />
 
+            <Controller
+              name="areaIds"
+              control={control}
+              render={({ field }) => (
+                <SelectAreas
+                  value={field.value || []}
+                  onChange={field.onChange}
+                  error={!!errors.areaIds}
+                  helperText={errors.areaIds?.message}
+                />
+              )}
+            />
+
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Controller
                 name="data_inicio"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Data de início"
-                    type="date"
-                    fullWidth
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputSx}
+                  <DatePickerField
+                    label="Data de início *"
+                    value={field.value || ""}
+                    onChange={(valor) => handleInicioChange(valor, field.onChange)}
+                    error={!!errors.data_inicio}
+                    helperText={errors.data_inicio?.message}
                   />
                 )}
               />
@@ -164,13 +193,13 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
                 name="data_fim"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
+                  <DatePickerField
                     label="Data de término"
-                    type="date"
-                    fullWidth
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputSx}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    minDate={parseDateInput(dataInicio)}
+                    error={!!errors.data_fim}
+                    helperText={errors.data_fim?.message}
                   />
                 )}
               />

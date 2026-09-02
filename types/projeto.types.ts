@@ -35,6 +35,12 @@ export interface StatusProjeto {
   aprovadoPorId?: string | null;
 }
 
+export interface AreaResumo {
+  id: string;
+  nome: string;
+  cor: string | null;
+}
+
 export interface LiderResumo {
   id: string;
   nome: string;
@@ -49,6 +55,7 @@ export interface ProjetoListagem {
   data_fim: string | null;
   liderUserId: string;
   lider: LiderResumo | null;
+  areas: AreaResumo[];
   eventoId: string | null;
   statusId: string | null;
   status: StatusProjeto | null;
