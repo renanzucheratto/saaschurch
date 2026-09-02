@@ -24,18 +24,10 @@ import type { ItemProjetoRequest } from "@/config/redux/api/projetosApi";
 import type { ProjetoDetalhes } from "@/types/projeto.types";
 import RichTextEditor from "@/modules/criar-evento/components/RichTextEditor";
 import { CurrencyMaskCustom, formatCurrencyToNumber } from "@/config/helpers/currency-mask";
+import { formatDateInput } from "@/config/helpers/format-date";
+import { getApiErrorMessage } from "@/config/helpers/get-api-error-message";
 
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: 1.5 } };
-
-const formatDateInput = (dateString: string | null) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "";
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 interface ProjetoDrawerProps {
   open: boolean;
@@ -89,17 +81,6 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
     }
   }, [projeto, open, reset]);
 
-  const getErrorMessage = (value: unknown): string => {
-    if (typeof value === "object" && value !== null && "data" in value) {
-      const data = (value as { data?: unknown }).data;
-      if (typeof data === "object" && data !== null && "error" in data) {
-        const errorValue = (data as { error?: unknown }).error;
-        if (typeof errorValue === "string") return errorValue;
-      }
-    }
-    return "Erro ao editar projeto";
-  };
-
   const onSubmit = async (data: CriarProjetoSchema) => {
     if (!projeto) return;
     try {
@@ -125,7 +106,7 @@ export default function ProjetoDrawer({ open, onClose, projeto }: ProjetoDrawerP
       setAlert({ open: true, message: "Projeto atualizado com sucesso!", severity: "success" });
       setTimeout(() => onClose(), 1200);
     } catch (error) {
-      setAlert({ open: true, message: getErrorMessage(error), severity: "error" });
+      setAlert({ open: true, message: getApiErrorMessage(error, "Erro ao editar projeto"), severity: "error" });
     }
   };
 

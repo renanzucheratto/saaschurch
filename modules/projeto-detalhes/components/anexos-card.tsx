@@ -1,60 +1,47 @@
 "use client";
 
 import { useRef, useState } from "react";
-import {
-  Typography,
-  Stack,
-  Button,
-  IconButton,
-  Link,
-  CircularProgress,
-} from "@mui/material";
+import { Button, CircularProgress, IconButton, Link, Stack, Typography } from "@mui/material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { CardWithTitle } from "@/components/card-with-title";
+import { getApiErrorMessage } from "@/config/helpers/get-api-error-message";
 import {
-  useUploadAnexoProjetoMutation,
   useRemoverAnexoProjetoMutation,
+  useUploadAnexoProjetoMutation,
 } from "@/config/redux/api/projetosApi";
 import type { AnexoProjeto, TipoAnexo } from "@/types/projeto.types";
+import { useProjetoDetalhesStyles } from "../styles";
 
-interface AnexosCardProps {
+interface Props {
   projetoId: string;
   anexos: AnexoProjeto[];
   tipo: TipoAnexo;
   titulo: string;
   descricao: string;
+  ancora: string;
   podeGerenciar: boolean;
   onError: (message: string) => void;
   onSuccess: (message: string) => void;
 }
 
-export function AnexosCard({
+export const AnexosCard = ({
   projetoId,
   anexos,
   tipo,
   titulo,
   descricao,
+  ancora,
   podeGerenciar,
   onError,
   onSuccess,
-}: AnexosCardProps) {
+}: Props) => {
+  const styles = useProjetoDetalhesStyles();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadAnexo, { isLoading: isUploading }] = useUploadAnexoProjetoMutation();
   const [removerAnexo] = useRemoverAnexoProjetoMutation();
   const [removendoId, setRemovendoId] = useState<string | null>(null);
 
   const anexosFiltrados = anexos.filter((a) => a.tipo === tipo);
-
-  const getErrorMessage = (value: unknown): string => {
-    if (typeof value === "object" && value !== null && "data" in value) {
-      const data = (value as { data?: unknown }).data;
-      if (typeof data === "object" && data !== null && "error" in data) {
-        const errorValue = (data as { error?: unknown }).error;
-        if (typeof errorValue === "string") return errorValue;
-      }
-    }
-    return "Erro ao processar anexo";
-  };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,7 +50,7 @@ export function AnexosCard({
       await uploadAnexo({ projetoId, tipo, arquivo: file }).unwrap();
       onSuccess("Anexo enviado com sucesso!");
     } catch (error) {
-      onError(getErrorMessage(error));
+      onError(getApiErrorMessage(error, "Erro ao processar anexo"));
     } finally {
       if (inputRef.current) inputRef.current.value = "";
     }
@@ -75,7 +62,7 @@ export function AnexosCard({
       await removerAnexo({ projetoId, anexoId }).unwrap();
       onSuccess("Anexo removido.");
     } catch (error) {
-      onError(getErrorMessage(error));
+      onError(getApiErrorMessage(error, "Erro ao processar anexo"));
     } finally {
       setRemovendoId(null);
     }
@@ -83,6 +70,7 @@ export function AnexosCard({
 
   return (
     <CardWithTitle
+      id={ancora}
       title={
         <>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -115,7 +103,7 @@ export function AnexosCard({
                 )
               }
               onClick={() => inputRef.current?.click()}
-              sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600 }}
+              sx={styles.acaoButton}
             >
               Anexar
             </Button>
@@ -125,7 +113,9 @@ export function AnexosCard({
     >
       {anexosFiltrados.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-          Nenhum anexo adicionado.
+          {podeGerenciar
+            ? 'Nenhum anexo ainda. Use "Anexar" para enviar imagem ou PDF.'
+            : "Nenhum anexo adicionado."}
         </Typography>
       ) : (
         <Stack spacing={1}>
@@ -135,7 +125,7 @@ export function AnexosCard({
               direction="row"
               alignItems="center"
               justifyContent="space-between"
-              sx={{ p: 1, bgcolor: "#FAFAFA", borderRadius: 1.5 }}
+              sx={styles.anexoLinha}
             >
               <Stack direction="row" alignItems="center" gap={1} sx={{ minWidth: 0 }}>
                 <IconifyIcon icon="material-symbols:description-outline" width={20} />
@@ -144,13 +134,7 @@ export function AnexosCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="hover"
-                  sx={{
-                    fontSize: 14,
-                    color: "#5B5FED",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
+                  sx={styles.anexoLink}
                 >
                   {anexo.nome}
                 </Link>
@@ -160,7 +144,7 @@ export function AnexosCard({
                   size="small"
                   disabled={removendoId === anexo.id}
                   onClick={() => handleRemove(anexo.id)}
-                  sx={{ color: "#999", "&:hover": { color: "#d32f2f" } }}
+                  sx={styles.removerAnexo}
                 >
                   {removendoId === anexo.id ? (
                     <CircularProgress size={16} />
@@ -175,4 +159,4 @@ export function AnexosCard({
       )}
     </CardWithTitle>
   );
-}
+};

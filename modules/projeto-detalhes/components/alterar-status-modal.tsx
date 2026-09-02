@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useAlterarStatusProjetoMutation } from "@/config/redux/api/projetosApi";
+import { getApiErrorMessage } from "@/config/helpers/get-api-error-message";
 import type { StatusProjetoNome } from "@/types/projeto.types";
 
 interface AlterarStatusModalProps {
@@ -39,19 +40,9 @@ export function AlterarStatusModal({
   const [alterarStatus, { isLoading }] = useAlterarStatusProjetoMutation();
   const [justificativa, setJustificativa] = useState("");
 
-  useEffect(() => {
-    if (open) setJustificativa("");
-  }, [open]);
-
-  const getErrorMessage = (value: unknown): string => {
-    if (typeof value === "object" && value !== null && "data" in value) {
-      const data = (value as { data?: unknown }).data;
-      if (typeof data === "object" && data !== null && "error" in data) {
-        const errorValue = (data as { error?: unknown }).error;
-        if (typeof errorValue === "string") return errorValue;
-      }
-    }
-    return "Erro ao alterar status";
+  const handleClose = () => {
+    setJustificativa("");
+    onClose();
   };
 
   const handleConfirm = async () => {
@@ -63,14 +54,14 @@ export function AlterarStatusModal({
         justificativa: justificativa || null,
       }).unwrap();
       onSuccess("Status atualizado com sucesso!");
-      onClose();
+      handleClose();
     } catch (error) {
-      onError(getErrorMessage(error));
+      onError(getApiErrorMessage(error, "Erro ao alterar status"));
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ fontWeight: 700 }}>{titulo}</DialogTitle>
       <DialogContent>
         {descricao && (
@@ -89,7 +80,7 @@ export function AlterarStatusModal({
         />
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} disabled={isLoading} sx={{ textTransform: "none" }}>
+        <Button onClick={handleClose} disabled={isLoading} sx={{ textTransform: "none" }}>
           Cancelar
         </Button>
         <Button

@@ -16,6 +16,16 @@ export const STATUS_PROJETO_INFO: Record<StatusProjetoNome, StatusInfo> = {
   finalizado: { label: 'Finalizado', color: 'default' },
 };
 
+/** Cores usadas nos gráficos de status (hex, pois o ECharts não lê o tema do MUI). */
+export const STATUS_PROJETO_COR: Record<StatusProjetoNome, string> = {
+  em_analise: '#f59e0b',
+  aprovado: '#10b981',
+  recusado: '#ef4444',
+  em_reembolso: '#3b82f6',
+  liquidado: '#8b5cf6',
+  finalizado: '#6b7280',
+};
+
 export function getStatusInfo(nome?: StatusProjetoNome | null): StatusInfo {
   if (nome && STATUS_PROJETO_INFO[nome]) {
     return STATUS_PROJETO_INFO[nome];
