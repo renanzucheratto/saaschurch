@@ -18,6 +18,15 @@ export const useProjetoDetalhesStyles = () => {
     "& .MuiStepLabel-label.Mui-active": { color: "primary.main" },
   };
 
+  /** Alerts do stepper: linhas mais próximas para caber no painel estreito. */
+  const alertCompacto: SxProps<Theme> = {
+    borderRadius: 1.5,
+    py: 0.5,
+    "& .MuiAlert-message": { py: 0.25 },
+    "& .MuiAlert-icon": { py: 0.5, mr: 1 },
+    "& .MuiTypography-root": { lineHeight: 1.35, display: "block" },
+  };
+
   const acaoButton: SxProps<Theme> = {
     borderRadius: 1.5,
     textTransform: "none",
@@ -62,6 +71,7 @@ export const useProjetoDetalhesStyles = () => {
     titulo,
     painelFluxo,
     stepper,
+    alertCompacto,
     acaoButton,
     infoLabel,
     infoValor,

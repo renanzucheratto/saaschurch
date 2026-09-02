@@ -15,10 +15,13 @@ export const featureRoles = {
   criarProjeto: ['lider', 'backoffice'],
   gerenciarArea: ['lider', 'backoffice', 'membro'],
   gerenciarUsuarios: ['backoffice'],
-  aprovarProjeto: ['lider', 'backoffice'],
+  // Aprovar/recusar e liquidar são exclusivos do backoffice: quem cria o projeto
+  // não pode ser quem aprova o próprio gasto.
+  aprovarProjeto: ['backoffice'],
   alterarPapelMembro: ['backoffice'],
   solicitarReembolso: ['lider', 'backoffice'],
-  liquidarProjeto: ['lider', 'backoffice'],
+  liquidarProjeto: ['backoffice'],
+  finalizarProjeto: ['lider', 'backoffice'],
 } satisfies Record<string, UserRole[]>;
 
 export function canAccessRoute(role: UserRole, path: string): boolean {

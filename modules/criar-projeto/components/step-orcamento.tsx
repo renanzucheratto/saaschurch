@@ -25,7 +25,7 @@ export const StepOrcamento = ({ form, itensArray, total }: Props) => {
       <Alert
         severity="warning"
         icon={<IconifyIcon icon="material-symbols:info-outline" width={20} />}
-        sx={{ borderRadius: 1.5 }}
+        sx={styles.alertCompacto}
       >
         <Typography variant="caption">{AVISO_ORCAMENTO}</Typography>
       </Alert>

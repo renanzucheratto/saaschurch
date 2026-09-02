@@ -47,14 +47,33 @@ export const useProjetoDetalhes = () => {
 
   const ehDono = projeto?.liderUserId === currentUser?.id;
   const ehBackoffice = is("backoffice");
-  const ehLiderOuBackoffice = is("lider", "backoffice");
   const podeAprovar = can("aprovarProjeto");
+  const podeSolicitarReembolso = can("solicitarReembolso");
+  const podeLiquidar = can("liquidarProjeto");
+  const podeFinalizar = can("finalizarProjeto");
 
   const podeEditar = (ehDono || ehBackoffice) && status === "em_analise";
 
   const acoes = useMemo(
-    () => getAcoesStatus({ status, ehDono, ehBackoffice, ehLiderOuBackoffice, podeAprovar }),
-    [status, ehDono, ehBackoffice, ehLiderOuBackoffice, podeAprovar],
+    () =>
+      getAcoesStatus({
+        status,
+        ehDono,
+        ehBackoffice,
+        podeAprovar,
+        podeSolicitarReembolso,
+        podeLiquidar,
+        podeFinalizar,
+      }),
+    [
+      status,
+      ehDono,
+      ehBackoffice,
+      podeAprovar,
+      podeSolicitarReembolso,
+      podeLiquidar,
+      podeFinalizar,
+    ],
   );
 
   const requisitos = useMemo(
@@ -86,8 +105,8 @@ export const useProjetoDetalhes = () => {
     mostrarNotas: STATUS_COM_NOTAS.includes(status),
     podeGerenciarNotas: (ehDono || ehBackoffice) && STATUS_GERENCIA_NOTAS.includes(status),
     mostrarComprovantes: STATUS_COM_COMPROVANTES.includes(status),
-    podeGerenciarComprovantes:
-      ehLiderOuBackoffice && STATUS_GERENCIA_COMPROVANTES.includes(status),
+    // O comprovante do reembolso é emitido por quem paga, então fica com o backoffice.
+    podeGerenciarComprovantes: ehBackoffice && STATUS_GERENCIA_COMPROVANTES.includes(status),
     drawerOpen,
     abrirDrawer: () => setDrawerOpen(true),
     fecharDrawer: () => setDrawerOpen(false),

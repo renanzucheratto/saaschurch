@@ -58,19 +58,19 @@ export const FluxoProjeto = ({
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {ehRecusado
-                ? "Projeto recusado pela liderança"
+                ? "Projeto recusado pelo backoffice"
                 : `Etapa ${indiceEtapa + 1} de ${etapas.length} — ${etapaAtual.titulo}`}
             </Typography>
           </>
         }
       >
         {ehRecusado ? (
-          <Alert severity="error" sx={{ borderRadius: 1.5 }}>
+          <Alert severity="error" sx={styles.alertCompacto}>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
               Projeto recusado
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {justificativa || "Nenhuma justificativa foi informada pela liderança."}
+              {justificativa || "Nenhuma justificativa foi informada pelo backoffice."}
             </Typography>
           </Alert>
         ) : (
@@ -123,7 +123,7 @@ export const FluxoProjeto = ({
                     )}
 
                     {ehAtual && acoes.length === 0 && (
-                      <Alert severity="info" sx={{ borderRadius: 1.5 }}>
+                      <Alert severity="info" sx={styles.alertCompacto}>
                         <Typography variant="caption">
                           Nada a fazer por enquanto. Aguardando {etapa.responsavel}.
                         </Typography>
@@ -133,7 +133,7 @@ export const FluxoProjeto = ({
                     {ehAtual && acoes.length > 0 && (
                       <Stack spacing={1}>
                         {temPendencia && acoes.some((acao) => acao.exigeRequisitos) && (
-                          <Alert severity="warning" sx={{ borderRadius: 1.5 }}>
+                          <Alert severity="warning" sx={styles.alertCompacto}>
                             <Typography variant="caption">
                               Anexe o documento acima para liberar a próxima etapa.
                             </Typography>

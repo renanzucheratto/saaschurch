@@ -25,6 +25,8 @@ export interface AlertState {
 export interface PermissoesProjeto {
   ehDono: boolean;
   ehBackoffice: boolean;
-  ehLiderOuBackoffice: boolean;
   podeAprovar: boolean;
+  podeSolicitarReembolso: boolean;
+  podeLiquidar: boolean;
+  podeFinalizar: boolean;
 }

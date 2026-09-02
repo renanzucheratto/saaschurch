@@ -48,6 +48,15 @@ export const useCriarProjetoStyles = () => {
     "&:hover": { color: "error.main" },
   };
 
+  /** Alerts do stepper: linhas mais próximas para caber no painel estreito. */
+  const alertCompacto: SxProps<Theme> = {
+    borderRadius: 1.5,
+    py: 0.5,
+    "& .MuiAlert-message": { py: 0.25 },
+    "& .MuiAlert-icon": { py: 0.5, mr: 1 },
+    "& .MuiTypography-root": { lineHeight: 1.35, display: "block" },
+  };
+
   const acaoButton: SxProps<Theme> = {
     borderRadius: 1.5,
     textTransform: "none",
@@ -71,6 +80,7 @@ export const useCriarProjetoStyles = () => {
     input,
     itemCard,
     removerItem,
+    alertCompacto,
     acaoButton,
     revisaoLinha,
   };

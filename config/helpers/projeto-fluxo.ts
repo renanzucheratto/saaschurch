@@ -2,8 +2,6 @@ import { StatusProjetoNome } from '@/types/projeto.types';
 
 export type EtapaProjetoId = Exclude<StatusProjetoNome, 'recusado'>;
 
-export type ResponsavelEtapa = 'lider' | 'liderancaOuBackoffice' | 'tesouraria';
-
 export interface EtapaProjeto {
   id: EtapaProjetoId;
   titulo: string;
@@ -21,9 +19,9 @@ export const ETAPAS_PROJETO: EtapaProjeto[] = [
     id: 'em_analise',
     titulo: 'Em análise',
     resumo:
-      'A liderança está avaliando o projeto e o orçamento planejado. Enquanto isso você ainda pode editar as informações.',
-    responsavel: 'a liderança',
-    concluido: 'Projeto avaliado pela liderança.',
+      'O backoffice está avaliando o projeto e o orçamento planejado. Enquanto isso você ainda pode editar as informações.',
+    responsavel: 'o backoffice',
+    concluido: 'Projeto avaliado pelo backoffice.',
     icone: 'material-symbols:pending-actions',
   },
   {
@@ -39,8 +37,8 @@ export const ETAPAS_PROJETO: EtapaProjeto[] = [
     id: 'em_reembolso',
     titulo: 'Em reembolso',
     resumo:
-      'A tesouraria está conferindo as notas fiscais e realizando o pagamento. O comprovante do reembolso deve ser anexado.',
-    responsavel: 'a tesouraria',
+      'O backoffice está conferindo as notas fiscais e realizando o pagamento. O comprovante do reembolso deve ser anexado.',
+    responsavel: 'o backoffice',
     concluido: 'Reembolso pago e comprovante anexado.',
     icone: 'material-symbols:payments-outline',
   },
@@ -48,7 +46,7 @@ export const ETAPAS_PROJETO: EtapaProjeto[] = [
     id: 'liquidado',
     titulo: 'Liquidado',
     resumo: 'Reembolso concluído. Falta apenas encerrar o projeto para arquivá-lo.',
-    responsavel: 'a liderança',
+    responsavel: 'o líder do projeto ou o backoffice',
     concluido: 'Reembolso conferido.',
     icone: 'material-symbols:task-alt',
   },

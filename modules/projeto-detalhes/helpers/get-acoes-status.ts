@@ -5,12 +5,19 @@ interface Params extends PermissoesProjeto {
   status: StatusProjetoNome;
 }
 
+/**
+ * Ações disponíveis na etapa atual. Aprovar/recusar e liquidar são exclusivos do
+ * backoffice; solicitar reembolso e finalizar ficam com o dono do projeto ou o
+ * backoffice.
+ */
 export const getAcoesStatus = ({
   status,
   ehDono,
   ehBackoffice,
-  ehLiderOuBackoffice,
   podeAprovar,
+  podeSolicitarReembolso,
+  podeLiquidar,
+  podeFinalizar,
 }: Params): StatusAction[] => {
   if (status === "em_analise" && podeAprovar) {
     return [
@@ -36,7 +43,7 @@ export const getAcoesStatus = ({
     ];
   }
 
-  if (status === "aprovado" && (ehDono || ehBackoffice)) {
+  if (status === "aprovado" && podeSolicitarReembolso && (ehDono || ehBackoffice)) {
     return [
       {
         novoStatus: "em_reembolso",
@@ -50,7 +57,7 @@ export const getAcoesStatus = ({
     ];
   }
 
-  if (status === "em_reembolso" && ehLiderOuBackoffice) {
+  if (status === "em_reembolso" && podeLiquidar) {
     return [
       {
         novoStatus: "liquidado",
@@ -64,7 +71,7 @@ export const getAcoesStatus = ({
     ];
   }
 
-  if (status === "liquidado" && ehLiderOuBackoffice) {
+  if (status === "liquidado" && podeFinalizar && (ehDono || ehBackoffice)) {
     return [
       {
         novoStatus: "finalizado",

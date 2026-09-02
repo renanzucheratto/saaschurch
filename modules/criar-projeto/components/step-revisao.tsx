@@ -35,6 +35,7 @@ const Linha = ({ label, valor }: LinhaProps) => {
 };
 
 export const StepRevisao = ({ form, total, onEditarEtapa }: Props) => {
+  const styles = useCriarProjetoStyles();
   const valores = form.watch();
 
   const botaoEditar = (indice: number) => (
@@ -50,7 +51,7 @@ export const StepRevisao = ({ form, total, onEditarEtapa }: Props) => {
 
   return (
     <Stack spacing={3}>
-      <Alert severity="info" sx={{ borderRadius: 1.5 }}>
+      <Alert severity="info" sx={styles.alertCompacto}>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
           Ao criar, o projeto entra em &quot;Em análise&quot;
         </Typography>

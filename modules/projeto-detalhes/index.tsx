@@ -143,7 +143,7 @@ export default function ProjetoDetalhesModule() {
                   anexos={projeto.anexos}
                   tipo="comprovante_pagamento"
                   titulo="Comprovante de reembolso"
-                  descricao="Transferência ou recibo assinado da tesouraria"
+                  descricao="Transferência ou recibo emitido pelo backoffice"
                   ancora={ANCORA_COMPROVANTES}
                   podeGerenciar={podeGerenciarComprovantes}
                   onSuccess={showSuccess}
